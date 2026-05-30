@@ -27,4 +27,5 @@ export async function updatePreferencesAction(formData: FormData): Promise<void>
   }
 
   revalidatePath("/", "layout");
+  revalidatePath("/settings");
 }
