@@ -18,6 +18,12 @@ describe("moderation transitions", () => {
     expect(canTransitionLetter("APPROVED", "PENDING")).toBe(false);
   });
 
+  it("allows admins to approve or reject letters routed to support", () => {
+    expect(canTransitionLetter("ROUTED_TO_SUPPORT", "APPROVED")).toBe(true);
+    expect(canTransitionLetter("ROUTED_TO_SUPPORT", "REJECTED")).toBe(true);
+    expect(canTransitionLetter("ROUTED_TO_SUPPORT", "PENDING")).toBe(false);
+  });
+
   it("allows pending replies to be approved or rejected once", () => {
     expect(canTransitionReply("PENDING", "APPROVED")).toBe(true);
     expect(canTransitionReply("PENDING", "REJECTED")).toBe(true);
