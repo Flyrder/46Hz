@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Inbox, PenLine, Settings, ShieldCheck, UserRound } from "lucide-react";
-import { updatePreferencesAction } from "@/app/actions/preferences";
+import { PreferenceForm } from "@/components/preference-form";
 import { localeOptions, type Locale } from "@/lib/i18n";
 import { themeOptions, type ThemePreference } from "@/lib/theme";
 
@@ -26,44 +26,17 @@ export function AppShell({
             <span>EKO</span>
           </Link>
           <div className="flex flex-wrap items-center justify-end gap-2">
-            <form action={updatePreferencesAction} className="flex items-center gap-2">
-              <label className="sr-only" htmlFor="shell-locale">
-                {t("language.label")}
-              </label>
-              <select
-                id="shell-locale"
-                name="locale"
-                defaultValue={locale}
-                className="h-9 rounded-lg border border-border bg-surface px-2 text-xs outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              >
-                {localeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <label className="sr-only" htmlFor="shell-theme">
-                {t("theme.label")}
-              </label>
-              <select
-                id="shell-theme"
-                name="theme"
-                defaultValue={theme}
-                className="h-9 rounded-lg border border-border bg-surface px-2 text-xs outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-              >
-                {themeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {t(option.labelKey)}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="h-9 rounded-lg border border-border bg-surface px-3 text-xs font-semibold hover:bg-muted focus:outline-none focus:ring-2 focus:ring-accent/40"
-                type="submit"
-              >
-                {t("settings.save")}
-              </button>
-            </form>
+            <PreferenceForm
+              locale={locale}
+              theme={theme}
+              localeLabel={t("language.label")}
+              themeLabel={t("theme.label")}
+              localeOptions={localeOptions}
+              themeOptions={themeOptions.map((option) => ({
+                value: option.value,
+                label: t(option.labelKey)
+              }))}
+            />
             <div className="flex items-center gap-1">
               <NavIcon href="/write" label={t("nav.write")}>
                 <PenLine className="h-4 w-4" aria-hidden="true" />
