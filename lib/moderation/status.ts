@@ -5,7 +5,7 @@ const letterTransitions: Record<LetterStatus, LetterStatus[]> = {
   PENDING: ["APPROVED", "REJECTED", "ROUTED_TO_SUPPORT"],
   APPROVED: ["REJECTED"],
   REJECTED: [],
-  ROUTED_TO_SUPPORT: ["REJECTED"]
+  ROUTED_TO_SUPPORT: ["APPROVED", "REJECTED"]
 };
 
 const replyTransitions: Record<ReplyStatus, ReplyStatus[]> = {
