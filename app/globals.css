@@ -63,10 +63,7 @@ html.theme-dark {
 html {
   min-height: 100%;
   background: hsl(var(--background));
-<<<<<<< HEAD
   transition: background-color 0.25s ease, color 0.25s ease;
-=======
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
 }
 
 body {
@@ -76,10 +73,7 @@ body {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 240px),
     hsl(var(--background));
-<<<<<<< HEAD
   transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
-=======
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
 }
 
 html.theme-dark body {
