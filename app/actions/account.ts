@@ -9,6 +9,9 @@ import { createAnonymousHandle, getCurrentUser, setCurrentUserId } from "@/lib/s
 import { defaultThemePreference, normalizeThemePreference } from "@/lib/theme";
 import { accountSchema, formValue } from "@/lib/validators";
 
+/**
+ * @deprecated Email and password registration is deprecated. Use Migration Code instead.
+ */
 export async function createAccountAction(formData: FormData): Promise<void> {
   const input = accountSchema.parse({
     email: formValue(formData, "email"),
@@ -55,6 +58,9 @@ export async function createAccountAction(formData: FormData): Promise<void> {
   redirect("/settings");
 }
 
+/**
+ * @deprecated Email and password sign-in is deprecated. Use Migration Code instead.
+ */
 export async function signInAction(formData: FormData): Promise<void> {
   const input = accountSchema.pick({ email: true, password: true }).parse({
     email: formValue(formData, "email"),
