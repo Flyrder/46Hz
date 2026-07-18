@@ -57,9 +57,6 @@ enum ModerationTargetType {
 model User {
   id                 String    @id @default(cuid())
   anonymousHandle    String    @unique
-  displayName        String?
-  accountEmail       String?   @unique
-  passwordHash       String?
   migrationCode      String?   @unique
   language           String
   themePreference    String    @default("system")
