@@ -1,17 +1,31 @@
 import { redirect } from "next/navigation";
+import { headers, cookies } from "next/headers";
 import { createAnonymousSessionAction } from "@/app/actions/onboarding";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { createTranslator, localeOptions } from "@/lib/i18n";
-import { getLocalePreference } from "@/lib/preferences";
+import { getLocalePreference, LOCALE_COOKIE } from "@/lib/preferences";
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
-  const [user, locale] = await Promise.all([getCurrentUser(), getLocalePreference()]);
+  const [user, storedLocale] = await Promise.all([getCurrentUser(), getLocalePreference()]);
   if (user) {
     redirect("/write");
   }
+
+  const cookieStore = await cookies();
+  const hasLocaleCookie = cookieStore.has(LOCALE_COOKIE);
+  let locale = storedLocale;
+
+  if (!hasLocaleCookie) {
+    const headersList = await headers();
+    const acceptLang = headersList.get("accept-language") || "";
+    if (acceptLang.toLowerCase().includes("ko")) {
+      locale = "ko_KR";
+    }
+  }
+
   const t = createTranslator(locale);
 
   return (
