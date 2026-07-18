@@ -23,12 +23,6 @@ export const onboardingSchema = z.object({
   preferredReplyType: replyTypeSchema
 });
 
-export const accountSchema = z.object({
-  email: z.string().trim().email().max(120),
-  password: z.string().min(8).max(128),
-  displayName: z.string().trim().min(2).max(80).optional().or(z.literal(""))
-});
-
 export const writeLetterSchema = z.object({
   rawText: z.string().trim().min(40, "Write at least a few sentences.").max(4000)
 });

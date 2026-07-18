@@ -47,9 +47,6 @@ export function AppShell({
               <NavIcon href="/settings" label={t("nav.settings")}>
                 <Settings className="h-4 w-4" aria-hidden="true" />
               </NavIcon>
-              <NavIcon href="/account" label={t("nav.account")}>
-                <UserRound className="h-4 w-4" aria-hidden="true" />
-              </NavIcon>
               <NavIcon href="/admin" label={t("nav.admin")}>
                 <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               </NavIcon>
