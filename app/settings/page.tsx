@@ -1,6 +1,7 @@
 import { leaveAnonymousSessionAction } from "@/app/actions/settings";
 import { PreferenceForm } from "@/components/preference-form";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { CopyButton } from "@/components/copy-button";
 import { createTranslator, localeOptions } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
@@ -39,6 +40,19 @@ export default async function SettingsPage() {
           <div>
             <dt className="font-semibold">{t("settings.trustScore")}</dt>
             <dd className="mt-1 text-muted-foreground">{user.trustScore}</dd>
+          </div>
+          
+          <div className="border-t border-border/60 pt-4 mt-2">
+            <dt className="font-semibold">{t("settings.migrationCode")}</dt>
+            <dd className="mt-1.5 flex items-center justify-between gap-3">
+              <span className="font-mono bg-muted/50 px-2.5 py-1 rounded text-xs select-all text-foreground border border-border/40">
+                {user.migrationCode}
+              </span>
+              {user.migrationCode && <CopyButton text={user.migrationCode} />}
+            </dd>
+            <dd className="mt-1.5 text-xs text-muted-foreground leading-normal">
+              ⚠️ {t("settings.migrationCodeHelp")}
+            </dd>
           </div>
         </dl>
       </div>

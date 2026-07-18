@@ -60,6 +60,7 @@ model User {
   displayName        String?
   accountEmail       String?   @unique
   passwordHash       String?
+  migrationCode      String?   @unique
   language           String
   themePreference    String    @default("system")
   ageRange           AgeRange

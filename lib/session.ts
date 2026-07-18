@@ -25,15 +25,38 @@ export async function clearCurrentUser(): Promise<void> {
   cookieStore.delete(USER_COOKIE);
 }
 
+import crypto from "crypto";
+
 export async function getCurrentUser() {
   const userId = await getCurrentUserId();
   if (!userId) {
     return null;
   }
 
-  return prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { id: userId }
   });
+
+  if (user && !user.migrationCode) {
+    const code = createMigrationCode();
+    user = await prisma.user.update({
+      where: { id: userId },
+      data: { migrationCode: code }
+    });
+  }
+
+  return user;
+}
+
+export function createMigrationCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "EKO-";
+  const bytes = crypto.randomBytes(8);
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) code += "-";
+    code += chars[bytes[i] % chars.length];
+  }
+  return code;
 }
 
 export async function requireUser() {
