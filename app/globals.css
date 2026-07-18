@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 42 29% 96%;
+  --foreground: 220 18% 16%;
+  --surface: 0 0% 100%;
+  --muted: 214 23% 92%;
+  --muted-foreground: 219 10% 39%;
+  --border: 214 18% 82%;
+  --accent: 174 36% 32%;
+  --accent-foreground: 0 0% 100%;
+  --warning: 38 87% 45%;
+  --danger: 356 63% 46%;
+}
+
+html.theme-light {
+  --background: 42 29% 96%;
+  --foreground: 220 18% 16%;
+  --surface: 0 0% 100%;
+  --muted: 214 23% 92%;
+  --muted-foreground: 219 10% 39%;
+  --border: 214 18% 82%;
+  --accent: 174 36% 32%;
+  --accent-foreground: 0 0% 100%;
+  --warning: 38 87% 45%;
+  --danger: 356 63% 46%;
+}
+
+html.theme-dark {
+  --background: 0 0% 0%;
+  --foreground: 210 30% 94%;
+  --surface: 0 0% 4%;
+  --muted: 220 10% 14%;
+  --muted-foreground: 218 12% 68%;
+  --border: 220 9% 22%;
+  --accent: 173 44% 47%;
+  --accent-foreground: 0 0% 0%;
+  --warning: 39 88% 55%;
+  --danger: 356 72% 58%;
+}
+
+@media (prefers-color-scheme: dark) {
+  html.theme-system {
+    --background: 0 0% 0%;
+    --foreground: 210 30% 94%;
+    --surface: 0 0% 4%;
+    --muted: 220 10% 14%;
+    --muted-foreground: 218 12% 68%;
+    --border: 220 9% 22%;
+    --accent: 173 44% 47%;
+    --accent-foreground: 0 0% 0%;
+    --warning: 39 88% 55%;
+    --danger: 356 72% 58%;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: hsl(var(--background));
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  color: hsl(var(--foreground));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 240px),
+    hsl(var(--background));
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+html.theme-dark body {
+  background: hsl(var(--background));
+}
+
+@media (prefers-color-scheme: dark) {
+  html.theme-system body {
+    background: hsl(var(--background));
+  }
+}
+
+textarea,
+input,
+select,
+button {
+  font: inherit;
+}
+
+textarea,
+input,
+select {
+  color: hsl(var(--foreground));
+}
+
+textarea::placeholder,
+input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+::selection {
+  background: hsl(var(--accent) / 0.18);
+}

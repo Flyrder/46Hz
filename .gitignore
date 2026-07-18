@@ -1,0 +1,12 @@
+node_modules
+.next
+.env
+.env.local
+.env.*.local
+coverage
+dist
+*.log
+*.tsbuildinfo
+.DS_Store
+.worktrees
+worktrees
