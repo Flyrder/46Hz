@@ -25,9 +25,12 @@ describe("i18n preferences", () => {
     expect(translate("ko_KR", "nav.write")).toBe("쓰기");
     expect(translate("zh_CN", "theme.dark")).toBe("纯深色");
     expect(translate("zh_CN", "unknown.key")).toBe("unknown.key");
+<<<<<<< HEAD
     expect(translate("ko_KR", "age.adult")).toBe("19세 이상");
     expect(translate("ko_KR", "age.under18")).toBe("19세 미만");
     expect(translate("en_US", "age.adult")).toBe("18+");
     expect(translate("en_US", "age.under18")).toBe("Under 18");
+=======
+>>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
   });
 });
