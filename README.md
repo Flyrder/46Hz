@@ -18,6 +18,12 @@ It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat 
 - Deterministic mock AI middleware
 - Vitest unit tests
 
+## Device Migration & Anonymity
+
+To maintain absolute anonymity while allowing profile recovery or transfer across devices:
+- **Device Migration Codes**: Every anonymous session receives a secure, typo-safe code (e.g. `EKO-XXXX-XXXX`). Users can view and copy this code from `/settings`, then enter it in `/onboarding` on a new device to instantly restore their session.
+- **No Password Accounts**: The deprecated email and password-based account registration system has been completely removed to prioritize user privacy.
+
 ## Local Setup
 
 1. Copy environment variables:
