@@ -12,8 +12,13 @@ export const koKR = {
   "account.signInHelp": "저장한 계정으로 돌아옵니다.",
   "account.signOut": "로그아웃",
   "account.title": "계정",
+<<<<<<< HEAD
+  "age.adult": "19세 이상",
+  "age.under18": "19세 미만",
+=======
   "age.adult": "18세 이상",
   "age.under18": "18세 미만",
+>>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
   "common.cancel": "취소",
   "common.optionalReason": "선택 사유",
   "common.report": "신고",
