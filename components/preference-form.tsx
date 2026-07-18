@@ -1,18 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
 import { useEffect, useState, useRef, useTransition, type MouseEvent as ReactMouseEvent } from "react";
 import { updatePreferencesAction } from "@/app/actions/preferences";
 import type { Locale } from "@/lib/i18n";
 import { themePreferences, type ThemePreference } from "@/lib/theme";
 import { Sun, Moon, Monitor, Languages, Check, Loader2 } from "lucide-react";
-=======
-import { useEffect, useState, type ChangeEvent } from "react";
-import { updatePreferencesAction } from "@/app/actions/preferences";
-import type { Locale } from "@/lib/i18n";
-import { themePreferences, type ThemePreference } from "@/lib/theme";
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
 
 type Option<T extends string> = {
   value: T;
@@ -39,7 +32,6 @@ export function PreferenceForm({
   variant?: "compact" | "full";
 }) {
   const router = useRouter();
-<<<<<<< HEAD
   const [localeValue, setLocaleValue] = useState<Locale>(locale);
   const [themeValue, setThemeValue] = useState<ThemePreference>(theme);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,18 +39,6 @@ export function PreferenceForm({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const isCompact = variant === "compact";
-=======
-  const [localeValue, setLocaleValue] = useState(locale);
-  const [themeValue, setThemeValue] = useState(theme);
-  const isCompact = variant === "compact";
-  const formClassName = isCompact
-    ? "flex items-center gap-2"
-    : "mt-5 rounded-lg border border-border bg-surface p-5 shadow-soft";
-  const labelClassName = isCompact ? "sr-only" : "mt-4 block text-sm font-semibold";
-  const selectClassName = isCompact
-    ? "h-9 rounded-lg border border-border bg-surface px-2 text-xs outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-    : "mt-2 w-full rounded-lg border border-border bg-background px-3 py-3 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20";
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
 
   useEffect(() => {
     setLocaleValue(locale);
@@ -68,7 +48,6 @@ export function PreferenceForm({
     setThemeValue(theme);
   }, [theme]);
 
-<<<<<<< HEAD
   // Handle click outside to close the dropdown menu
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -262,64 +241,6 @@ export function PreferenceForm({
         </div>
       </div>
     </div>
-=======
-  async function handleSubmit(formData: FormData) {
-    await updatePreferencesAction(formData);
-    router.refresh();
-  }
-
-  function handleChange(event: ChangeEvent<HTMLSelectElement>) {
-    const value = event.currentTarget.value;
-
-    if (event.currentTarget.name === "locale") {
-      setLocaleValue(value as Locale);
-    }
-
-    if (event.currentTarget.name === "theme") {
-      setThemeValue(value as ThemePreference);
-      applyTheme(value);
-    }
-
-    event.currentTarget.form?.requestSubmit();
-  }
-
-  return (
-    <form action={handleSubmit} className={formClassName}>
-      {!isCompact && title ? <h2 className="text-lg font-semibold">{title}</h2> : null}
-      <label className={labelClassName} htmlFor={`${variant}-locale`}>
-        {localeLabel}
-      </label>
-      <select
-        id={`${variant}-locale`}
-        name="locale"
-        value={localeValue}
-        className={selectClassName}
-        onChange={handleChange}
-      >
-        {localeOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <label className={labelClassName} htmlFor={`${variant}-theme`}>
-        {themeLabel}
-      </label>
-      <select
-        id={`${variant}-theme`}
-        name="theme"
-        value={themeValue}
-        className={selectClassName}
-        onChange={handleChange}
-      >
-        {themeOptions.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </form>
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
   );
 }
 

@@ -1,22 +1,14 @@
 import { redirect } from "next/navigation";
-<<<<<<< HEAD
 import { headers, cookies } from "next/headers";
 import { createAnonymousSessionAction } from "@/app/actions/onboarding";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { createTranslator, localeOptions } from "@/lib/i18n";
 import { getLocalePreference, LOCALE_COOKIE } from "@/lib/preferences";
-=======
-import { createAnonymousSessionAction } from "@/app/actions/onboarding";
-import { SubmitButton } from "@/components/ui/submit-button";
-import { createTranslator, localeOptions } from "@/lib/i18n";
-import { getLocalePreference } from "@/lib/preferences";
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
 import { getCurrentUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
-<<<<<<< HEAD
   const [user, storedLocale] = await Promise.all([getCurrentUser(), getLocalePreference()]);
   if (user) {
     redirect("/write");
@@ -34,12 +26,6 @@ export default async function OnboardingPage() {
     }
   }
 
-=======
-  const [user, locale] = await Promise.all([getCurrentUser(), getLocalePreference()]);
-  if (user) {
-    redirect("/write");
-  }
->>>>>>> 2f3e05a24ebe43c1ec467468bc42a74b5966e785
   const t = createTranslator(locale);
 
   return (
