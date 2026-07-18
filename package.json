@@ -18,7 +18,7 @@
     "@prisma/client": "6.19.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
-    "next": "latest",
+    "next": "^16.2.10",
     "react": "latest",
     "react-dom": "latest",
     "zod": "^3.24.1"
@@ -31,10 +31,19 @@
     "eslint": "^9.17.0",
     "eslint-config-next": "latest",
     "postcss": "^8.4.49",
-    "prisma": "6.19.0",
+    "prisma": "^6.19.3",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "esbuild@0.28.0": true,
+    "esbuild@0.21.5": true,
+    "unrs-resolver@1.12.1": true,
+    "sharp@0.34.5": true,
+    "prisma@6.19.0": true,
+    "@prisma/engines@6.19.0": true,
+    "@prisma/client@6.19.0": true
   }
 }
