@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { normalizeLocale } from "@/lib/i18n";
 import { setLocalePreference, setThemePreference } from "@/lib/preferences";
-import { getCurrentUserId } from "@/lib/session";
+import { getCurrentUserId, clearCurrentUser } from "@/lib/session";
 import { normalizeThemePreference } from "@/lib/theme";
 import { formValue } from "@/lib/validators";
 
@@ -17,13 +17,22 @@ export async function updatePreferencesAction(formData: FormData): Promise<void>
 
   const userId = await getCurrentUserId();
   if (userId) {
-    await prisma.user.update({
+    const userExists = await prisma.user.findUnique({
       where: { id: userId },
-      data: {
-        language: locale,
-        themePreference: theme
-      }
+      select: { id: true }
     });
+
+    if (userExists) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          language: locale,
+          themePreference: theme
+        }
+      });
+    } else {
+      await clearCurrentUser();
+    }
   }
 
   revalidatePath("/", "layout");
