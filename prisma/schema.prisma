@@ -65,6 +65,7 @@ model User {
   trustScore         Int       @default(50)
   suspendedAt        DateTime?
   createdAt          DateTime  @default(now())
+  recentIps          Json      @default("[]")
 
   letters            Letter[]  @relation("LetterAuthor")
   replies            Reply[]   @relation("ReplyResponder")
