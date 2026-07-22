@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { setLocalePreference } from "@/lib/preferences";
 import { createAnonymousHandle, setCurrentUserId, createMigrationCode } from "@/lib/session";
+import { recordUserIp } from "@/lib/ip";
 import { formValue, onboardingSchema } from "@/lib/validators";
 
 export async function createAnonymousSessionAction(formData: FormData): Promise<void> {
@@ -23,6 +24,7 @@ export async function createAnonymousSessionAction(formData: FormData): Promise<
     }
   });
 
+  await recordUserIp(user.id);
   await setCurrentUserId(user.id);
   await setLocalePreference(user.language as "en_US" | "ko_KR" | "zh_CN");
   redirect("/write");

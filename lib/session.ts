@@ -26,6 +26,7 @@ export async function clearCurrentUser(): Promise<void> {
 }
 
 import crypto from "crypto";
+import { recordUserIp } from "@/lib/ip";
 
 export async function getCurrentUser() {
   const userId = await getCurrentUserId();
@@ -43,6 +44,10 @@ export async function getCurrentUser() {
       where: { id: userId },
       data: { migrationCode: code }
     });
+  }
+
+  if (user) {
+    await recordUserIp(user.id);
   }
 
   return user;
