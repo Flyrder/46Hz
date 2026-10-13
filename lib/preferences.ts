@@ -21,13 +21,13 @@ const cookieOptions = {
 
 export async function getLocalePreference(): Promise<Locale> {
   const cookieStore = await cookies();
-  const raw = cookieStore.get(LOCALE_COOKIE)?.value ?? cookieStore.get("eko_locale")?.value;
+  const raw = cookieStore.get(LOCALE_COOKIE)?.value;
   return normalizeLocale(raw ?? defaultLocale);
 }
 
 export async function getThemePreference(): Promise<ThemePreference> {
   const cookieStore = await cookies();
-  const raw = cookieStore.get(THEME_COOKIE)?.value ?? cookieStore.get("eko_theme")?.value;
+  const raw = cookieStore.get(THEME_COOKIE)?.value;
   return normalizeThemePreference(raw ?? defaultThemePreference);
 }
 

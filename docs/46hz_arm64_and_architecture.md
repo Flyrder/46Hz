@@ -29,9 +29,9 @@
      - `lib/i18n.ts`: 统一对外平滑转发。
    - 迁移占位提示统一升级为 `46HZ-XXXX-XXXX`。
 3. **Session 与 Cookie 隔离设计**：
-   - 匿名用户识别：`46hz_user_id`（向下兼容读取 `eko_user_id`）。
-   - 语言偏好：`46hz_locale`（向下兼容读取 `eko_locale`）。
-   - 主题偏好：`46hz_theme`（向下兼容读取 `eko_theme`）。
+   - 匿名用户识别：`46hz_user_id`。
+   - 语言偏好：`46hz_locale`。
+   - 主题偏好：`46hz_theme`。
    - 管理员身份：`46hz_admin_role`（存储 `ADMIN` 或 `MODERATOR`）。
    - 设备间匿名迁移码：采用 Crockford Base32 变体（排除 `0, 1, I, O` 易混淆字符），前缀升级为 `46HZ-`（形如 `46HZ-XXXX-XXXX`）。
 
