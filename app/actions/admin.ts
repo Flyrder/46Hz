@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { clearAdminSession, getAdminPasscode, requireAdmin, setAdminSession } from "@/lib/admin";
+import {
+  authenticatePasscode,
+  clearAdminSession,
+  requireAdmin,
+  requireStaff,
+  setAdminSession
+} from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { canTransitionLetter, canTransitionReply } from "@/lib/moderation/status";
 import {
@@ -15,11 +21,12 @@ import {
 
 export async function adminLoginAction(formData: FormData): Promise<void> {
   const passcode = formValue(formData, "passcode");
-  if (passcode !== getAdminPasscode()) {
+  const role = authenticatePasscode(passcode);
+  if (!role) {
     redirect("/admin?error=1");
   }
 
-  await setAdminSession();
+  await setAdminSession(role);
   redirect("/admin");
 }
 
@@ -29,7 +36,7 @@ export async function adminLogoutAction(): Promise<void> {
 }
 
 export async function moderateLetterAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const role = await requireStaff();
   const input = adminLetterSchema.parse({
     letterId: formValue(formData, "letterId"),
     status: formValue(formData, "status"),
@@ -61,7 +68,7 @@ export async function moderateLetterAction(formData: FormData): Promise<void> {
       data: {
         targetType: "LETTER",
         targetId: letter.id,
-        action: "ADMIN_MODERATED",
+        action: role === "ADMIN" ? "ADMIN_MODERATED" : "MODERATOR_MODERATED",
         reason: input.reason,
         previousStatus: `${letter.status}/${letter.riskLevel}`,
         newStatus: `${input.status}/${input.riskLevel}`
@@ -76,7 +83,7 @@ export async function moderateLetterAction(formData: FormData): Promise<void> {
 }
 
 export async function overrideLetterRiskAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const role = await requireStaff();
   const letterId = formValue(formData, "letterId");
   const riskLevel = riskLevelSchema.parse(formValue(formData, "riskLevel"));
   const reason = formValue(formData, "reason") || "Risk override";
@@ -95,7 +102,7 @@ export async function overrideLetterRiskAction(formData: FormData): Promise<void
       data: {
         targetType: "LETTER",
         targetId: letter.id,
-        action: "RISK_OVERRIDDEN",
+        action: role === "ADMIN" ? "RISK_OVERRIDDEN" : "MODERATOR_RISK_OVERRIDDEN",
         reason,
         previousStatus: letter.riskLevel,
         newStatus: riskLevel
@@ -108,7 +115,7 @@ export async function overrideLetterRiskAction(formData: FormData): Promise<void
 }
 
 export async function moderateReplyAction(formData: FormData): Promise<void> {
-  await requireAdmin();
+  const role = await requireStaff();
   const input = adminReplySchema.parse({
     replyId: formValue(formData, "replyId"),
     status: formValue(formData, "status"),
@@ -136,7 +143,7 @@ export async function moderateReplyAction(formData: FormData): Promise<void> {
       data: {
         targetType: "REPLY",
         targetId: reply.id,
-        action: "ADMIN_MODERATED",
+        action: role === "ADMIN" ? "ADMIN_MODERATED" : "MODERATOR_MODERATED",
         reason: input.reason,
         previousStatus: reply.status,
         newStatus: input.status

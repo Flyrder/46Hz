@@ -2,13 +2,33 @@ import { saveSupportResourceAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { requireAdmin } from "@/lib/admin";
+import { getAdminRole } from "@/lib/admin";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminResourcesPage() {
-  await requireAdmin();
+  const role = await getAdminRole();
+  if (!role) {
+    redirect("/admin");
+  }
+
+  if (role !== "ADMIN") {
+    return (
+      <section className="mx-auto max-w-4xl">
+        <h1 className="text-3xl font-semibold">Support resources</h1>
+        <AdminNav role={role} />
+        <div className="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-6 text-center">
+          <h2 className="text-lg font-semibold">Administrator Privileges Required</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Crisis support resource management is restricted to full System Administrators.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
   const resources = await prisma.supportResource.findMany({
     orderBy: [{ active: "desc" }, { region: "asc" }, { title: "asc" }]
   });
@@ -16,7 +36,7 @@ export default async function AdminResourcesPage() {
   return (
     <section className="mx-auto max-w-4xl">
       <h1 className="text-3xl font-semibold">Support resources</h1>
-      <AdminNav />
+      <AdminNav role={role} />
       <form action={saveSupportResourceAction} className="rounded-lg border border-border bg-surface p-5 shadow-soft">
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="text-sm font-semibold">

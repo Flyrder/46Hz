@@ -5,7 +5,7 @@ import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 
 export const metadata: Metadata = {
-  title: "EKO Letterbox",
+  title: "46Hz Letterbox",
   description: "A quiet anonymous emotional support letterbox."
 };
 

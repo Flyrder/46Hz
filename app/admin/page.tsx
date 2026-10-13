@@ -2,18 +2,21 @@ import { adminLoginAction, adminLogoutAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { isAdminSession } from "@/lib/admin";
+import { getAdminRole } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const isAdmin = await isAdminSession();
+  const role = await getAdminRole();
 
-  if (!isAdmin) {
+  if (!role) {
     return (
       <section className="mx-auto max-w-md">
-        <h1 className="text-3xl font-semibold">Admin</h1>
+        <h1 className="text-3xl font-semibold">Staff access</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Enter Administrator or Moderator passcode to continue.
+        </p>
         <form action={adminLoginAction} className="mt-6 rounded-lg border border-border bg-surface p-5 shadow-soft">
           <label className="text-sm font-semibold" htmlFor="passcode">
             Passcode
@@ -22,6 +25,7 @@ export default async function AdminPage() {
             id="passcode"
             name="passcode"
             type="password"
+            placeholder="Admin or Moderator passcode"
             className="mt-2 w-full rounded-lg border border-border px-3 py-3 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
           <div className="mt-4">
@@ -73,7 +77,12 @@ export default async function AdminPage() {
     <section>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Admin dashboard</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-semibold">Admin dashboard</h1>
+            <StatusBadge tone={role === "ADMIN" ? "good" : "neutral"}>
+              {role === "ADMIN" ? "Administrator" : "Moderator"}
+            </StatusBadge>
+          </div>
           <p className="mt-2 text-sm text-muted-foreground">
             Safety and moderation controls for the MVP loop.
           </p>
@@ -82,7 +91,7 @@ export default async function AdminPage() {
           <SubmitButton variant="secondary">Sign out</SubmitButton>
         </form>
       </div>
-      <AdminNav />
+      <AdminNav role={role} />
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.map(([label, value]) => (
           <div key={label} className="rounded-lg border border-border bg-surface p-4 shadow-soft">

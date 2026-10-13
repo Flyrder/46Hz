@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
-import { requireAdmin } from "@/lib/admin";
+import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { formatDate, excerpt } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminRepliesPage() {
-  await requireAdmin();
+  const role = await requireStaff();
   const replies = await prisma.reply.findMany({
     where: { status: "PENDING" },
     include: { letter: true, responder: true },
@@ -19,7 +19,7 @@ export default async function AdminRepliesPage() {
   return (
     <section className="mx-auto max-w-3xl">
       <h1 className="text-3xl font-semibold">Pending replies</h1>
-      <AdminNav />
+      <AdminNav role={role} />
       <div className="space-y-4">
         {replies.map((reply) => (
           <Link key={reply.id} href={`/admin/replies/${reply.id}`} className="block rounded-lg border border-border bg-surface p-5 shadow-soft hover:border-accent/40">

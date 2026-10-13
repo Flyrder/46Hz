@@ -1,100 +1,175 @@
-# EKO Letterbox MVP
+# 46Hz Letterbox
 
-A web-first, mobile-first anonymous emotional support letter app. This MVP builds only the complete loop:
+A quiet, web-first, mobile-first anonymous emotional support letter app.
 
-`write letter -> admin approve -> peer reply -> admin approve -> receive reply -> feedback`
+46Hz is built around a single, safe, human-to-human slow loop:
 
-It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat product. AI is implemented as editable middleware between people.
+$$\text{Write Letter} \longrightarrow \text{AI Anonymize & Screen} \longrightarrow \text{Author Review} \longrightarrow \text{Admin Moderation} \longrightarrow \text{Peer Reply} \longrightarrow \text{AI Reply Coach} \longrightarrow \text{Admin Moderation} \longrightarrow \text{Receive Reply} \longrightarrow \text{Feedback}$$
 
-## Stack
+It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat product. AI acts strictly as an editable, transparent middleware layer between people.
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- PostgreSQL
-- Prisma ORM
-- Zod validation
-- Server Actions and small API routes
-- Deterministic mock AI middleware
-- Vitest unit tests
+---
 
-## Device Migration & Anonymity
+## Key Features & Architecture
 
-To maintain absolute anonymity while allowing profile recovery or transfer across devices:
-- **Device Migration Codes**: Every anonymous session receives a secure, typo-safe code (e.g. `EKO-XXXX-XXXX`). Users can view and copy this code from `/settings`, then enter it in `/onboarding` on a new device to instantly restore their session.
-- **No Password Accounts**: The deprecated email and password-based account registration system has been completely removed to prioritize user privacy.
+- **Human-Centered Letter Holding Protocol (Anti-Shadowban Design)**:
+  - When a peer opens a letter to write a reply, the letter is quietly held for a 15-minute focused writing window to prevent multiple overlapping responses.
+  - Transparent physical letterbox metaphor: Peers see that someone is thoughtfully drafting a reply, and responders can click "Put back in letterbox" at any time to release it. No confusing "lockout" or "shadowban" states.
+- **Default Korean (`ko_KR`) & Modular Decoupled i18n**:
+  - The application defaults to Korean (`ko_KR`), with English (`en_US`) and Simplified Chinese (`zh_CN`) fully supported.
+  - Clean isolated architecture (`lib/i18n/types.ts`, `lib/i18n/config.ts`, `lib/i18n/locales/*`, `lib/i18n/index.ts`) eliminating language-file circular dependencies.
+- **Arm64 & Multi-Arch Platform Support**:
+  - Configured with Prisma multi-arch binary targets (`linux-arm64-openssl-3.0.x`, `linux-arm64-openssl-1.1.x`, `linux-musl-arm64-openssl-3.0.x`, `darwin-arm64`, and `native`).
+  - Production-ready multi-stage `Dockerfile` (Node 20 Bookworm slim, non-root runner) and `docker-compose.yml` optimized for Apple Silicon, AWS Graviton, and x86_64 servers.
+- **Pluggable AI Middleware (`AiMiddleware`)**:
+  - Default deterministic, zero-dependency `MockAiMiddleware` runs offline without API keys.
+  - Hot-swappable production LLM adapter (`LlmAiMiddleware`) supporting `openai`, `deepseek` (with automated `<think>...</think>` reasoning tag stripping and enum sanitization), and `custom` OpenAI-compatible gateways.
+  - Automatic graceful fallback to Mock on timeout or network degradation.
+- **Granular Admin RBAC**:
+  - Dual-role authentication separating **Admin** (`ADMIN_PASSCODE`) from **Moderator** (`MODERATOR_PASSCODE`).
+  - Moderators can review letters and replies, inspect moderation logs, and view reports, while user suspensions and emergency crisis resources remain restricted to Admins.
+- **Zero PII & Device Migration Codes**:
+  - No email/password database accounts.
+  - Anonymous sessions with typo-safe Crockford Base32 migration codes (e.g. `46HZ-XXXX-XXXX`) for cross-device session transfers.
 
-## Local Setup
+---
 
-1. Copy environment variables:
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, Server Actions, React 19)
+- **Language**: TypeScript (Strict Mode)
+- **Styling**: Tailwind CSS + Lucide Icons + System/Light/Dark Themes
+- **Database & ORM**: PostgreSQL + Prisma ORM 6.x
+- **Validation**: Zod 3.x
+- **Testing**: Vitest 4.x
+- **Containerization**: Multi-arch Docker & Docker Compose
+
+---
+
+## Project Structure
+
+```
+c:\Users\voide\eko\
+├── app/                          # Next.js App Router
+│   ├── actions/                  # Server Actions (letters, replies, admin, feedback, onboarding)
+│   ├── admin/                    # Admin portal (dashboard, letters, replies, reports, users, resources)
+│   ├── api/                      # Public API routes (health check, AI proxy endpoints)
+│   ├── inbox/                    # User inbox (received letters & sent replies)
+│   ├── letters/[id]/             # Letter detail & feedback submission
+│   ├── onboarding/               # Anonymous session creation & migration code restore
+│   ├── reply/                    # Peer reply pool & reply workbench ([letterId])
+│   ├── settings/                 # Profile, migration code export, theme, language
+│   ├── support-resources/        # Emergency mental health crisis resources
+│   └── write/                    # Letter writing & review
+├── components/                   # Reusable UI components & layouts
+├── docs/                         # Engineering architecture & Arm64 manuals
+│   └── 46hz_arm64_and_architecture.md
+├── lib/                          # Core domain services & utilities
+│   ├── admin.ts                  # Admin session & RBAC enforcement
+│   ├── db.ts                     # Prisma client singleton
+│   ├── domain.ts                 # Enums & domain types
+│   ├── i18n/                     # Modular internationalization system
+│   │   ├── config.ts             # Default locale & options
+│   │   ├── types.ts              # Translation keys & locale types
+│   │   ├── locales/              # Language dictionaries (ko_KR, en_US, zh_CN)
+│   │   └── index.ts              # Core translator engine
+│   ├── ai/                       # AI Middleware (interfaces, mock, pluggable LLM)
+│   ├── reply/                    # Concurrency claiming & letter holding protocol
+│   ├── safety/                   # Risk classification & crisis routing
+│   └── session.ts                # Session management & migration codes
+├── prisma/                       # Database schema & migrations
+├── tests/                        # Vitest automated test suites (11 suites, 62 tests)
+├── docker-compose.yml            # PostgreSQL service definition
+├── Dockerfile                    # Multi-arch production container build
+└── package.json
+```
+
+---
+
+## Local Development
+
+### 1. Environment Setup
+
+Copy example environment variables:
 
 ```bash
 cp .env.example .env
 ```
 
-2. Start Postgres:
+Key environment configurations in `.env`:
+
+```env
+DATABASE_URL="postgresql://46hz:46hz_dev_password@localhost:5432/46hz_letterbox?schema=public"
+ADMIN_PASSCODE="local-admin"
+MODERATOR_PASSCODE="local-moderator"
+AI_PROVIDER="mock" # Options: mock | openai | deepseek | custom
+```
+
+### 2. Start PostgreSQL
 
 ```bash
 docker compose up -d
 ```
 
-3. Install dependencies:
+### 3. Install Dependencies & Generate Database Client
 
 ```bash
 npm install
-```
-
-4. Create tables and seed data:
-
-```bash
 npm run prisma:migrate
 npm run prisma:seed
 ```
 
-5. Run the app:
+### 4. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. By default, the application opens in Korean (`ko_KR`). You can toggle language and theme in the header navigation or `/settings`.
 
-Admin passcode defaults to `local-admin` in `.env.example`.
+---
 
-## Manual Acceptance Flow
+## Verification & Quality Assurance
 
-1. Go to `/onboarding` and create an anonymous session.
-2. Go to `/write`, write a safe letter, and review the AI-processed version.
-3. Confirm the letter. It should enter pending moderation.
-4. Go to `/admin`, sign in, open `/admin/letters`, and approve the letter.
-5. Create another anonymous session in a separate browser/profile, or clear the session in `/settings`.
-6. Go to `/reply`, open the approved letter, write a reply, run the reply coach, and submit it.
-7. In `/admin/replies`, approve the reply.
-8. Return as the original writer and open `/inbox`, then the letter detail page.
-9. Leave feedback on the approved reply.
-10. Check `/admin/moderation-log` and `/admin/reports`.
-
-High-risk letters containing direct self-harm language are routed to `/support-resources` and are not shown in `/reply`.
-
-## Tests
+Run the automated test suite (Vitest):
 
 ```bash
 npm run test:run
 ```
 
-Current coverage focuses on:
+Run static type checking:
 
-- Mock AI letter processing, anonymization, risk classification, and reply coaching
-- Risk routing and peer matching gates
-- Moderation status transitions and responder trust score updates
+```bash
+npm run lint
+```
 
-## AI Middleware
+Build production bundle with Next.js Turbopack:
 
-The app works without API keys. `MockAiMiddleware` implements:
+```bash
+npm run build
+```
 
-- `processLetter`
-- `coachReply`
-- `classifyRisk`
-- `anonymize`
+---
 
-`getAiMiddleware()` is the provider boundary. A real LLM adapter can be added behind `AI_PROVIDER` without changing core product logic.
+## Multi-Arch Docker Build (Arm64 / AMD64)
+
+Build a multi-architecture container image using Docker Buildx:
+
+```bash
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t 46hz-letterbox:latest .
+```
+
+---
+
+## Acceptance Workflow
+
+1. Go to `/onboarding` to start an anonymous session (default Korean).
+2. Go to `/write`, draft a letter, and review the AI-anonymized version.
+3. Confirm the letter. It transitions into `PENDING` moderation.
+4. Go to `/admin`, sign in with `local-admin`, open `/admin/letters`, and approve the letter.
+5. In another browser profile, enter `/reply` to browse approved letters.
+6. Open the letter: it enters the 15-minute quiet protection window (`OFFERED`). Draft a reply with the AI Reply Coach and submit.
+7. Under `/admin/replies`, approve the reply.
+8. As the author, open `/inbox` and view the approved response, leaving feedback.

@@ -6,8 +6,8 @@ import {
   type ThemePreference
 } from "@/lib/theme";
 
-export const LOCALE_COOKIE = "eko_locale";
-export const THEME_COOKIE = "eko_theme";
+export const LOCALE_COOKIE = "46hz_locale";
+export const THEME_COOKIE = "46hz_theme";
 
 const cookieOptions = {
   httpOnly: true,
@@ -19,12 +19,14 @@ const cookieOptions = {
 
 export async function getLocalePreference(): Promise<Locale> {
   const cookieStore = await cookies();
-  return normalizeLocale(cookieStore.get(LOCALE_COOKIE)?.value ?? defaultLocale);
+  const raw = cookieStore.get(LOCALE_COOKIE)?.value ?? cookieStore.get("eko_locale")?.value;
+  return normalizeLocale(raw ?? defaultLocale);
 }
 
 export async function getThemePreference(): Promise<ThemePreference> {
   const cookieStore = await cookies();
-  return normalizeThemePreference(cookieStore.get(THEME_COOKIE)?.value ?? defaultThemePreference);
+  const raw = cookieStore.get(THEME_COOKIE)?.value ?? cookieStore.get("eko_theme")?.value;
+  return normalizeThemePreference(raw ?? defaultThemePreference);
 }
 
 export async function setLocalePreference(locale: Locale): Promise<void> {

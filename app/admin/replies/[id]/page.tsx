@@ -3,7 +3,7 @@ import { moderateReplyAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { requireAdmin } from "@/lib/admin";
+import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ export default async function AdminReplyDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requireAdmin();
+  const role = await requireStaff();
   const { id } = await params;
   const reply = await prisma.reply.findUnique({
     where: { id },
@@ -31,7 +31,7 @@ export default async function AdminReplyDetailPage({
   return (
     <section className="mx-auto max-w-4xl">
       <h1 className="text-3xl font-semibold">Reply review</h1>
-      <AdminNav />
+      <AdminNav role={role} />
       <div className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
         <article className="rounded-lg border border-border bg-surface p-5 shadow-soft">
           <div className="flex flex-wrap gap-2">
