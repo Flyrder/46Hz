@@ -18,7 +18,7 @@ describe("Arm64 Architecture Support", () => {
     const pkgPath = path.join(process.cwd(), "package.json");
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
-    expect(pkg.name).toBe("46hz-letterbox-mvp");
+    expect(pkg.name).toBe("46hz");
     // Verification that scripts work with platform-agnostic tools
     expect(pkg.scripts.build).toContain("prisma generate");
   });
