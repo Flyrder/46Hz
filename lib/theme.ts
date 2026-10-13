@@ -1,13 +1,13 @@
-export const themePreferences = ["system", "light", "dark"] as const;
+import { themeSettings } from "@/settings";
+
+export const themePreferences = themeSettings.supportedThemes;
 
 export type ThemePreference = (typeof themePreferences)[number];
 
-export const defaultThemePreference: ThemePreference = "system";
+export const defaultThemePreference: ThemePreference = themeSettings.defaultTheme;
 
 export const themeOptions: Array<{ value: ThemePreference; labelKey: string }> = [
-  { value: "system", labelKey: "theme.system" },
-  { value: "light", labelKey: "theme.light" },
-  { value: "dark", labelKey: "theme.dark" }
+  ...themeSettings.themeOptions
 ];
 
 export function normalizeThemePreference(value: unknown): ThemePreference {

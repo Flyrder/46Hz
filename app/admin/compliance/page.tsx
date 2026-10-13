@@ -141,12 +141,17 @@ export default async function AdminCompliancePage({
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                Origin Network Trace ({generatedPacket.networkOrigin.retentionPolicy})
+                Client Browser & Origin Trace ({generatedPacket.networkOrigin.retentionPolicy})
               </span>
-              <ul className="list-disc pl-5 space-y-0.5 text-muted-foreground">
-                {generatedPacket.networkOrigin.maskedTrace.map((trace, idx) => (
-                  <li key={idx}>{trace}</li>
-                ))}
+              <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                {generatedPacket.networkOrigin.maskedTrace.map((trace, idx) => {
+                  const ua = generatedPacket.networkOrigin.userAgentTrace[idx] ?? "No UA";
+                  return (
+                    <li key={idx}>
+                      <span className="font-medium text-foreground">{trace}</span> — <span className="text-[11px] font-mono">{ua}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
@@ -174,7 +179,9 @@ export default async function AdminCompliancePage({
               const ips = Array.isArray(letter.author.recentIps)
                 ? (letter.author.recentIps as unknown as IpRecord[])
                 : [];
-              const latestIp = ips.length > 0 ? maskIp(ips[ips.length - 1].ip) : "No trace";
+              const latest = ips.length > 0 ? ips[ips.length - 1] : undefined;
+              const latestIp = latest ? maskIp(latest.ip) : "No trace";
+              const clientInfo = latest?.browser ? `${latest.browser} on ${latest.os ?? "OS"}` : undefined;
 
               return (
                 <article
@@ -193,7 +200,7 @@ export default async function AdminCompliancePage({
                       {letter.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      Author: <span className="font-medium">{letter.author.anonymousHandle}</span> | Masked Origin: {latestIp}
+                      Author: <span className="font-medium">{letter.author.anonymousHandle}</span> | Masked Origin: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 
@@ -233,7 +240,9 @@ export default async function AdminCompliancePage({
               const ips = Array.isArray(reply.responder.recentIps)
                 ? (reply.responder.recentIps as unknown as IpRecord[])
                 : [];
-              const latestIp = ips.length > 0 ? maskIp(ips[ips.length - 1].ip) : "No trace";
+              const latest = ips.length > 0 ? ips[ips.length - 1] : undefined;
+              const latestIp = latest ? maskIp(latest.ip) : "No trace";
+              const clientInfo = latest?.browser ? `${latest.browser} on ${latest.os ?? "OS"}` : undefined;
 
               return (
                 <article
@@ -251,7 +260,7 @@ export default async function AdminCompliancePage({
                       {reply.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      Responder: <span className="font-medium">{reply.responder.anonymousHandle}</span> | Masked Origin: {latestIp}
+                      Responder: <span className="font-medium">{reply.responder.anonymousHandle}</span> | Masked Origin: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 

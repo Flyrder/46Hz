@@ -269,14 +269,39 @@ docker buildx build \
    - 当收到法定调证函或处理高危自伤/违法涉案内容时，系统通过 `/admin/compliance` 一键生成标准化证据数据包（`ComplianceIncidentPacket`）。
    - 数据包内对违规文本生成 SHA-256 密码学指纹，完整封存事件发生时刻的 UTC 时间戳、内容风险分类、审核处置历史责任链以及最小必要网络源点，形成不可抵赖的法庭证据链。
 
+### 7.5 客户端 User Agent 信息收集与统一根配置设计
+1. **浏览器 User Agent 信息收集与纯原生解析**：
+   - 在 [`lib/ip.ts`](file:///c:/Users/voide/eko/lib/ip.ts) 中增加 [`getClientUserAgent`](file:///c:/Users/voide/eko/lib/ip.ts#L162-L173) 与轻量无外部依赖的 [`parseUserAgent`](file:///c:/Users/voide/eko/lib/ip.ts#L27-L68) 解析器，智能识别浏览器名称（Chrome, Safari, Firefox, Edge 等）、操作系统（Windows, macOS, iOS, Android, Linux）以及设备类型（Mobile, Tablet, Desktop, Bot）。
+   - 随 IP 连接记录一并写入 `User.recentIps` 队列（通过 PostgreSQL 原生 JSONB 兼容扩展，无破坏性变更），并在 [`ComplianceIncidentPacket`](file:///c:/Users/voide/eko/lib/compliance/incident-packet.ts) 和后台合规审查面板中清晰关联呈递。
+2. **全局统一设置中心 (`settings.ts`)**：
+   - 在根目录下建立专有的单一真实配置源文件 [`settings.ts`](file:///c:/Users/voide/eko/settings.ts)，收敛全局所有参数：
+     - **品牌元数据** (`brand`)：产品名、全称标题、标语。
+     - **国际化引擎** (`i18n`)：默认语言 (`ko_KR`)、支持语言清单、语言标签。
+     - **主题配置** (`theme`)：默认主题 (`system`)、支持模式及标签。
+     - **会话持久化** (`session`)：Cookie 名称、180 天过期时效、迁移码前缀 (`46HZ-`) 与 Base32 字符集。
+     - **权限管理** (`admin`)：角色 Cookie 名称、默认管理员/审核员密码。
+     - **舒曼共振** (`resonance`)：默认 7 次上限、作者同意扩容 15 次。
+     - **并发守护** (`claiming`)：15 分钟静心撰写独占保留窗口。
+     - **安全限流** (`security`)：后台登录防爆破阈值与写信频率限制。
+     - **合规审计** (`compliance`)：14 天滚动保留、最多 5 条记录、合规协议代号。
+     - **模型适配** (`ai`)：默认服务商与超时机制。
+   - 所有业务模块（`lib/session.ts`, `lib/preferences.ts`, `lib/admin.ts`, `lib/ip.ts`, `lib/reply/claiming.ts`, `lib/compliance/incident-packet.ts`, `app/layout.tsx` 等）统一从 `@/settings` 引用，彻底杜绝硬编码参数散落。
+3. **根目录冗余无用文件彻底清理 (Root Directory Purge)**：
+   - 物理移除 `tailwind.config.ts`：由于 Tailwind CSS v4 已全面转向 CSS 内 `@theme` 配置，根目录遗留的 Tailwind 3 配置文件已毫无作用。
+   - 物理移除 `start.bat`：统一收敛为原生功能更完备的 PowerShell 启动编排脚本 `start.ps1`。
+   - 配置 `tsconfig.json` 的 `tsBuildInfoFile: ".next/cache/tsconfig.tsbuildinfo"` 并清理根目录 `tsconfig.tsbuildinfo` 缓存文件，消除构建临时文件对项目根目录的污染。
+
 ---
 
 ## 8. 验证记录与质量保证 (Verification Record)
 
 ### 8.1 自动化测试覆盖指标
 - **测试框架**：Vitest 5.0.4
-- **测试套件总览**：15 个测试文件，92 个单元与集成测试用例，100% 全部通过。
+- **测试套件总览**：17 个测试文件，108 个单元与集成测试用例，100% 全部通过。
 - **全链路测试涵盖**：
+  - `tests/client/user-agent.test.ts`: 浏览器 User Agent 深度提取、多平台与设备类型解析实测。
+  - `tests/settings/settings.test.ts`: 根目录统一配置文件 `settings.ts` 各维度配置契约断言。
+  - `tests/ip.test.ts`: IP 队列与 User Agent 协同持久化与 14 天裁剪验证。
   - `tests/utils/cn.test.ts`: 原生极简 `cn` 工具的条件合并与嵌套数组覆盖。
   - `tests/security/security.test.ts`: 常数时间比对算法与滑动窗口限流器全场景实测。
   - `tests/compliance/compliance.test.ts`: SHA-256 证据包哈希、IP 隐私遮罩与 14 天自动物理剪裁。
@@ -286,7 +311,7 @@ docker buildx build \
 
 ### 8.2 常用开发维护指令
 ```bash
-# 运行全部单元测试 (92 tests)
+# 运行全部单元测试 (108 tests)
 npm run test:run
 
 # 运行全链路后端与数据库完整性实测

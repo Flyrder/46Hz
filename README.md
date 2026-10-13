@@ -93,7 +93,7 @@ c:\Users\voide\eko\
 ├── tests/                        # Vitest automated test suites (12 suites, 71 tests)
 ├── docker-compose.yml            # PostgreSQL service definition
 ├── Dockerfile                    # Multi-arch production container build
-├── start.bat                     # Windows one-click batch launcher
+├── settings.ts                   # Unified application settings & central configuration
 ├── start.ps1                     # PowerShell automated orchestrator & launcher
 └── package.json
 ```
@@ -102,9 +102,8 @@ c:\Users\voide\eko\
 
 ## Quick Start (One-Click Launcher)
 
-On Windows, you can start PostgreSQL (via WSLC / Docker), verify Prisma client, and launch the development server with a single click:
+On Windows, you can start PostgreSQL (via WSLC / Docker), verify Prisma client, and launch the development server with:
 
-- **Double-click** `start.bat`, or
 - Run in PowerShell:
   ```powershell
   .\start.ps1
