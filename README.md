@@ -69,8 +69,9 @@ flowchart LR
 - **Hot-Swappable Production LLM (`LlmAiMiddleware`)**: Supports `openai`, `deepseek` (with automated `<think>...</think>` reasoning tag stripping and enum sanitization), and `custom` OpenAI-compatible endpoints.
 - **Resilient Fallback**: Automatically falls back to Mock upon upstream timeout or network degradation.
 
-### 5. Author Control: Letter Deletion & Draft Comparison (Diff)
+### 5. Author Control: Letter Deletion, Draft Comparison (Diff) & Passage Comments
 - **Original vs Processed Comparison (Diff)**: In the review screen (`/write/review`) and letter detail (`/letters/[id]`), authors can compare their raw writing against the AI-anonymized draft side-by-side or tabbed, confirming private details were shielded before confirming.
+- **Interactive Passage Commenting**: After submitting a letter, authors can highlight or select specific sentences or passages in `/letters/[id]` to attach personal reflections, emotional notes, and marginalia. Commented passages are visually highlighted with soft warm accents, creating a living reflective journal alongside peer replies.
 - **Permanent Sovereign Letter Deletion**: Authors can permanently delete their letters at any time with accessible confirmation modals, cleanly cascading across all associated replies, matches, and feedback while releasing any in-progress reply leases.
 
 ### 6. Zero PII & Crockford Base32 Device Migration

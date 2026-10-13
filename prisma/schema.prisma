@@ -72,6 +72,7 @@ model User {
   replies            Reply[]   @relation("ReplyResponder")
   matches            Match[]
   feedback           Feedback[]
+  comments           LetterComment[]
 }
 
 model Letter {
@@ -92,6 +93,7 @@ model Letter {
 
   replies          Reply[]
   matches          Match[]
+  comments         LetterComment[]
 
   @@index([status, riskLevel, maxReplies, createdAt])
   @@index([authorId, createdAt])
@@ -175,3 +177,19 @@ model SupportResource {
 
   @@index([active, language, region])
 }
+
+model LetterComment {
+  id           String   @id @default(cuid())
+  letterId     String
+  letter       Letter   @relation(fields: [letterId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  selectedText String
+  content      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([letterId, createdAt])
+  @@index([authorId, createdAt])
+}
+

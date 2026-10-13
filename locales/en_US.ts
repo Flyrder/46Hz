@@ -306,5 +306,20 @@ export const enUS: Translations = {
   "review.rawNotice": "This is your original draft as written. Personal identifying information and harsh expressions were safely moderated by AI.",
   "review.comparisonHint": "Compare your original draft on the left with the AI-moderated text on the right. You can edit the text before sending.",
   "review.editInEditor": "Edit in Processed tab",
-  "write.privacyAssuranceBadge": "AI Anonymization Active"
+  "write.privacyAssuranceBadge": "AI Anonymization Active",
+
+  // Letter Passage Comments
+  "comment.title": "Passage Comments & Notes",
+  "comment.subtitle": "Select a passage from the letter to record your thoughts or reflections.",
+  "comment.badge": "{count}",
+  "comment.add": "Add passage comment",
+  "comment.commentOnSelection": "Comment on selection",
+  "comment.selectedQuote": "Selected passage",
+  "comment.quotePlaceholder": "Quote or excerpt from the letter (optional)",
+  "comment.contentLabel": "My thought / reflection",
+  "comment.placeholder": "Share your thoughts or reflections on this passage...",
+  "comment.submit": "Save comment",
+  "comment.emptyTitle": "No passage comments yet",
+  "comment.emptyBody": "Highlight or select any sentence in the letter to leave personal notes and reflections.",
+  "comment.delete": "Delete comment"
 };

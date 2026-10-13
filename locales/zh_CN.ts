@@ -301,5 +301,20 @@ export const zhCN: Translations = {
   "review.rawNotice": "这是您最初撰写的原稿。个人身份信息与不妥措辞已由 AI 安全脱敏整理。",
   "review.comparisonHint": "请对比左侧原稿与右侧 AI 整理版。如有需要，您可在发送前直接编辑修改内容。",
   "review.editInEditor": "在整理版标签页中修改",
-  "write.privacyAssuranceBadge": "AI 安全脱敏已生效"
+  "write.privacyAssuranceBadge": "AI 安全脱敏已生效",
+
+  // Letter Passage Comments
+  "comment.title": "信件段落批注与随感",
+  "comment.subtitle": "可划选信件中触动心弦的段落，记录下您的思绪与感悟。",
+  "comment.badge": "{count} 条",
+  "comment.add": "添加段落批注",
+  "comment.commentOnSelection": "对所选段落写批注",
+  "comment.selectedQuote": "选中的信件段落",
+  "comment.quotePlaceholder": "想要记录的信中语句（可选）",
+  "comment.contentLabel": "我的随感与笔记",
+  "comment.placeholder": "请写下您对这一段落的所思所想或心声...",
+  "comment.submit": "保存批注",
+  "comment.emptyTitle": "暂无段落批注",
+  "comment.emptyBody": "划选信件正文中的语句，即可留下专属的笔记与感悟。",
+  "comment.delete": "删除批注"
 };
