@@ -37,4 +37,27 @@ describe("IP queue recording logic", () => {
     expect(queue[0].ip).toBe("192.168.1.3");
     expect(queue[4].ip).toBe("192.168.1.7");
   });
+
+  it("should record and parse user agent metadata when provided", () => {
+    const queue: IpRecord[] = [];
+    const chromeWindowsUa =
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+    const updated = updateIpQueue(
+      queue,
+      "127.0.0.1",
+      "2026-10-12T12:00:00Z",
+      5,
+      14,
+      chromeWindowsUa
+    );
+
+    expect(updated[0]).toMatchObject({
+      ip: "127.0.0.1",
+      at: "2026-10-12T12:00:00Z",
+      userAgent: chromeWindowsUa,
+      browser: "Chrome",
+      os: "Windows",
+      device: "Desktop"
+    });
+  });
 });

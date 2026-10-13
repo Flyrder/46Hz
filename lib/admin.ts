@@ -2,10 +2,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createHash, timingSafeEqual } from "node:crypto";
 
+import { adminSettings } from "@/settings";
+
 export type AdminRole = "ADMIN" | "MODERATOR";
 
-export const ADMIN_COOKIE = "46hz_admin_role";
-export const LEGACY_ADMIN_COOKIE = "eko_admin";
+export const ADMIN_COOKIE = adminSettings.roleCookie;
+export const LEGACY_ADMIN_COOKIE = adminSettings.legacyRoleCookie;
 
 /**
  * Constant-time string comparison using SHA-256 digests to prevent timing attacks.
@@ -21,11 +23,11 @@ export function timingSafeStringEqual(a: string, b: string): boolean {
 }
 
 export function getAdminPasscode(): string {
-  return process.env.ADMIN_PASSCODE ?? "local-admin";
+  return process.env.ADMIN_PASSCODE ?? adminSettings.defaultAdminPasscode;
 }
 
 export function getModeratorPasscode(): string {
-  return process.env.MODERATOR_PASSCODE ?? "local-moderator";
+  return process.env.MODERATOR_PASSCODE ?? adminSettings.defaultModeratorPasscode;
 }
 
 export function authenticatePasscode(passcode: string): AdminRole | null {

@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/db";
 import type { MatchStatus } from "@/lib/domain";
+import { claimingSettings, resonanceSettings } from "@/settings";
 
-export const CLAIM_LEASE_MINUTES = 15;
+export const CLAIM_LEASE_MINUTES = claimingSettings.leaseDurationMinutes;
 export const CLAIM_LEASE_MS = CLAIM_LEASE_MINUTES * 60 * 1000;
 
 /**
@@ -10,8 +11,8 @@ export const CLAIM_LEASE_MS = CLAIM_LEASE_MINUTES * 60 * 1000;
  * By default, each letter receives up to 7 resonant replies to prevent emotional overwhelm.
  * Letter authors can consciously opt-in to expand the resonance space to 15 replies.
  */
-export const DEFAULT_RESONANCE_CAP = 7;
-export const EXPANDED_RESONANCE_CAP = 15;
+export const DEFAULT_RESONANCE_CAP = resonanceSettings.defaultMaxReplies;
+export const EXPANDED_RESONANCE_CAP = resonanceSettings.expandedMaxReplies;
 
 export type ClaimResult =
   | {

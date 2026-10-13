@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { maskIp, type IpRecord } from "@/lib/ip";
+import { complianceSettings } from "@/settings";
 
 export type ComplianceIncidentPacket = {
   packetHeader: {
-    protocolVersion: "46HZ-LE-PACKET-V1";
+    protocolVersion: typeof complianceSettings.protocolVersion;
     packetId: string;
     generatedAt: string;
     legalBasis: string;
@@ -26,8 +27,9 @@ export type ComplianceIncidentPacket = {
   };
   networkOrigin: {
     retentionPolicy: string;
-    capturedIpsCount: number;
+    capturedRecordsCount: number;
     maskedTrace: string[];
+    userAgentTrace: string[];
     unmaskedComplianceRecord?: IpRecord[];
   };
 };
@@ -90,12 +92,11 @@ export async function generateIncidentPacket(
 
     return {
       packetHeader: {
-        protocolVersion: "46HZ-LE-PACKET-V1",
+        protocolVersion: complianceSettings.protocolVersion,
         packetId,
         generatedAt,
-        legalBasis: "Law Enforcement Incident & Compliance Request (Data Minimization Principle)",
-        dataMinimizationNotice:
-          "46Hz strictly collects zero PII (no legal names, no email, no phone, no biometrics). Retention policy is strictly capped at rolling 14 days."
+        legalBasis: complianceSettings.legalBasis,
+        dataMinimizationNotice: complianceSettings.dataMinimizationNotice
       },
       incident: {
         targetType: "LETTER",
@@ -108,9 +109,14 @@ export async function generateIncidentPacket(
         moderationTrail
       },
       networkOrigin: {
-        retentionPolicy: "14-day rolling window, maximum 5 entries",
-        capturedIpsCount: ips.length,
+        retentionPolicy: `${complianceSettings.ipRetentionDays}-day rolling window, maximum ${complianceSettings.maxRecentIps} entries`,
+        capturedRecordsCount: ips.length,
         maskedTrace: ips.map((rec) => `${maskIp(rec.ip)} (${rec.at})`),
+        userAgentTrace: ips.map((rec) =>
+          rec.userAgent
+            ? `${rec.browser ?? "Unknown"} on ${rec.os ?? "Unknown"} [${rec.userAgent}]`
+            : "No User Agent captured"
+        ),
         ...(includeUnmaskedForWarrant ? { unmaskedComplianceRecord: ips } : {})
       }
     };
@@ -139,12 +145,11 @@ export async function generateIncidentPacket(
 
     return {
       packetHeader: {
-        protocolVersion: "46HZ-LE-PACKET-V1",
+        protocolVersion: complianceSettings.protocolVersion,
         packetId,
         generatedAt,
-        legalBasis: "Law Enforcement Incident & Compliance Request (Data Minimization Principle)",
-        dataMinimizationNotice:
-          "46Hz strictly collects zero PII (no legal names, no email, no phone, no biometrics). Retention policy is strictly capped at rolling 14 days."
+        legalBasis: complianceSettings.legalBasis,
+        dataMinimizationNotice: complianceSettings.dataMinimizationNotice
       },
       incident: {
         targetType: "REPLY",
@@ -157,9 +162,14 @@ export async function generateIncidentPacket(
         moderationTrail
       },
       networkOrigin: {
-        retentionPolicy: "14-day rolling window, maximum 5 entries",
-        capturedIpsCount: ips.length,
+        retentionPolicy: `${complianceSettings.ipRetentionDays}-day rolling window, maximum ${complianceSettings.maxRecentIps} entries`,
+        capturedRecordsCount: ips.length,
         maskedTrace: ips.map((rec) => `${maskIp(rec.ip)} (${rec.at})`),
+        userAgentTrace: ips.map((rec) =>
+          rec.userAgent
+            ? `${rec.browser ?? "Unknown"} on ${rec.os ?? "Unknown"} [${rec.userAgent}]`
+            : "No User Agent captured"
+        ),
         ...(includeUnmaskedForWarrant ? { unmaskedComplianceRecord: ips } : {})
       }
     };

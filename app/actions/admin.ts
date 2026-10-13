@@ -13,6 +13,7 @@ import { prisma } from "@/lib/db";
 import { canTransitionLetter, canTransitionReply } from "@/lib/moderation/status";
 import { getClientIp } from "@/lib/ip";
 import { checkRateLimit, resetRateLimit } from "@/lib/safety/rate-limit";
+import { securitySettings } from "@/settings";
 import {
   adminLetterSchema,
   adminReplySchema,
@@ -24,7 +25,8 @@ import {
 export async function adminLoginAction(formData: FormData): Promise<void> {
   const ip = await getClientIp();
   const rateLimitKey = `admin_login:${ip}`;
-  const rateLimit = checkRateLimit(rateLimitKey, 5, 5 * 60_000); // 5 attempts per 5 minutes
+  const { maxRequests, windowMs } = securitySettings.rateLimits.adminLogin;
+  const rateLimit = checkRateLimit(rateLimitKey, maxRequests, windowMs);
 
   if (!rateLimit.allowed) {
     redirect("/admin?error=rate_limited");

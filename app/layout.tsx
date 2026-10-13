@@ -4,9 +4,11 @@ import { AppShell } from "@/components/app-shell";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 
+import { brandSettings } from "@/settings";
+
 export const metadata: Metadata = {
-  title: "46Hz Letterbox",
-  description: "A quiet anonymous emotional support letterbox."
+  title: brandSettings.title,
+  description: brandSettings.tagline
 };
 
 export default async function RootLayout({

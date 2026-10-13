@@ -6,8 +6,10 @@ import {
   type ThemePreference
 } from "@/lib/theme";
 
-export const LOCALE_COOKIE = "46hz_locale";
-export const THEME_COOKIE = "46hz_theme";
+import { sessionSettings } from "@/settings";
+
+export const LOCALE_COOKIE = sessionSettings.localeCookie;
+export const THEME_COOKIE = sessionSettings.themeCookie;
 
 const cookieOptions = {
   httpOnly: true,

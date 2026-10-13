@@ -1,12 +1,14 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { sessionSettings } from "@/settings";
 
-const USER_COOKIE = "46hz_user_id";
+export const USER_COOKIE = sessionSettings.userCookie;
+export const LEGACY_USER_COOKIE = sessionSettings.legacyUserCookie;
 
 export async function getCurrentUserId(): Promise<string | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(USER_COOKIE)?.value ?? cookieStore.get("eko_user_id")?.value ?? null;
+  return cookieStore.get(USER_COOKIE)?.value ?? cookieStore.get(LEGACY_USER_COOKIE)?.value ?? null;
 }
 
 export async function setCurrentUserId(userId: string): Promise<void> {
@@ -16,14 +18,14 @@ export async function setCurrentUserId(userId: string): Promise<void> {
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 180
+    maxAge: sessionSettings.cookieMaxAgeSeconds
   });
 }
 
 export async function clearCurrentUser(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(USER_COOKIE);
-  cookieStore.delete("eko_user_id");
+  cookieStore.delete(LEGACY_USER_COOKIE);
 }
 
 import crypto from "crypto";
@@ -55,8 +57,8 @@ export async function getCurrentUser() {
 }
 
 export function createMigrationCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "46HZ-";
+  const chars = sessionSettings.migrationCodeAlphabet;
+  let code = sessionSettings.migrationCodePrefix;
   const bytes = crypto.randomBytes(8);
   for (let i = 0; i < 8; i++) {
     if (i === 4) code += "-";

@@ -1,3 +1,4 @@
+import { i18nSettings } from "@/settings";
 import { type Locale, type LocaleOption, locales } from "./types";
 
 export { locales, type Locale, type LocaleOption };
@@ -5,10 +6,6 @@ export { locales, type Locale, type LocaleOption };
 /**
  * 默认语言配置为韩语 (ko_KR)
  */
-export const defaultLocale: Locale = "ko_KR";
+export const defaultLocale: Locale = i18nSettings.defaultLocale;
 
-export const localeOptions: LocaleOption[] = [
-  { value: "ko_KR", label: "한국어" },
-  { value: "en_US", label: "English" },
-  { value: "zh_CN", label: "简体中文" }
-];
+export const localeOptions: LocaleOption[] = [...i18nSettings.localeOptions];
