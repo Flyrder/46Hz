@@ -191,25 +191,53 @@ docker buildx build \
 
 ---
 
-## 6. 验证记录与质量保证 (Verification Record)
+## 6. 舒曼共鸣 7 次谐波与深度扩容机制 (46Hz Schumann Resonance Harmonic Reply Cap)
 
-### 6.1 自动化测试覆盖指标
+### 6.1 科学物理渊源与品牌调性
+- **物理学本源**：
+  地球电离层与地表构成的空腔谐振波——**舒曼共鸣（Schumann Resonance）**，其基频约为 $7.83\text{ Hz}$。
+  当计算其各阶自然高次谐波时：
+  - 1阶谐波: $\approx 7.83\text{ Hz}$
+  - 2阶谐波: $\approx 14.3\text{ Hz}$
+  - 3阶谐波: $\approx 20.8\text{ Hz}$
+  - 4阶谐波: $\approx 27.3\text{ Hz}$
+  - 5阶谐波: $\approx 33.8\text{ Hz}$
+  - 6阶谐波: $\approx 39.0\text{ Hz}$
+  - **7阶谐波: $\approx 45.3 - 46.0\text{ Hz}$** $\longrightarrow$ **这正是 46Hz 品牌命名的科学物理本源！**
+
+### 6.2 产品情绪哲学与容量控制
+- **默认 7 次谐波保护 (The 7 Harmonic Resonances)**：
+  在快节奏与噪音充斥的互联网环境中，信件极易被海量琐碎评论淹没。为了保护写信人的内心平静，避免信息与情绪过载（Anti-Overwhelm），系统每封信件**默认限定最多接收 7 封回信**。
+  7 次回信对应地球自然脉动的 7 次谐振，让写信人能够静心、郑重地阅读每一封真诚的回音。
+- **作者明确知情与自主扩容 (Conscious Opt-in Expansion up to 15)**：
+  当写信人准备好接纳更多关怀、希望听到更多同伴的共鸣时，写信人可以在自己的信件详情页明确点击：
+  `"더 깊은 공명 열기 (최대 15개로 확장)"` / `"开启更深共鸣（扩展至15次回响）"`。
+  系统通过服务端原子事务 `expandLetterResonanceAction` 将该信件的 `maxReplies` 提升至 15。
+- **系统性能与并发检索优化 (System Optimization)**：
+  1. **复合索引加速**：在 `prisma/schema.prisma` 中为 `Letter` 配置 `@@index([status, riskLevel, maxReplies, createdAt])`，让公共回信池的高频分页检索走覆益索引。
+  2. **回信池容量实时剪裁**：在 `findAvailableReplyLetters` 中通过 Prisma `_count: { select: { replies: { where: { status: { not: "REJECTED" } } } } }` 统计有效回信数，将达到或超出共鸣上限的信件即时过滤出公共池。
+  3. **机会性超时锁自动回收 (Stale Lock Auto-Purge)**：在查询公共池时自动异步批量清理超过 15 分钟的废弃 `OFFERED` 预占锁（更新为 `EXPIRED`），无需常驻 Cron 轮询。
+  4. **完结状态温情转译**：当信件达到容量上限后，若同伴直接访问 `/reply/[letterId]`，系统优雅呈现“共鸣已圆满”的温润界面（`RESONANCE_LIMIT_REACHED`），引导同伴浏览其他需要陪伴的心事。
+
+---
+
+## 7. 验证记录与质量保证 (Verification Record)
+
+### 7.1 自动化测试覆盖指标
 - **测试框架**：Vitest 4.1.10
-- **测试套件总览**：11 个测试文件，62 个单元测试用例，100% 全部通过。
-- **覆盖核心领域**：
-  1. `tests/arm64/schema-arm64.test.ts`: 静态校验 Prisma Arm64 二进制目标配置与跨平台打包脚本。
-  2. `tests/ai/pluggable-ai.test.ts`: 验证多提供商识别（openai, deepseek, mock）、标准请求构造、JSON Markdown 容错提取及异常自动降级。
-  3. `tests/reply/claiming.test.ts`: 验证 15 分钟租约时间窗口、并发防抢机制、租约刷新及超时自动解冻。
-  4. `tests/admin/rbac.test.ts`: 验证管理员与审核员双角色鉴权、权限矩阵拦截及安全口令校验。
-  5. `tests/auth/migration.test.ts`: 验证 46HZ 规范迁移码生成、无易混淆字符及高熵唯一性。
-  6. `tests/safety/routing.test.ts`: 验证敏感/高危信件的安全隔离与分流策略。
-  7. `tests/moderation/transitions.test.ts`: 验证信件与回信的状态机合法流转。
-  8. `tests/preferences/i18n.test.ts` & `theme.test.ts`: 验证多语言与主题配置体系。
+- **测试套件总览**：12 个测试文件，70 个单元与集成测试用例，100% 全部通过。
+- **新增核心测试**：
+  - `tests/reply/resonance.test.ts`: 专门覆盖舒曼共鸣默认 7 次上限、满额判定、作者本人扩容至 15 次以及非作者/超限非法扩容拦截。
+  - `tests/reply/claiming.test.ts`: 覆盖 15 分钟租约时间窗口、并发防抢机制、租约刷新及超时自动解冻。
+  - `scripts/verify_backend.ts`: 包含 7 阶段全链路数据库实测，验证舒曼 7 次上限拦截（`RESONANCE_LIMIT_REACHED`）、作者扩容至 15 次、以及解锁第 8 封回信认领流转。
 
-### 6.2 常用开发维护指令
+### 7.2 常用开发维护指令
 ```bash
-# 运行全部测试
+# 运行全部单元测试
 npm run test:run
+
+# 运行全链路后端与数据库完整性实测
+npm run verify:backend
 
 # 运行 TypeScript 类型静态检查
 npm run lint

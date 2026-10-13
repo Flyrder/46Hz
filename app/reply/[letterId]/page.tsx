@@ -11,7 +11,7 @@ import Link from "next/link";
 import { releaseReplyClaimAction } from "@/app/actions/replies";
 import { claimLetterForReply, CLAIM_LEASE_MINUTES } from "@/lib/reply/claiming";
 
-import { PenLine, Inbox, Clock } from "lucide-react";
+import { PenLine, Inbox, Clock, Waves } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +87,32 @@ export default async function ReplyLetterPage({
               <Link
                 href="/reply"
                 className="inline-flex items-center rounded-lg border border-border px-5 py-2.5 text-sm font-semibold hover:bg-muted transition-colors"
+              >
+                {t("reply.browseOtherLetters")}
+              </Link>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    if (claimResult.reason === "RESONANCE_LIMIT_REACHED") {
+      return (
+        <section className="mx-auto max-w-xl py-12">
+          <div className="rounded-2xl border border-border/80 bg-surface p-8 text-center shadow-soft">
+            <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-full bg-accent/15 text-accent">
+              <Waves className="h-6 w-6" aria-hidden="true" />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground">
+              {t("reply.resonanceFullTitle")}
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-muted-foreground max-w-md mx-auto">
+              {t("reply.resonanceFullDesc")}
+            </p>
+            <div className="mt-6">
+              <Link
+                href="/reply"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-foreground hover:bg-accent/90 transition-colors"
               >
                 {t("reply.browseOtherLetters")}
               </Link>

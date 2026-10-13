@@ -114,11 +114,29 @@ export const enUS: Translations = {
     "To ensure each letter receives thoughtful, unhurried attention without duplicate replies, a peer is currently reading and drafting a response. The letter is gently held for {minutes} minutes while they write. If they step away, it will return to the letterbox automatically.",
   "reply.reservedByOtherTitle": "A peer is currently writing a reply to this letter",
   "reply.reservedForYou": "Writing reply · {minutes}m quiet focus",
+  "reply.resonanceFullDesc":
+    "This letter has reached its full Schumann resonance harmonic capacity with heartfelt replies. Thank you for your care—feel free to browse other letters waiting for a gentle voice.",
+  "reply.resonanceFullTitle": "Resonance limit reached",
   "reply.send": "Send to moderation",
   "reply.skipClaim": "Put back in letterbox for others",
   "reply.startOver": "Start over",
   "reply.title": "Write a reply",
   "reply.yourReply": "Your reply",
+
+  // Schumann Resonance Harmonic Mechanics
+  "resonance.defaultDesc":
+    "Protected by the default 7 Schumann harmonic replies to prevent emotional overwhelm. If you feel ready to receive more care, you can expand to 15 replies below.",
+  "resonance.expandButton": "Open deeper resonance (expand to 15 replies)",
+  "resonance.expandedBadge": "15th harmonic resonance",
+  "resonance.expandedDesc":
+    "Expanded to receive up to 15 resonant replies upon your choice.",
+  "resonance.fulfilledBadge": "Resonance complete",
+  "resonance.fulfilledDesc":
+    "All resonance slots have been peacefully fulfilled. Take your time reading through each message.",
+  "resonance.meterLabel": "Resonance Harmonics ({current} / {max})",
+  "resonance.schumannNote":
+    "46Hz represents the 7th harmonic frequency of Earth's Schumann resonance (~46Hz). Each letter is initially held to 7 replies to preserve intimacy and protect you from emotional noise.",
+  "resonance.title": "46Hz Schumann Resonance",
 
   // Reply Preferences & Types
   "replyType.ADVICE": "Gentle advice",

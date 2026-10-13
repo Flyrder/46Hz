@@ -12,6 +12,11 @@ It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat 
 
 ## Key Features & Architecture
 
+- **46Hz Schumann Resonance Harmonic Reply Cap (Brand Story & Anti-Overwhelm)**:
+  - 46Hz corresponds to Earth's 7th harmonic Schumann resonance frequency (~7.83Hz $\times$ 7 $\approx$ 46Hz).
+  - Each letter is held to **at most 7 resonant replies** by default to protect the author from emotional noise and comment flooding.
+  - Only when the letter author explicitly clicks a button (`더 깊은 공명 열기`) on their letter page does the letter consciously expand to **15 replies**.
+  - Once the resonance cap is reached, the letter is gracefully closed to new replies and filtered out of the peer pool.
 - **Human-Centered Letter Holding Protocol (Anti-Shadowban Design)**:
   - When a peer opens a letter to write a reply, the letter is quietly held for a 15-minute focused writing window to prevent multiple overlapping responses.
   - Transparent physical letterbox metaphor: Peers see that someone is thoughtfully drafting a reply, and responders can click "Put back in letterbox" at any time to release it. No confusing "lockout" or "shadowban" states.

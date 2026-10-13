@@ -104,3 +104,50 @@ export async function cancelDraftLetterAction(formData: FormData): Promise<void>
 
   redirect("/write");
 }
+
+export async function expandLetterResonanceAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const letterId = formValue(formData, "letterId");
+
+  if (!letterId) {
+    throw new Error("Letter ID is required.");
+  }
+
+  const letter = await prisma.letter.findFirst({
+    where: {
+      id: letterId,
+      authorId: user.id
+    }
+  });
+
+  if (!letter) {
+    throw new Error("Letter not found or you are not the author.");
+  }
+
+  if (letter.maxReplies >= 15) {
+    return;
+  }
+
+  await prisma.$transaction([
+    prisma.letter.update({
+      where: { id: letter.id },
+      data: {
+        maxReplies: 15
+      }
+    }),
+    prisma.moderationEvent.create({
+      data: {
+        targetType: "LETTER",
+        targetId: letter.id,
+        action: "RESONANCE_EXPANDED",
+        reason: "Author explicitly consented to expand resonance capacity from 7 to 15 replies.",
+        previousStatus: letter.status,
+        newStatus: letter.status
+      }
+    })
+  ]);
+
+  revalidatePath(`/letters/${letter.id}`);
+  revalidatePath("/inbox");
+  revalidatePath("/reply");
+}

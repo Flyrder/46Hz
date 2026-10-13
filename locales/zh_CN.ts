@@ -108,11 +108,29 @@ export const zhCN: Translations = {
     "为了让每一位写信人的心事都能得到专注、温暖的回应，避免多人同时重复回复，当前已有一位同伴取下这封信并正在认真书写。信件会为 TA 保留 {minutes} 分钟专注时间；若对方中途离开或未完成，信件会自动放回信箱。请先看看其他同样需要陪伴的心事吧。",
   "reply.reservedByOtherTitle": "另一位同伴正在用心写信中",
   "reply.reservedForYou": "静心书写中 · 为您守护 {minutes} 分钟",
+  "reply.resonanceFullDesc":
+    "这封信已收到充足温暖的舒曼谐波共鸣回响。感谢你的善意与陪伴，请先看看其他同样需要温热回音的信件吧。",
+  "reply.resonanceFullTitle": "共鸣已圆满",
   "reply.send": "提交审核",
   "reply.skipClaim": "放回信箱（留给其他同伴）",
   "reply.startOver": "重新开始",
   "reply.title": "撰写回信",
   "reply.yourReply": "你的回信",
+
+  // Schumann Resonance Harmonic Mechanics
+  "resonance.defaultDesc":
+    "当前处于默认的 7 次舒曼谐波共鸣保护中，避免信息过载打扰内心的平静。当你准备好接纳更多关怀时，可随时在下方扩展至 15 次回响。",
+  "resonance.expandButton": "开启更深共鸣（扩展至15次回响）",
+  "resonance.expandedBadge": "15次深层共鸣",
+  "resonance.expandedDesc":
+    "已根据你的心意开启 15 次深层共鸣模式。",
+  "resonance.fulfilledBadge": "共鸣圆满",
+  "resonance.fulfilledDesc":
+    "所有共鸣席位均已温暖填满。请静心翻阅同伴们留给你的每一段回响。",
+  "resonance.meterLabel": "共鸣谐波 ({current} / {max})",
+  "resonance.schumannNote":
+    "46Hz 代表地球舒曼共鸣的第 7 阶自然谐波（约 46Hz）。每封信件默认限定 7 封回信，守护倾诉的私密与专注，避免社交信息喧嚣与过载。",
+  "resonance.title": "46Hz 舒曼共鸣",
 
   // Reply Preferences & Types
   "replyType.ADVICE": "温和建议",

@@ -87,13 +87,14 @@ model Letter {
   riskLevel        RiskLevel
   language         String
   status           LetterStatus @default(DRAFT)
+  maxReplies       Int          @default(7)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
   replies          Reply[]
   matches          Match[]
 
-  @@index([status, riskLevel, createdAt])
+  @@index([status, riskLevel, maxReplies, createdAt])
   @@index([authorId, createdAt])
 }
 

@@ -18,6 +18,8 @@ export function LetterCard({
     desiredReplyType: ReplyType;
     riskLevel: RiskLevel;
     status: LetterStatus;
+    maxReplies?: number;
+    _count?: { replies: number };
     createdAt: Date;
   };
   href: string;
@@ -41,6 +43,11 @@ export function LetterCard({
         <StatusBadge tone={letter.riskLevel === "NORMAL" ? "good" : "warning"}>
           {t(`status.${letter.riskLevel}`)}
         </StatusBadge>
+        {letter.maxReplies ? (
+          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+            {letter.maxReplies >= 15 ? t("resonance.expandedBadge") : "7 Harmonics"}
+          </span>
+        ) : null}
         <span className="text-xs text-muted-foreground">{formatDate(letter.createdAt)}</span>
       </div>
       <p className="mt-4 text-sm leading-6 text-foreground">{preview}</p>

@@ -45,8 +45,7 @@ export async function coachReplyAction(
     where: { id: input.data.letterId },
     include: {
       replies: {
-        where: { responderId: user.id },
-        select: { id: true }
+        select: { id: true, responderId: true, status: true }
       },
       matches: {
         where: {
@@ -67,10 +66,18 @@ export async function coachReplyAction(
     };
   }
 
-  if (letter.replies.length > 0) {
+  if (letter.replies.some((r) => r.responderId === user.id)) {
     return {
       ok: false,
       error: "You have already submitted a reply to this letter."
+    };
+  }
+
+  const activeRepliesCount = letter.replies.filter((r) => r.status !== "REJECTED").length;
+  if (activeRepliesCount >= (letter.maxReplies ?? 7)) {
+    return {
+      ok: false,
+      error: "This letter has reached its maximum resonance replies."
     };
   }
 
@@ -116,8 +123,7 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
     where: { id: input.letterId },
     include: {
       replies: {
-        where: { responderId: user.id },
-        select: { id: true }
+        select: { id: true, responderId: true, status: true }
       },
       matches: {
         where: {
@@ -135,8 +141,13 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
     throw new Error("This letter is not available for peer response.");
   }
 
-  if (letter.replies.length > 0) {
+  if (letter.replies.some((r) => r.responderId === user.id)) {
     throw new Error("You have already submitted a reply to this letter.");
+  }
+
+  const activeRepliesCount = letter.replies.filter((r) => r.status !== "REJECTED").length;
+  if (activeRepliesCount >= (letter.maxReplies ?? 7)) {
+    throw new Error("This letter has reached its maximum resonance replies.");
   }
 
   const now = new Date();
