@@ -8,6 +8,8 @@ import { requireUser } from "@/lib/session";
 import { isPeerMatchable } from "@/lib/safety/routing";
 import { coachReplySchema, formValue, submitReplySchema } from "@/lib/validators";
 
+import { isMatchActiveClaim, releaseLetterClaim } from "@/lib/reply/claiming";
+
 export type CoachReplyState =
   | {
       ok: false;
@@ -40,7 +42,18 @@ export async function coachReplyAction(
   }
 
   const letter = await prisma.letter.findUnique({
-    where: { id: input.data.letterId }
+    where: { id: input.data.letterId },
+    include: {
+      replies: {
+        where: { responderId: user.id },
+        select: { id: true }
+      },
+      matches: {
+        where: {
+          status: "OFFERED"
+        }
+      }
+    }
   });
 
   if (
@@ -51,6 +64,25 @@ export async function coachReplyAction(
     return {
       ok: false,
       error: "This letter is not available for peer response."
+    };
+  }
+
+  if (letter.replies.length > 0) {
+    return {
+      ok: false,
+      error: "You have already submitted a reply to this letter."
+    };
+  }
+
+  const now = new Date();
+  const lockedByOther = letter.matches.some(
+    (m) => m.responderId !== user.id && isMatchActiveClaim(m, now)
+  );
+
+  if (lockedByOther) {
+    return {
+      ok: false,
+      error: "This letter is currently being answered by another peer."
     };
   }
 
@@ -81,7 +113,18 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
   });
 
   const letter = await prisma.letter.findUnique({
-    where: { id: input.letterId }
+    where: { id: input.letterId },
+    include: {
+      replies: {
+        where: { responderId: user.id },
+        select: { id: true }
+      },
+      matches: {
+        where: {
+          status: "OFFERED"
+        }
+      }
+    }
   });
 
   if (
@@ -90,6 +133,19 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
     !isPeerMatchable({ status: letter.status, riskLevel: letter.riskLevel })
   ) {
     throw new Error("This letter is not available for peer response.");
+  }
+
+  if (letter.replies.length > 0) {
+    throw new Error("You have already submitted a reply to this letter.");
+  }
+
+  const now = new Date();
+  const lockedByOther = letter.matches.some(
+    (m) => m.responderId !== user.id && isMatchActiveClaim(m, now)
+  );
+
+  if (lockedByOther) {
+    throw new Error("This letter is currently locked by another peer's reply session.");
   }
 
   const reply = await prisma.reply.create({
@@ -134,4 +190,14 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
 
   revalidatePath("/admin/replies");
   redirect("/inbox?replySubmitted=1");
+}
+
+export async function releaseReplyClaimAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const letterId = formValue(formData, "letterId");
+  if (letterId) {
+    await releaseLetterClaim(letterId, user.id);
+  }
+  revalidatePath("/reply");
+  redirect("/reply");
 }

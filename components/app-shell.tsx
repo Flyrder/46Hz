@@ -21,9 +21,9 @@ export function AppShell({
         <nav className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
           <Link href="/" className="flex items-center gap-2 text-sm font-semibold">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-accent-foreground">
-              E
+              46
             </span>
-            <span>EKO</span>
+            <span>46Hz</span>
           </Link>
           <div className="flex flex-wrap items-center justify-end gap-2">
             <PreferenceForm

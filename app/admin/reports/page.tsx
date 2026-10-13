@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
-import { requireAdmin } from "@/lib/admin";
+import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminReportsPage() {
-  await requireAdmin();
+  const role = await requireStaff();
   const reports = await prisma.feedback.findMany({
     where: { reportReason: { not: null } },
     include: {
@@ -27,7 +27,7 @@ export default async function AdminReportsPage() {
   return (
     <section className="mx-auto max-w-3xl">
       <h1 className="text-3xl font-semibold">Reports</h1>
-      <AdminNav />
+      <AdminNav role={role} />
       <div className="space-y-4">
         {reports.map((report) => (
           <article key={report.id} className="rounded-lg border border-border bg-surface p-5 shadow-soft">

@@ -5,25 +5,14 @@ import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
 
+import { findAvailableReplyLetters } from "@/lib/reply/claiming";
+
 export const dynamic = "force-dynamic";
 
 export default async function ReplyOpportunitiesPage() {
   const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
   const t = createTranslator(locale);
-  const letters = await prisma.letter.findMany({
-    where: {
-      authorId: { not: user.id },
-      status: "APPROVED",
-      riskLevel: "NORMAL",
-      replies: {
-        none: {
-          responderId: user.id
-        }
-      }
-    },
-    orderBy: { createdAt: "asc" },
-    take: 6
-  });
+  const letters = await findAvailableReplyLetters(user.id, 6);
 
   return (
     <section className="mx-auto max-w-3xl">

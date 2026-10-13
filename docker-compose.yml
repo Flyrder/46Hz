@@ -1,12 +1,13 @@
 services:
   postgres:
+    # postgres:16 is a multi-platform official image supporting both linux/amd64 and linux/arm64
     image: postgres:16
-    container_name: eko-letterbox-postgres
+    container_name: 46hz-letterbox-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: eko
-      POSTGRES_PASSWORD: eko
-      POSTGRES_DB: eko_letterbox
+      POSTGRES_USER: ${POSTGRES_USER:-46hz}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-46hz}
+      POSTGRES_DB: ${POSTGRES_DB:-46hz_letterbox}
     ports:
       - "5432:5432"
     volumes:

@@ -2,11 +2,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 
-const USER_COOKIE = "eko_user_id";
+const USER_COOKIE = "46hz_user_id";
 
 export async function getCurrentUserId(): Promise<string | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(USER_COOKIE)?.value ?? null;
+  return cookieStore.get(USER_COOKIE)?.value ?? cookieStore.get("eko_user_id")?.value ?? null;
 }
 
 export async function setCurrentUserId(userId: string): Promise<void> {
@@ -23,6 +23,7 @@ export async function setCurrentUserId(userId: string): Promise<void> {
 export async function clearCurrentUser(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(USER_COOKIE);
+  cookieStore.delete("eko_user_id");
 }
 
 import crypto from "crypto";
@@ -55,7 +56,7 @@ export async function getCurrentUser() {
 
 export function createMigrationCode(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "EKO-";
+  let code = "46HZ-";
   const bytes = crypto.randomBytes(8);
   for (let i = 0; i < 8; i++) {
     if (i === 4) code += "-";
