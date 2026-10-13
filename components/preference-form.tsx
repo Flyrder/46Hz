@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useRef, useTransition, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useState, useRef, useTransition } from "react";
 import { updatePreferencesAction } from "@/app/actions/preferences";
 import type { Locale } from "@/lib/i18n";
 import { themePreferences, type ThemePreference } from "@/lib/theme";
@@ -99,7 +99,8 @@ export function PreferenceForm({
   };
 
   if (isCompact) {
-    const themeIndex = themePreferences.indexOf(themeValue);
+    const rawThemeIndex = themePreferences.indexOf(themeValue);
+    const themeIndex = rawThemeIndex >= 0 ? rawThemeIndex : 0;
 
     return (
       <div className="flex items-center gap-2 relative">
@@ -111,17 +112,17 @@ export function PreferenceForm({
             aria-label={localeLabel}
             aria-expanded={menuOpen}
             aria-haspopup="listbox"
-            className="flex items-center gap-1.5 min-h-[36px] px-2.5 rounded-full border border-border bg-surface text-xs font-medium hover:bg-muted/50 active:scale-95 transition-all select-none focus:outline-none focus:ring-2 focus:ring-accent/40"
+            className="flex items-center gap-1.5 min-h-[44px] px-3.5 rounded-full border border-border/80 bg-surface/90 text-xs font-medium hover:bg-muted/60 active:scale-95 transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 shadow-2xs"
           >
-            <Languages className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
-            <span>{getLangCode(localeValue)}</span>
+            <Languages className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span className="font-semibold">{getLangCode(localeValue)}</span>
           </button>
 
           {menuOpen && (
             <div
               role="listbox"
               aria-label={localeLabel}
-              className="absolute right-0 mt-1.5 w-36 rounded-xl border border-border bg-surface p-1 shadow-soft z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+              className="absolute right-0 mt-1.5 w-36 rounded-2xl border border-border/80 bg-surface p-1.5 shadow-tactile z-50 animate-in fade-in slide-in-from-top-2 duration-150"
             >
               {localeOptions.map((option) => (
                 <button
@@ -133,11 +134,11 @@ export function PreferenceForm({
                     handlePreferenceChange(option.value, themeValue);
                     setMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs font-medium hover:bg-muted/50 transition-colors text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full flex items-center justify-between min-h-[44px] px-3 py-2 rounded-xl text-left text-xs font-medium hover:bg-muted/60 transition-colors text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent"
                 >
                   <span>{option.label}</span>
                   {localeValue === option.value && (
-                    <Check className="h-3 w-3 text-accent" aria-hidden="true" />
+                    <Check className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
                   )}
                 </button>
               ))}
@@ -149,11 +150,11 @@ export function PreferenceForm({
         <div
           role="radiogroup"
           aria-label={themeLabel}
-          className="relative flex items-center bg-muted/40 border border-border/70 p-0.5 rounded-full h-8 w-24 overflow-hidden select-none"
+          className="relative flex items-center bg-muted/50 border border-border/70 p-0.5 rounded-full h-11 min-w-[124px] overflow-hidden select-none"
         >
           {/* Sliding Pill Background Highlight */}
           <div
-            className="absolute top-0.5 bottom-0.5 rounded-full bg-surface shadow-sm transition-all duration-200 ease-out"
+            className="absolute top-0.5 bottom-0.5 rounded-full bg-surface shadow-xs transition-all duration-200 ease-out"
             style={{
               left: `calc(${themeIndex} * 33.333% + 2px)`,
               width: `calc(33.333% - 4px)`
@@ -170,11 +171,11 @@ export function PreferenceForm({
                 aria-checked={isActive}
                 onClick={() => handlePreferenceChange(localeValue, pref)}
                 aria-label={`${pref} theme`}
-                className={`relative flex-1 grid place-items-center h-full rounded-full transition-colors z-10 focus:outline-none focus:ring-1 focus:ring-accent ${
-                  isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                className={`relative flex-1 grid place-items-center h-full min-h-[40px] rounded-full transition-colors z-10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent ${
+                  isActive ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {getThemeIcon(pref, "h-3.5 w-3.5")}
+                {getThemeIcon(pref, "h-4 w-4")}
               </button>
             );
           })}
@@ -192,20 +193,20 @@ export function PreferenceForm({
 
   // Full representation in settings page
   return (
-    <div className="mt-5 rounded-lg border border-border bg-surface p-5 shadow-soft">
+    <div className="mt-6 rounded-2xl border border-border/85 bg-surface p-6 shadow-soft">
       {title && (
-        <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-4">
-          <h2 className="text-lg font-semibold">{title}</h2>
+        <div className="flex items-center justify-between border-b border-border/60 pb-3 mb-5">
+          <h2 className="text-base font-semibold tracking-tight text-foreground">{title}</h2>
           {isPending && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
         </div>
       )}
 
       {/* Language Section */}
       <div>
-        <label className="text-sm font-semibold block text-foreground mb-2">
+        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-2.5">
           {localeLabel}
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           {localeOptions.map((option) => {
             const isActive = localeValue === option.value;
             return (
@@ -213,10 +214,10 @@ export function PreferenceForm({
                 key={option.value}
                 type="button"
                 onClick={() => handlePreferenceChange(option.value, themeValue)}
-                className={`relative flex items-center justify-center gap-2 py-3 px-4 rounded-xl border text-sm font-medium transition-all ${
+                className={`relative flex items-center justify-center gap-2 py-3 px-3 rounded-xl border text-sm font-medium transition-all ${
                   isActive
-                    ? "border-accent bg-accent/5 text-foreground ring-1 ring-accent/20"
-                    : "border-border bg-surface hover:border-border/80 hover:bg-muted/10 text-muted-foreground hover:text-foreground"
+                    ? "border-accent bg-accent/10 text-foreground ring-1 ring-accent/30 font-semibold"
+                    : "border-border/80 bg-surface hover:border-border hover:bg-muted/40 text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <span>{option.label}</span>
@@ -228,11 +229,11 @@ export function PreferenceForm({
       </div>
 
       {/* Theme Section */}
-      <div className="mt-5">
-        <label className="text-sm font-semibold block text-foreground mb-2">
+      <div className="mt-6">
+        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground block mb-2.5">
           {themeLabel}
         </label>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           {themeOptions.map((option) => {
             const isActive = themeValue === option.value;
             return (
@@ -240,13 +241,13 @@ export function PreferenceForm({
                 key={option.value}
                 type="button"
                 onClick={() => handlePreferenceChange(localeValue, option.value)}
-                className={`relative flex flex-col items-center gap-1.5 py-3 px-4 rounded-xl border text-xs font-medium transition-all ${
+                className={`relative flex flex-col items-center gap-1.5 py-3 px-3 rounded-xl border text-xs font-medium transition-all ${
                   isActive
-                    ? "border-accent bg-accent/5 text-foreground ring-1 ring-accent/20"
-                    : "border-border bg-surface hover:border-border/80 hover:bg-muted/10 text-muted-foreground hover:text-foreground"
+                    ? "border-accent bg-accent/10 text-foreground ring-1 ring-accent/30 font-semibold"
+                    : "border-border/80 bg-surface hover:border-border hover:bg-muted/40 text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {getThemeIcon(option.value, "h-4 w-4 text-foreground/80")}
+                {getThemeIcon(option.value, "h-4 w-4 text-foreground/85")}
                 <span>{option.label}</span>
               </button>
             );

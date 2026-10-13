@@ -172,5 +172,28 @@ export const zhCN: Translations = {
   "theme.dark": "纯深色",
   "theme.label": "主题",
   "theme.light": "浅色模式",
-  "theme.system": "跟随系统"
+  "theme.system": "跟随系统",
+
+  // Additional UI & Emotional Pacing Translations
+  "letter.backToInbox": "返回回信箱",
+  "letter.peerReplyTitle": "同伴的回信",
+  "letter.replyFeedbackTitle": "给回信的温润反馈",
+  "onboarding.startSession": "开启匿名会话",
+  "reply.aiHint": "✨ 草拟完成后，AI回信教练将提供温润的润色建议。",
+  "reply.coachEditableNote": "您可以自由微调润色后的内容，带着温情寄出。",
+  "reply.counter": "{current} / 最少{min}字",
+  "reply.draftEncouragement": "无需匆忙。不必试图改变对方的心情，仅是温润倾听与接纳，便是最深切的抚慰。",
+  "reply.peerReplyTitle": "同伴的回信",
+  "reply.poolTitle": "同伴回信连接池",
+  "resonance.expandNote": "46Hz（默认第7阶共振）→ 扩展至第15阶深层共振",
+  "review.directlyEditable": "支持直接修改",
+  "review.moderationNotice": "审核通过后将安全送达回信箱。",
+  "review.supportConnected": "将为您连接专业咨询与援助资源。",
+  "review.supportNoticeTitle": "安心保护引导说明",
+  "settings.profileTitle": "匿名档案信息",
+  "settings.subtitle": "管理您的匿名档案与偏好设置。",
+  "write.counter": "{current} / 最少{min}字",
+  "write.peacePacing": "无需匆忙，按照您的节奏落笔即可。",
+  "write.privacyAssurance": "46Hz承诺保护您的隐私。信件提交后，AI将自动过滤姓名、联系方式等敏感信息，您可在下一步自由编辑确认。",
+  "write.sparks": "心绪灵感（点击开启）"
 };

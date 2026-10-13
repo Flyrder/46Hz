@@ -1,53 +1,93 @@
 # 46Hz Letterbox
 
-A quiet, web-first, mobile-first anonymous emotional support letter app.
+<div align="center">
 
-46Hz is built around a single, safe, human-to-human slow loop:
+**A quiet, human-centered anonymous emotional support slow letterbox.**
 
-$$\text{Write Letter} \longrightarrow \text{AI Anonymize & Screen} \longrightarrow \text{Author Review} \longrightarrow \text{Admin Moderation} \longrightarrow \text{Peer Reply} \longrightarrow \text{AI Reply Coach} \longrightarrow \text{Admin Moderation} \longrightarrow \text{Receive Reply} \longrightarrow \text{Feedback}$$
+[![Next.js 16.4](https://img.shields.io/badge/Next.js-16.4-black.svg?logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7.x%20Strict-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS 4](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg?logo=tailwindcss)](https://tailwindcss.com/)
+[![Prisma ORM 7](https://img.shields.io/badge/Prisma-7.10%20pg--adapter-2D3748.svg?logo=prisma)](https://www.prisma.io/)
+[![Vitest](https://img.shields.io/badge/Vitest-109%20Passed-6E9F18.svg?logo=vitest)](https://vitest.dev/)
+[![Multi-Arch](https://img.shields.io/badge/Arch-Arm64%20%7C%20AMD64-orange.svg?logo=docker)](https://www.docker.com/)
+[![Barrier-Free A11y](https://img.shields.io/badge/A11y-Barrier--Free%20WCAG-emerald.svg)](#barrier-free-accessibility)
+[![Zero PII](https://img.shields.io/badge/Privacy-Zero%20PII%20GDPR-teal.svg)](#data-minimization--compliance)
 
-It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat product. AI acts strictly as an editable, transparent middleware layer between people.
-
----
-
-## Key Features & Architecture
-
-- **46Hz Schumann Resonance Harmonic Reply Cap (Brand Story & Anti-Overwhelm)**:
-  - 46Hz corresponds to Earth's 7th harmonic Schumann resonance frequency (~7.83Hz $\times$ 7 $\approx$ 46Hz).
-  - Each letter is held to **at most 7 resonant replies** by default to protect the author from emotional noise and comment flooding.
-  - Only when the letter author explicitly clicks a button (`더 깊은 공명 열기`) on their letter page does the letter consciously expand to **15 replies**.
-  - Once the resonance cap is reached, the letter is gracefully closed to new replies and filtered out of the peer pool.
-- **Human-Centered Letter Holding Protocol (Anti-Shadowban Design)**:
-  - When a peer opens a letter to write a reply, the letter is quietly held for a 15-minute focused writing window to prevent multiple overlapping responses.
-  - Transparent physical letterbox metaphor: Peers see that someone is thoughtfully drafting a reply, and responders can click "Put back in letterbox" at any time to release it. No confusing "lockout" or "shadowban" states.
-- **Default Korean (`ko_KR`) & Thoroughly Decoupled i18n Architecture**:
-  - The application defaults to Korean (`ko_KR`), with English (`en_US`) and Simplified Chinese (`zh_CN`) fully supported.
-  - Complete architectural decoupling between translation content data ([locales/](file:///c:/Users/voide/eko/locales)) and engine logic ([lib/i18n/](file:///c:/Users/voide/eko/lib/i18n)). Zero language files reside directly under `lib/i18n/`.
-- **Arm64 & Multi-Arch Platform Support**:
-  - Configured with Prisma multi-arch binary targets (`linux-arm64-openssl-3.0.x`, `linux-arm64-openssl-1.1.x`, `linux-musl-arm64-openssl-3.0.x`, `darwin-arm64`, and `native`).
-  - Production-ready multi-stage `Dockerfile` (Node 20 Bookworm slim, non-root runner) and `docker-compose.yml` optimized for Apple Silicon, AWS Graviton, and x86_64 servers.
-- **Pluggable AI Middleware (`AiMiddleware`)**:
-  - Default deterministic, zero-dependency `MockAiMiddleware` runs offline without API keys.
-  - Hot-swappable production LLM adapter (`LlmAiMiddleware`) supporting `openai`, `deepseek` (with automated `<think>...</think>` reasoning tag stripping and enum sanitization), and `custom` OpenAI-compatible gateways.
-  - Automatic graceful fallback to Mock on timeout or network degradation.
-- **Granular Admin RBAC**:
-  - Dual-role authentication separating **Admin** (`ADMIN_PASSCODE`) from **Moderator** (`MODERATOR_PASSCODE`).
-  - Moderators can review letters and replies, inspect moderation logs, and view reports, while user suspensions and emergency crisis resources remain restricted to Admins.
-- **Zero PII & Device Migration Codes**:
-  - No email/password database accounts.
-  - Anonymous sessions with typo-safe Crockford Base32 migration codes (e.g. `46HZ-XXXX-XXXX`) for cross-device session transfers.
+</div>
 
 ---
 
-## Tech Stack
+## Brand Philosophy: The 46Hz Slow Loop
 
-- **Framework**: Next.js 16.4 (App Router, Server Actions, React 19.3)
-- **Language**: TypeScript 7.x (Strict Mode)
-- **Styling**: Tailwind CSS 4.x + Lucide Icons 1.x + System/Light/Dark Themes
-- **Database & ORM**: PostgreSQL + Prisma ORM 7.x (`@prisma/adapter-pg` Driver Adapter)
-- **Validation**: Zod 4.x
-- **Testing**: Vitest 5.x
-- **Containerization**: Multi-arch Docker & Docker Compose
+46Hz is inspired by Earth's **7th Schumann resonance harmonic** (~7.83Hz $\times$ 7 $\approx$ 45.9Hz $\approx$ 46Hz). In emotional acoustics, extremely low frequencies ground and calm the nervous system. 
+
+In a digital world dominated by instant read receipts, performative metrics, and reactive comments, 46Hz offers an intentional, unhurried space for vulnerable thoughts.
+
+$$\text{Write Privately} \longrightarrow \text{AI Anonymize \& Screen} \longrightarrow \text{Author Review} \longrightarrow \text{Moderation} \longrightarrow \text{Peer Reply} \longrightarrow \text{AI Reply Coach} \longrightarrow \text{Moderation} \longrightarrow \text{Receive Reply} \longrightarrow \text{Feedback}$$
+
+> [!NOTE]
+> 46Hz is **not** a clinic, diagnostic tool, or emergency crisis chat. AI acts strictly as an editable, transparent middleware layer between people. Letters in immediate crisis are safely redirected to 24/7 dedicated professional helplines.
+
+---
+
+## Key Features
+
+### 1. 46Hz Schumann Resonance Harmonic Cap
+- **7-Reply Cap by Default**: To prevent emotional overwhelm and advice flooding, every letter is limited to **at most 7 replies**.
+- **Conscious Expansion to 15**: Only when the letter author feels ready for deeper connection can they explicitly click the expansion action (`더 깊은 공명 열기`) on their letter page, expanding capacity to 15 replies.
+- **Graceful Closure**: Once the cap is reached, the letter is gently closed to new replies and filtered out of the peer pool.
+
+### 2. Human-Centered Physical Letterbox Holding (Anti-Shadowban Design)
+- **15-Minute Focused Writing Window**: When a peer begins drafting a response, the letter is quietly held for 15 minutes to prevent collision with other responders.
+- **Physical Letterbox Metaphor**: Instead of alarming "Locked" or "Warning" alerts, peers see: *"Another peer is currently reading and thoughtfully writing a reply..."*
+- **Voluntary Release**: Responders can click *"Put back in letterbox"* at any time to return the letter to the pool for others.
+
+### 3. Quiet Stationery Aesthetic & Midnight Dark Mode
+- **Warm Stationery Paper Textures**: Subtle stone and parchment backgrounds (`#FAF7F2`), delicate card borders, comfortable typography (`leading-relaxed`), and real-time character pacing.
+- **Midnight Dark Mode**: Deep calming slate (`#0F131A` / `hsl(222 24% 8%)`) designed to comfort fatigued eyes without harsh pitch-black contrast.
+- **Emotional Reflection Sparks**: Gentle prompt chips helping writers begin their letters without pressure.
+
+### 4. Pluggable AI Middleware (`AiMiddleware`)
+- **Default Offline Mock (`MockAiMiddleware`)**: Zero external API dependencies; runs completely offline and deterministically with realistic simulated latency.
+- **Hot-Swappable Production LLM (`LlmAiMiddleware`)**: Supports `openai`, `deepseek` (with automated `<think>...</think>` reasoning tag stripping and enum sanitization), and `custom` OpenAI-compatible endpoints.
+- **Resilient Fallback**: Automatically falls back to Mock upon upstream timeout or network degradation.
+
+### 5. Zero PII & Crockford Base32 Device Migration
+- **No Email/Password Database Accounts**: True anonymity with zero personal data collected.
+- **Crockford Base32 Migration Codes**: Cross-device transfer using typo-safe codes (e.g. `46HZ-XXXX-XXXX`), excluding confusing characters (`0`, `1`, `I`, `O`).
+
+### 6. Granular Dual-Role Admin RBAC
+- **Admin (`ADMIN_PASSCODE`)**: Full access, including user suspensions, crisis resource management, and compliance exports.
+- **Moderator (`MODERATOR_PASSCODE`)**: Dedicated to content safety—reviewing letters and replies, reading reports, and inspecting audit logs.
+
+### 7. Barrier-Free Accessibility (WCAG AA/AAA)
+- Minimum **44px $\times$ 44px** touch targets across all interactive buttons, links, and navigation icons.
+- Screen reader skip-to-content links (`#main-content`), landmark regions (`banner`, `main`, `contentinfo`, `progressbar`), and ARIA live announcements.
+
+---
+
+## Unified Configuration (`settings.ts`)
+
+All application settings are centralized in [settings.ts](file:///c:/Users/voide/eko/settings.ts) as a single source of truth:
+
+```typescript
+import { settings } from "@/settings";
+
+// Brand & Metadata
+settings.brand.name;               // "46Hz"
+settings.brand.tagline;            // "A quiet anonymous emotional support letterbox."
+
+// Resonance & Harmonics
+settings.resonance.defaultMaxReplies;   // 7 (7th Schumann Harmonic)
+settings.resonance.expandedMaxReplies;  // 15 (Expanded Harmonic)
+
+// Concurrency Holding
+settings.claiming.leaseDurationMinutes; // 15 minutes
+
+// Law Enforcement & Compliance
+settings.compliance.ipRetentionDays;    // 14 days rolling auto-purge
+settings.compliance.maxRecentIps;       // 5 entries max
+```
 
 ---
 
@@ -55,74 +95,85 @@ It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat 
 
 ```
 c:\Users\voide\eko\
-├── app/                          # Next.js App Router
+├── app/                          # Next.js App Router (React 19.3)
 │   ├── actions/                  # Server Actions (letters, replies, admin, feedback, onboarding)
 │   ├── admin/                    # Admin portal (dashboard, letters, replies, reports, users, resources)
 │   ├── api/                      # Public API routes (health check, AI proxy endpoints)
 │   ├── inbox/                    # User inbox (received letters & sent replies)
-│   ├── letters/[id]/             # Letter detail & feedback submission
+│   ├── letters/[id]/             # Letter detail, Schumann meter & feedback
 │   ├── onboarding/               # Anonymous session creation & migration code restore
 │   ├── reply/                    # Peer reply pool & reply workbench ([letterId])
 │   ├── settings/                 # Profile, migration code export, theme, language
 │   ├── support-resources/        # Emergency mental health crisis resources
-│   └── write/                    # Letter writing & review
+│   ├── write/                    # Letter writing & review
+│   ├── globals.css               # Design tokens, stationery styles, midnight dark mode
+│   └── layout.tsx                # Root layout with AppShell wrapper
 ├── components/                   # Reusable UI components & layouts
-├── docs/                         # Engineering architecture & Arm64 manuals
-│   └── 46hz_arm64_and_architecture.md
+│   ├── ui/                       # Accessible buttons & form primitives
+│   ├── app-shell.tsx             # Barrier-free header, navigation & footer
+│   ├── letter-card.tsx           # Stationery postcard card with status pills
+│   ├── letter-editor.tsx         # Interactive lined stationery writing workbench
+│   ├── preference-form.tsx       # Compact sliding pill & full theme/locale controls
+│   ├── reply-composer.tsx        # AI Reply Coach interactive workbench
+│   └── resonance-meter.tsx       # Schumann harmonic visualizer & expansion control
+├── docs/                         # Engineering manuals & specifications
+│   ├── 46hz_ui_design_system.md  # Design tokens, aesthetics & A11y specifications
+│   └── 46hz_arm64_and_architecture.md # Architecture evolution & Arm64 manual
 ├── lib/                          # Core domain services & utilities
 │   ├── admin.ts                  # Admin session & RBAC enforcement
-│   ├── db.ts                     # Prisma client singleton
-│   ├── domain.ts                 # Enums & domain types
-│   ├── i18n/                     # i18n engine infrastructure (zero language files)
-│   │   ├── config.ts             # Default locale & options
-│   │   ├── types.ts              # Translation keys & locale types
-│   │   └── index.ts              # Core translator engine
-│   ├── ai/                       # AI Middleware (interfaces, mock, pluggable LLM)
-│   ├── reply/                    # Concurrency claiming & letter holding protocol
-│   ├── safety/                   # Risk classification & crisis routing
-│   └── session.ts                # Session management & migration codes
-├── locales/                      # Standalone language dictionaries (pure content data)
-│   ├── ko_KR.ts                  # Korean language pack (default)
-│   ├── en_US.ts                  # English language pack
-│   ├── zh_CN.ts                  # Simplified Chinese language pack
-│   └── index.ts                  # Locales dictionary aggregator
+│   ├── ai/                       # Pluggable AI middleware (Mock & LLM)
+│   ├── db.ts                     # Prisma client singleton (@prisma/adapter-pg)
+│   ├── domain.ts                 # Domain types & state enums
+│   ├── i18n/                     # Decoupled i18n core engine
+│   ├── reply/                    # 15-minute concurrency holding protocol
+│   ├── safety/                   # Risk classification & safety routing
+│   └── session.ts                # Crockford Base32 migration & session cookies
+├── locales/                      # Standalone translation data packs
+│   ├── ko_KR.ts                  # Korean (default)
+│   ├── en_US.ts                  # English
+│   └── zh_CN.ts                  # Simplified Chinese
 ├── prisma/                       # Database schema & migrations
-├── prisma.config.ts              # Prisma 7 datasource & migration configuration
 ├── scripts/                      # Verification & maintenance tools
-│   └── verify_backend.ts         # Comprehensive 7-phase backend integrity test
-├── tests/                        # Vitest automated test suites (12 suites, 71 tests)
-├── docker-compose.yml            # PostgreSQL service definition
-├── Dockerfile                    # Multi-arch production container build
-├── settings.ts                   # Unified application settings & central configuration
+│   └── verify_backend.ts         # 7-phase end-to-end backend integrity test
+├── tests/                        # Vitest automated test suites (17 files, 108 tests)
+├── docker-compose.yml            # Multi-arch PostgreSQL service definition
+├── Dockerfile                    # Production multi-stage multi-arch container build
+├── settings.ts                   # Central application configuration
 ├── start.ps1                     # PowerShell automated orchestrator & launcher
 └── package.json
 ```
 
 ---
 
-## Quick Start (One-Click Launcher)
+## Quick Start (Automated Launcher)
 
-On Windows, you can start PostgreSQL (via WSLC / Docker), verify Prisma client, and launch the development server with:
+On Windows, run the automated launcher script in PowerShell:
 
-- Run in PowerShell:
-  ```powershell
-  .\start.ps1
-  ```
-
-Options:
 ```powershell
-.\start.ps1 -VerifyOnly   # Run end-to-end backend integrity checks without starting server
-.\start.ps1 -Seed         # Seed sample letters and resources before launching
-.\start.ps1 -Prod         # Build Turbopack production bundle and launch on port 3000
+.\start.ps1
+```
+
+The script will automatically:
+1. Verify Node.js and npm versions.
+2. Ensure PostgreSQL container is running (via Docker or WSLC).
+3. Validate `.env` configuration.
+4. Run Prisma schema generation and pending migrations.
+5. Launch the Next.js development server on `http://localhost:3000`.
+
+### Advanced Options:
+
+```powershell
+.\start.ps1 -VerifyOnly   # Run full 7-phase backend verification without launching server
+.\start.ps1 -Seed         # Seed sample letters and support resources
+.\start.ps1 -Prod         # Build production bundle and start server
+.\start.ps1 -SkipChecks   # Fast launch skipping database readiness checks
 ```
 
 ---
 
-## Local Development
+## Manual Setup
 
-### 1. Environment Setup
-
-Copy example environment variables:
+### 1. Environment Configuration
 
 ```bash
 cp .env.example .env
@@ -137,17 +188,19 @@ MODERATOR_PASSCODE="local-moderator"
 AI_PROVIDER="mock" # Options: mock | openai | deepseek | custom
 ```
 
-### 2. Start PostgreSQL (WSLC or Docker)
+### 2. Start PostgreSQL
 
+Using Docker Compose:
 ```bash
-# Using WSLC (Windows WSL Container CLI):
-wslc run -d --name 46hz-postgres -p 127.0.0.1:5432:5432 -e POSTGRES_USER=46hz -e POSTGRES_PASSWORD=46hz -e POSTGRES_DB=46hz_letterbox -v 46hz_postgres_data:/var/lib/postgresql/data postgres:16-alpine
-
-# Or using Docker Compose:
 docker compose up -d
 ```
 
-### 3. Install Dependencies & Generate Database Client
+Or using WSLC (Windows WSL Container CLI):
+```bash
+wslc run -d --name 46hz-postgres -p 127.0.0.1:5432:5432 -e POSTGRES_USER=46hz -e POSTGRES_PASSWORD=46hz -e POSTGRES_DB=46hz_letterbox -v 46hz_postgres_data:/var/lib/postgresql/data postgres:16-alpine
+```
+
+### 3. Install Dependencies & Initialize Database
 
 ```bash
 npm install
@@ -162,57 +215,60 @@ npm run prisma:seed
 npm run dev
 ```
 
-Open `http://localhost:3000`. By default, the application opens in Korean (`ko_KR`). You can toggle language and theme in the header navigation or `/settings`.
+Open `http://localhost:3000`. The application opens by default in Korean (`ko_KR`).
+
+---
+
+## Arm64 & Multi-Arch Platform Support
+
+46Hz is architected for native compatibility with Apple Silicon (M1/M2/M3/M4), AWS Graviton, and standard x86_64 servers:
+
+- **Prisma Multi-Arch Binaries**: `prisma/schema.prisma` declares:
+  `binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "linux-arm64-openssl-1.1.x", "linux-musl-arm64-openssl-3.0.x", "darwin-arm64"]`.
+- **Driver Adapter Mode**: Uses `@prisma/adapter-pg` driver adapter for fast startup on ARM architectures.
+- **Production Multi-Arch Docker Build**:
+  ```bash
+  docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -t 46hz-letterbox:latest .
+  ```
+
+---
+
+## Security Hardening & Compliance
+
+- **Rate Limiting**: Sliding-window in-memory rate limiting on sensitive actions:
+  - Admin sign-in: 5 attempts per 5 minutes.
+  - Letter submission: 10 drafts per minute.
+  - AI reply coaching: 10 requests per minute.
+- **HTTP Security Headers**: Automated CSP, HSTS, X-Content-Type-Options, X-Frame-Options (`DENY`), and Referrer-Policy configured in `next.config.mjs`.
+- **GDPR & Data Minimization Protocol (`46HZ-LE-PACKET-V1`)**:
+  - Network IP logs are strictly purged after a rolling **14-day retention window**.
+  - Maximum 5 recent IP entries retained per anonymous session.
+  - Law enforcement export packet strictly redacts user content and provides only minimized trace metadata.
 
 ---
 
 ## Verification & Quality Assurance
 
-Run the comprehensive end-to-end backend integrity check:
+To ensure zero regressions, run the full verification suite:
 
 ```bash
-npm run verify:backend
-```
-
-Run the automated test suite (Vitest):
-
-```bash
+# 1. Run all 17 automated test suites (109 tests)
 npm run test:run
-```
 
-Run static type checking:
-
-```bash
+# 2. Run TypeScript strict type-checking
 npm run lint
-```
 
-Build production bundle with Next.js Turbopack:
+# 3. Run comprehensive 7-phase backend integrity test
+npm run verify:backend
 
-```bash
+# 4. Compile optimized Next.js production build
 npm run build
 ```
 
 ---
 
-## Multi-Arch Docker Build (Arm64 / AMD64)
+## License
 
-Build a multi-architecture container image using Docker Buildx:
-
-```bash
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t 46hz-letterbox:latest .
-```
-
----
-
-## Acceptance Workflow
-
-1. Go to `/onboarding` to start an anonymous session (default Korean).
-2. Go to `/write`, draft a letter, and review the AI-anonymized version.
-3. Confirm the letter. It transitions into `PENDING` moderation.
-4. Go to `/admin`, sign in with `local-admin`, open `/admin/letters`, and approve the letter.
-5. In another browser profile, enter `/reply` to browse approved letters.
-6. Open the letter: it enters the 15-minute quiet protection window (`OFFERED`). Draft a reply with the AI Reply Coach and submit.
-7. Under `/admin/replies`, approve the reply.
-8. As the author, open `/inbox` and view the approved response, leaving feedback.
+AGPL-3.0 License. See [LICENSE](file:///c:/Users/voide/eko/LICENSE) for details.

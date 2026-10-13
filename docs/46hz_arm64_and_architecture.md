@@ -1,8 +1,9 @@
 # 46Hz 架构演进与 Arm64 多架构适配实践手册
 
-> 沉淀日期: 2026-10-11  
+> 沉淀日期: 2026-10-11 (Updated 2026-10-12)  
 > 适用版本: 46Hz Letterbox MVP (v0.1.0)  
-> 适用架构: Linux (arm64/aarch64, x86_64), macOS (darwin-arm64, darwin-x64), Windows
+> 适用架构: Linux (arm64/aarch64, x86_64), macOS (darwin-arm64, darwin-x64), Windows  
+> 关联手册: [46Hz UI/UX Design System Manual](file:///c:/Users/voide/eko/docs/46hz_ui_design_system.md)
 
 ---
 

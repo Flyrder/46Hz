@@ -10,6 +10,25 @@ interface ResonanceMeterProps {
   t: (key: string, values?: Record<string, string>) => string;
 }
 
+// Earth's Schumann Harmonic Frequencies (Fundamental ~7.83Hz up to 7th harmonic ~45.9Hz)
+const SCHUMANN_HARMONICS = [
+  "7.8Hz",
+  "14.3Hz",
+  "20.8Hz",
+  "27.3Hz",
+  "33.8Hz",
+  "39.0Hz",
+  "45.9Hz",
+  "52.4Hz",
+  "58.9Hz",
+  "65.4Hz",
+  "71.9Hz",
+  "78.4Hz",
+  "84.9Hz",
+  "91.4Hz",
+  "97.9Hz"
+];
+
 export function ResonanceMeter({
   current,
   max,
@@ -25,41 +44,48 @@ export function ResonanceMeter({
     <section
       role="region"
       aria-label={t("resonance.title")}
-      className="rounded-xl border border-border/80 bg-surface p-5 shadow-soft"
+      className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft transition-all"
     >
       {/* Header with Title and Harmonics Count */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-foreground font-semibold">
-          <Waves className="h-5 w-5 text-accent animate-pulse" aria-hidden="true" />
-          <span>{t("resonance.title")}</span>
+        <div className="flex items-center gap-2.5 text-foreground font-semibold">
+          <div className="grid h-8 w-8 place-items-center rounded-xl bg-accent/10 text-accent">
+            <Waves className="h-4.5 w-4.5" aria-hidden="true" />
+          </div>
+          <div>
+            <span className="text-base tracking-tight">{t("resonance.title")}</span>
+            <span className="ml-2 text-xs font-normal text-muted-foreground hidden sm:inline">
+              (~46Hz Earth Schumann Frequency)
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
           {isFulfilled ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
               <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
               {t("resonance.fulfilledBadge")}
             </span>
           ) : isExpanded ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-0.5 text-xs font-medium text-accent">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t("resonance.expandedBadge")}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-              7th Harmonic
+            <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              7th Harmonic Cap
             </span>
           )}
 
-          <span className="text-xs font-semibold text-foreground">
+          <span className="rounded-lg bg-muted/50 px-2.5 py-1 text-xs font-semibold text-foreground">
             {t("resonance.meterLabel", { current: String(clampedCurrent), max: String(max) })}
           </span>
         </div>
       </div>
 
-      {/* Schumann Harmonic Frequency Nodes (7 or 15) with accessible progressbar */}
+      {/* Schumann Harmonic Frequency Nodes with Accessible Progressbar */}
       <div
-        className="mt-4"
+        className="mt-5"
         role="progressbar"
         aria-label={`${t("resonance.title")}: ${clampedCurrent}/${max}`}
         aria-valuenow={clampedCurrent}
@@ -67,29 +93,30 @@ export function ResonanceMeter({
         aria-valuemax={max}
         aria-valuetext={`${clampedCurrent} of ${max} harmonic replies received`}
       >
-        <div className="flex items-center justify-between gap-1 sm:gap-1.5">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2">
           {Array.from({ length: max }).map((_, index) => {
             const isFilled = index < current;
-            const isCurrentNode = index === current;
+            const isCurrentNode = index === current && !isFulfilled;
+            const freqLabel = SCHUMANN_HARMONICS[index] || `${index + 1}H`;
 
             return (
               <div
                 key={index}
-                className="flex flex-1 flex-col items-center gap-1 group"
-                title={`Resonance Harmonic ${index + 1}`}
+                className="flex flex-1 flex-col items-center gap-1.5 group select-none"
+                title={`Resonance Harmonic ${index + 1} (${freqLabel})`}
                 aria-hidden="true"
               >
                 <div
-                  className={`h-2.5 w-full rounded-full transition-all duration-300 ${
+                  className={`h-3 w-full rounded-full transition-all duration-300 ${
                     isFilled
                       ? "bg-accent shadow-xs"
                       : isCurrentNode
-                      ? "bg-accent/40 ring-2 ring-accent/30 animate-pulse"
-                      : "bg-muted/80 border border-border/50"
+                      ? "bg-accent/40 ring-2 ring-accent/40 schumann-pulse"
+                      : "bg-muted/70 border border-border/40"
                   }`}
                 />
-                <span className="text-[10px] text-muted-foreground/70 hidden sm:inline select-none">
-                  {index + 1}
+                <span className="text-[10px] text-muted-foreground/60 hidden sm:inline tracking-tighter">
+                  {freqLabel}
                 </span>
               </div>
             );
@@ -98,13 +125,13 @@ export function ResonanceMeter({
       </div>
 
       {/* Story & Philosophy Note */}
-      <p className="mt-3.5 text-xs leading-5 text-muted-foreground">
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
         {t("resonance.schumannNote")}
       </p>
 
       {/* Status Description with Live Region */}
       <div
-        className="mt-2 text-xs text-foreground/80 leading-5"
+        className="mt-2 text-xs leading-relaxed text-foreground/85"
         role="status"
         aria-live="polite"
       >
@@ -117,14 +144,14 @@ export function ResonanceMeter({
 
       {/* Author Explicit Opt-in Expansion Button */}
       {isAuthor && !isExpanded && letterId && (
-        <form action={expandLetterResonanceAction} className="mt-4 pt-3 border-t border-border/70">
+        <form action={expandLetterResonanceAction} className="mt-4 pt-4 border-t border-border/60">
           <input type="hidden" name="letterId" value={letterId} />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">
-              46Hz (7차) → 15차 심층 공명
+              {t("resonance.expandNote")}
             </span>
             <SubmitButton variant="secondary">
-              <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent" aria-hidden="true" />
+              <Sparkles className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
               {t("resonance.expandButton")}
             </SubmitButton>
           </div>

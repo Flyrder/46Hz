@@ -47,4 +47,40 @@ describe("i18n preferences", () => {
     expect(translate("zh_CN", "reply.reservedByOtherTitle")).toBe("另一位同伴正在用心写信中");
     expect(translate("en_US", "reply.reservedByOtherTitle")).toBe("A peer is currently writing a reply to this letter");
   });
+
+  it("ensures zero untranslated keys across all 3 supported languages", () => {
+    const keysToCheck = [
+      "write.counter",
+      "write.sparks",
+      "write.privacyAssurance",
+      "write.peacePacing",
+      "reply.counter",
+      "reply.draftEncouragement",
+      "reply.aiHint",
+      "reply.coachEditableNote",
+      "resonance.expandNote",
+      "review.supportNoticeTitle",
+      "review.directlyEditable",
+      "review.supportConnected",
+      "review.moderationNotice",
+      "letter.backToInbox",
+      "letter.peerReplyTitle",
+      "letter.replyFeedbackTitle",
+      "settings.profileTitle",
+      "settings.subtitle",
+      "onboarding.startSession",
+      "reply.poolTitle"
+    ];
+
+    for (const key of keysToCheck) {
+      expect(translate("ko_KR", key)).not.toBe(key);
+      expect(translate("en_US", key)).not.toBe(key);
+      expect(translate("zh_CN", key)).not.toBe(key);
+    }
+
+    // Dynamic interpolation check
+    expect(translate("ko_KR", "write.counter", { current: "25", min: "40" })).toBe("25 / 40자 이상");
+    expect(translate("en_US", "write.counter", { current: "25", min: "40" })).toBe("25 / min 40 chars");
+    expect(translate("zh_CN", "write.counter", { current: "25", min: "40" })).toBe("25 / 最少40字");
+  });
 });
