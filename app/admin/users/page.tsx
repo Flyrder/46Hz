@@ -5,25 +5,30 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { getAdminRole } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { createTranslator } from "@/lib/i18n";
+import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
+import { Users, Shield, UserX, UserCheck, Calendar } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
-  const role = await getAdminRole();
+  const [role, locale] = await Promise.all([getAdminRole(), getLocalePreference()]);
   if (!role) {
     redirect("/admin");
   }
+  const t = createTranslator(locale);
 
   if (role !== "ADMIN") {
     return (
-      <section className="mx-auto max-w-4xl">
-        <h1 className="text-3xl font-semibold">Anonymous users</h1>
-        <AdminNav role={role} />
-        <div className="mt-6 rounded-xl border border-amber-500/30 bg-amber-500/10 p-6 text-center">
-          <h2 className="text-lg font-semibold">Administrator Privileges Required</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            User management and account suspensions are restricted to full System Administrators.
+      <section className="mx-auto max-w-4xl py-2 sm:py-4">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.usersTitle")}</h1>
+        <AdminNav role={role} t={t} />
+        <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center shadow-soft">
+          <Shield className="mx-auto h-8 w-8 text-amber-600 dark:text-amber-400 mb-2" />
+          <h2 className="text-lg font-bold text-foreground">{t("admin.adminRequiredTitle")}</h2>
+          <p className="mt-2 text-xs text-muted-foreground max-w-md mx-auto leading-relaxed">
+            {t("admin.adminRequiredDesc")}
           </p>
         </div>
       </section>
@@ -44,28 +49,75 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <section className="mx-auto max-w-4xl">
-      <h1 className="text-3xl font-semibold">Anonymous users</h1>
-      <AdminNav role={role} />
+    <section className="mx-auto max-w-5xl py-2 sm:py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-accent">
+            <Users className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.usersTitle")}</h1>
+              <StatusBadge tone="neutral">{users.length}명</StatusBadge>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              무계정 익명 세션 사용자 현황 및 이상 행동 계정 제재 관리입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <AdminNav role={role} t={t} />
+
       <div className="space-y-3">
         {users.map((user) => (
-          <article key={user.id} className="rounded-lg border border-border bg-surface p-4 shadow-soft">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="font-semibold">{user.anonymousHandle}</div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {formatDate(user.createdAt)} / trust {user.trustScore} / {user._count.letters} letters / {user._count.replies} replies
-                </div>
+          <article
+            key={user.id}
+            className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border/80 bg-surface p-4.5 shadow-soft transition-all hover:border-accent/40"
+          >
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-foreground">{user.anonymousHandle}</span>
+                <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent">
+                  신뢰 점수: {user.trustScore}
+                </span>
+                {user.suspendedAt ? (
+                  <StatusBadge tone="danger">
+                    <span className="flex items-center gap-1">
+                      <UserX className="h-3 w-3" /> 정지됨 (Suspended)
+                    </span>
+                  </StatusBadge>
+                ) : (
+                  <StatusBadge tone="good">
+                    <span className="flex items-center gap-1">
+                      <UserCheck className="h-3 w-3" /> 활성 (Active)
+                    </span>
+                  </StatusBadge>
+                )}
               </div>
-              {user.suspendedAt ? <StatusBadge tone="danger">suspended</StatusBadge> : <StatusBadge tone="good">active</StatusBadge>}
+
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1 font-mono">
+                  <Calendar className="h-3 w-3" /> {formatDate(user.createdAt)}
+                </span>
+                <span>•</span>
+                <span>편지 <strong>{user._count.letters}</strong>건</span>
+                <span>•</span>
+                <span>답장 <strong>{user._count.replies}</strong>건</span>
+                <span>•</span>
+                <span className="font-mono text-[11px] opacity-70">ID: {user.id.slice(0, 10)}...</span>
+              </div>
             </div>
+
             {!user.suspendedAt ? (
-              <form action={suspendUserAction} className="mt-4 flex flex-wrap gap-2">
+              <form action={suspendUserAction}>
                 <input type="hidden" name="userId" value={user.id} />
                 <input type="hidden" name="reason" value="Suspended from admin user list" />
-                <SubmitButton variant="danger">Suspend</SubmitButton>
+                <SubmitButton variant="danger">계정 활동 정지</SubmitButton>
               </form>
-            ) : null}
+            ) : (
+              <span className="text-xs text-danger font-medium">활동 정지 상태</span>
+            )}
           </article>
         ))}
       </div>

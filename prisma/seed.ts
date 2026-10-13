@@ -42,19 +42,35 @@ async function main() {
   await prisma.supportResource.createMany({
     data: [
       {
-        title: "988 Suicide & Crisis Lifeline",
-        description: "Free, confidential support in the United States and Canada.",
-        region: "US/Canada",
-        language: "en",
-        url: "https://988lifeline.org",
-        phone: "988",
+        title: "24시 자살예방 상담전화 (109)",
+        description: "보건복지부 주관 24시간 365일 긴급 위기 상담 및 마음 안심 지원 (국번없이 109, 통화료 무료)",
+        region: "KR",
+        language: "ko",
+        phone: "109",
         active: true
       },
       {
-        title: "Find a trusted local contact",
-        description: "A friend, family member, school counselor, manager, or local emergency line can help in urgent moments.",
-        region: "Local",
-        language: "en",
+        title: "보건복지상담센터 (1393)",
+        description: "자살예방 및 심리적 위기 긴급 상담 전문 핫라인 (국번없이 1393, 24시간 연중무휴)",
+        region: "KR",
+        language: "ko",
+        phone: "1393",
+        active: true
+      },
+      {
+        title: "정신건강 위기상담전화 (1577-0199)",
+        description: "전국 광역 및 기초 정신건강복지센터 연계 24시간 전문 위기 개입 상담",
+        region: "KR",
+        language: "ko",
+        phone: "1577-0199",
+        active: true
+      },
+      {
+        title: "청소년 상담전화 (1388)",
+        description: "청소년과 보호자를 위한 24시간 고민 및 심리 상담 핫라인",
+        region: "KR",
+        language: "ko",
+        phone: "1388",
         active: true
       },
       {
@@ -63,6 +79,30 @@ async function main() {
         region: "KR",
         language: "ko",
         url: "https://www.mentalhealth.go.kr",
+        active: true
+      },
+      {
+        title: "全国心理危机干预热线 (400-161-9995)",
+        description: "全国免费心理危机干预及自杀预防生命热线，提供24小时专业心理疏导与危机干预。",
+        region: "CN",
+        language: "zh",
+        phone: "400-161-9995",
+        active: true
+      },
+      {
+        title: "共青团青少年心理援助热线 (12355)",
+        description: "面向全国青少年的专业心理咨询与危机救助专线 (统一拨打 12355)。",
+        region: "CN",
+        language: "zh",
+        phone: "12355",
+        active: true
+      },
+      {
+        title: "北京心理危机研究与干预中心",
+        description: "国家级自杀危机干预与心理救援热线 (北京回龙观医院)。",
+        region: "CN",
+        language: "zh",
+        phone: "010-82951332",
         active: true
       }
     ]

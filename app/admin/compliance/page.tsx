@@ -5,8 +5,10 @@ import { requireStaff } from "@/lib/admin";
 import { generateIncidentPacket } from "@/lib/compliance/incident-packet";
 import { prisma } from "@/lib/db";
 import { maskIp, type IpRecord } from "@/lib/ip";
+import { createTranslator } from "@/lib/i18n";
+import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
-import { ShieldAlert, FileText, CheckCircle, Scale, Download } from "lucide-react";
+import { ShieldAlert, FileText, Scale, ShieldCheck, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,9 @@ export default async function AdminCompliancePage({
 }: {
   searchParams?: Promise<{ targetId?: string; targetType?: string; warrant?: string }>;
 }) {
-  const role = await requireStaff();
+  const [role, locale] = await Promise.all([requireStaff(), getLocalePreference()]);
+  const t = createTranslator(locale);
+
   const resolvedParams = searchParams ? await searchParams : undefined;
   const targetId = resolvedParams?.targetId;
   const targetType = resolvedParams?.targetType === "REPLY" ? "REPLY" : "LETTER";
@@ -52,41 +56,46 @@ export default async function AdminCompliancePage({
   ]);
 
   return (
-    <section className="mx-auto max-w-4xl">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-semibold">Compliance & Law Enforcement</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Strict data minimization management for legal requests and safety audits.
-          </p>
+    <section className="mx-auto max-w-5xl py-2 sm:py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-accent">
+            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.complianceTitle")}</h1>
+            <p className="mt-1 text-xs text-muted-foreground">
+              법적 요청(압수수색 등) 대응 및 보안 감사를 위한 엄격한 데이터 최소화 규정 준수 관리
+            </p>
+          </div>
         </div>
       </div>
 
-      <AdminNav role={role} />
+      <AdminNav role={role} t={t} />
 
       {/* Data Minimization Principle Charter */}
-      <div className="rounded-xl border border-border bg-surface p-5 shadow-soft">
-        <div className="flex items-center gap-2 text-base font-semibold text-foreground">
+      <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">
+        <div className="flex items-center gap-2 text-base font-bold text-foreground">
           <Scale className="h-5 w-5 text-accent" aria-hidden="true" />
-          <span>46Hz Data Minimization Principle (Law Enforcement Standard)</span>
+          <span>46Hz 데이터 최소화 및 사법 공조 표준 (Data Minimization Standard)</span>
         </div>
-        <div className="mt-3 grid gap-3 text-xs leading-5 text-muted-foreground sm:grid-cols-3">
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
-            <span className="font-semibold text-foreground">Zero PII Collected</span>
-            <p className="mt-1">
-              No real names, phone numbers, email addresses, passwords, physical addresses, or device IDs are ever requested or stored.
+        <div className="mt-4 grid gap-3 text-xs leading-5 text-muted-foreground sm:grid-cols-3">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+            <span className="font-bold text-foreground block text-sm mb-1">Zero PII (개인식별정보 부존재)</span>
+            <p>
+              실명, 주민등록번호, 연락처, 이메일, 비밀번호, 기기 고유식별값(UDID) 등을 수집하거나 저장하지 않습니다.
             </p>
           </div>
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
-            <span className="font-semibold text-foreground">14-Day Rolling Horizon</span>
-            <p className="mt-1">
-              IP connection traces are strictly capped at max 5 entries and automatically pruned after 14 days unless sealed for compliance.
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+            <span className="font-bold text-foreground block text-sm mb-1">14일 롤링 보관 및 자동 파기</span>
+            <p>
+              보안 및 방화벽 IP 접속 기록은 최대 5개 항목으로 한정되며, 14일 경과 시 데이터베이스에서 영구 소멸합니다.
             </p>
           </div>
-          <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
-            <span className="font-semibold text-foreground">Cryptographic Evidence</span>
-            <p className="mt-1">
-              All exported incident packets contain SHA-256 content hashes to prove tamper-free chain of custody for official legal requests.
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
+            <span className="font-bold text-foreground block text-sm mb-1">SHA-256 증거 무결성 해시</span>
+            <p>
+              사법기관 제출용 인시던트 패킷은 SHA-256 암호화 해시를 포함하여 위변조 없는 증거 연속성을 보장합니다.
             </p>
           </div>
         </div>
@@ -94,54 +103,54 @@ export default async function AdminCompliancePage({
 
       {/* Generated Packet Inspection View */}
       {generatedPacket ? (
-        <div className="mt-6 rounded-xl border border-accent/40 bg-accent/5 p-5 shadow-soft">
+        <div className="mt-6 rounded-2xl border border-accent/40 bg-accent/5 p-6 shadow-soft">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
-            <div className="flex items-center gap-2 font-semibold text-foreground">
+            <div className="flex items-center gap-2 font-bold text-foreground">
               <FileText className="h-5 w-5 text-accent" aria-hidden="true" />
-              <span>Compliance Packet: {generatedPacket.packetHeader.packetId}</span>
+              <span>사법 공조 패킷: {generatedPacket.packetHeader.packetId}</span>
             </div>
             <div className="flex items-center gap-2">
               <Link
                 href="/admin/compliance"
-                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                className="rounded-xl border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold hover:bg-muted"
               >
-                Clear Inspection
+                검사 닫기
               </Link>
             </div>
           </div>
 
-          <div className="mt-4 space-y-3 text-xs">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-muted-foreground">
-              <div>
-                <span className="font-semibold text-foreground block">Target Type</span>
+          <div className="mt-4 space-y-3.5 text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-muted-foreground">
+              <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
+                <span className="font-semibold text-foreground block">대상 유형</span>
                 {generatedPacket.incident.targetType}
               </div>
-              <div>
-                <span className="font-semibold text-foreground block">Author Pseudonym</span>
+              <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
+                <span className="font-semibold text-foreground block">작성자 가명</span>
                 {generatedPacket.incident.authorPseudonym}
               </div>
-              <div>
-                <span className="font-semibold text-foreground block">Classification</span>
+              <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
+                <span className="font-semibold text-foreground block">분류 등급</span>
                 {generatedPacket.incident.riskClassification}
               </div>
-              <div>
-                <span className="font-semibold text-foreground block">Generated At</span>
+              <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
+                <span className="font-semibold text-foreground block">생성 일시</span>
                 {formatDate(generatedPacket.packetHeader.generatedAt)}
               </div>
             </div>
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                SHA-256 Evidentiary Hash
+                SHA-256 증거 무결성 해시
               </span>
-              <code className="block rounded bg-background p-2 font-mono text-[11px] text-accent break-all">
+              <code className="block rounded-lg border border-border/60 bg-background p-2.5 font-mono text-[11px] text-accent break-all">
                 {generatedPacket.incident.contentHashSha256}
               </code>
             </div>
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                Client Browser & Origin Trace ({generatedPacket.networkOrigin.retentionPolicy})
+                클라이언트 접속 원본 추적 ({generatedPacket.networkOrigin.retentionPolicy})
               </span>
               <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                 {generatedPacket.networkOrigin.maskedTrace.map((trace, idx) => {
@@ -157,9 +166,9 @@ export default async function AdminCompliancePage({
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                Raw JSON Incident Packet
+                원시 JSON 증거 패킷
               </span>
-              <pre className="max-h-60 overflow-auto rounded bg-background p-3 text-[11px] leading-5 text-foreground font-mono">
+              <pre className="max-h-60 overflow-auto rounded-xl border border-border/60 bg-background p-3 text-[11px] leading-5 text-foreground font-mono">
                 {JSON.stringify(generatedPacket, null, 2)}
               </pre>
             </div>
@@ -168,11 +177,11 @@ export default async function AdminCompliancePage({
       ) : null}
 
       {/* Flagged Incidents List */}
-      <div className="mt-6 space-y-6">
+      <div className="mt-8 space-y-6">
         <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
+          <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
             <ShieldAlert className="h-4 w-4 text-danger" aria-hidden="true" />
-            <span>High-Risk Incidents (Letters)</span>
+            <span>고위험 편지 인시던트 (High-Risk Letters)</span>
           </h2>
           <div className="mt-3 space-y-3">
             {flaggedLetters.map((letter) => {
@@ -186,54 +195,54 @@ export default async function AdminCompliancePage({
               return (
                 <article
                   key={letter.id}
-                  className="rounded-lg border border-border bg-surface p-4 shadow-soft flex flex-wrap items-center justify-between gap-3"
+                  className="rounded-2xl border border-border/80 bg-surface p-4.5 shadow-soft flex flex-wrap items-center justify-between gap-3 transition-all hover:border-accent/40"
                 >
                   <div>
                     <div className="flex items-center gap-2">
                       <StatusBadge tone="danger">{letter.riskLevel}</StatusBadge>
                       <StatusBadge>{letter.status}</StatusBadge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground font-mono">
                         {formatDate(letter.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-foreground line-clamp-1 max-w-xl">
+                    <p className="mt-2 text-xs text-foreground line-clamp-1 max-w-xl font-mono">
                       {letter.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      Author: <span className="font-medium">{letter.author.anonymousHandle}</span> | Masked Origin: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
+                      작성자: <span className="font-medium text-foreground">{letter.author.anonymousHandle}</span> | 마스킹 접속지: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/admin/compliance?targetId=${letter.id}&targetType=LETTER`}
-                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
                     >
                       <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>Export Packet</span>
+                      <span>증거 패킷 추출</span>
                     </Link>
                     <Link
                       href={`/admin/letters/${letter.id}`}
-                      className="inline-flex min-h-[36px] items-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      className="inline-flex min-h-[36px] items-center rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
                     >
-                      Review
+                      검토
                     </Link>
                   </div>
                 </article>
               );
             })}
             {flaggedLetters.length === 0 ? (
-              <p className="text-xs text-muted-foreground rounded-lg border border-border bg-surface p-4">
-                No high-risk letters recorded.
+              <p className="text-xs text-muted-foreground rounded-2xl border border-dashed border-border/80 bg-surface/50 p-6 text-center">
+                기록된 고위험 편지가 없습니다.
               </p>
             ) : null}
           </div>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold flex items-center gap-2">
+          <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
             <ShieldAlert className="h-4 w-4 text-warning" aria-hidden="true" />
-            <span>Moderated / Rejected Replies</span>
+            <span>반려 및 이상 답장 인시던트 (Moderated / Rejected Replies)</span>
           </h2>
           <div className="mt-3 space-y-3">
             {flaggedReplies.map((reply) => {
@@ -247,44 +256,44 @@ export default async function AdminCompliancePage({
               return (
                 <article
                   key={reply.id}
-                  className="rounded-lg border border-border bg-surface p-4 shadow-soft flex flex-wrap items-center justify-between gap-3"
+                  className="rounded-2xl border border-border/80 bg-surface p-4.5 shadow-soft flex flex-wrap items-center justify-between gap-3 transition-all hover:border-accent/40"
                 >
                   <div>
                     <div className="flex items-center gap-2">
                       <StatusBadge tone="danger">{reply.status}</StatusBadge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground font-mono">
                         {formatDate(reply.createdAt)}
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-foreground line-clamp-1 max-w-xl">
+                    <p className="mt-2 text-xs text-foreground line-clamp-1 max-w-xl font-mono">
                       {reply.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      Responder: <span className="font-medium">{reply.responder.anonymousHandle}</span> | Masked Origin: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
+                      응답자: <span className="font-medium text-foreground">{reply.responder.anonymousHandle}</span> | 마스킹 접속지: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/admin/compliance?targetId=${reply.id}&targetType=REPLY`}
-                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
+                      className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
                     >
                       <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>Export Packet</span>
+                      <span>증거 패킷 추출</span>
                     </Link>
                     <Link
                       href={`/admin/replies/${reply.id}`}
-                      className="inline-flex min-h-[36px] items-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-muted"
+                      className="inline-flex min-h-[36px] items-center rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
                     >
-                      Review
+                      검토
                     </Link>
                   </div>
                 </article>
               );
             })}
             {flaggedReplies.length === 0 ? (
-              <p className="text-xs text-muted-foreground rounded-lg border border-border bg-surface p-4">
-                No rejected replies recorded.
+              <p className="text-xs text-muted-foreground rounded-2xl border border-dashed border-border/80 bg-surface/50 p-6 text-center">
+                기록된 반려 답장이 없습니다.
               </p>
             ) : null}
           </div>
