@@ -128,7 +128,7 @@ export const koKR: Translations = {
     "모든 공명이 가득 찼습니다. 편지에 전해진 소중한 마음들을 편안히 읽어보세요.",
   "resonance.meterLabel": "공명 하모닉스 ({current} / {max})",
   "resonance.schumannNote":
-    "46Hz는 지구의 7차 슈만 공명 주파수(~46Hz)를 상징합니다. 편지가 감정적 과부하에 빠지지 않고 온전히 마음에 닿을 수 있도록 기본 7개의 공명 답장으로 보호됩니다.",
+    "46Hz는 단순한 정수배 산술 계산이 아니라, 지구-전리층 공동의 유한 전도도 및 감쇠(Damping)에 의해 실측되는 지구의 7차 슈만 공명 모드(~45.9Hz)를 상징합니다. 감정적 과부하에 빠지지 않고 온전히 마음에 닿을 수 있도록 기본 7개의 공명 답장으로 보호됩니다.",
   "resonance.title": "46Hz 슈만 공명",
 
   // Reply Preferences & Types
@@ -270,5 +270,34 @@ export const koKR: Translations = {
   "admin.dashboardTitle": "46Hz 운영 대시보드",
   "admin.dashboardSubtitle": "실시간 편지함 모니터링 및 안전 지표",
   "admin.roleBadge": "권한: {role}",
-  "admin.logout": "로그아웃"
+  "admin.logout": "로그아웃",
+
+  // Letter Deletion & Author Controls
+  "letter.delete": "편지 삭제",
+  "letter.deleteConfirmTitle": "편지를 삭제하시겠습니까?",
+  "letter.deleteConfirmDesc": "편지와 주고받은 모든 답장이 영구적으로 삭제되며, 복구할 수 없습니다.",
+  "letter.deleteConfirmButton": "삭제 확인",
+  "letter.deleteSuccess": "편지가 안전하게 삭제되었습니다.",
+  "letter.submitSuccess": "편지가 성공적으로 등록되었습니다.",
+
+  // Letter & Draft Comparison (Diff)
+  "letter.viewModeAria": "편지 보기 방식 선택",
+  "letter.viewProcessed": "정돈본",
+  "letter.viewRaw": "작성 원문",
+  "letter.viewComparison": "대조 비교",
+  "letter.rawDraftBadge": "작성자 전용 원문",
+  "letter.processedBadge": "공개 정돈본",
+  "letter.copyRaw": "원문 복사",
+  "letter.restoreRaw": "원문으로 채우기",
+  "letter.restoredNotice": "원문 복원됨",
+
+  // Review Page Diff & Comparison
+  "review.comparisonTitle": "원문 및 AI 정돈본 검토 보기",
+  "review.tabProcessed": "AI 정돈본 (수정 가능)",
+  "review.tabRaw": "작성 원문 보기",
+  "review.tabComparison": "나란히 비교 (대조)",
+  "review.rawNotice": "내가 작성했던 원문 그대로의 내용입니다. 개인 식별 정보나 과도한 표현이 AI에 의해 안전하게 정돈되었습니다.",
+  "review.comparisonHint": "왼쪽의 원문과 오른쪽의 AI 정돈본을 비교해 보세요. 필요한 경우 직접 내용을 수정할 수 있습니다.",
+  "review.editInEditor": "정돈본 탭에서 수정하기",
+  "write.privacyAssuranceBadge": "AI 안심 익명화 적용됨"
 };

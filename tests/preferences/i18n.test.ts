@@ -129,7 +129,30 @@ describe("i18n preferences", () => {
       "admin.dashboardTitle",
       "admin.dashboardSubtitle",
       "admin.roleBadge",
-      "admin.logout"
+      "admin.logout",
+      "letter.delete",
+      "letter.deleteConfirmTitle",
+      "letter.deleteConfirmDesc",
+      "letter.deleteConfirmButton",
+      "letter.deleteSuccess",
+      "letter.submitSuccess",
+      "letter.viewModeAria",
+      "letter.viewProcessed",
+      "letter.viewRaw",
+      "letter.viewComparison",
+      "letter.rawDraftBadge",
+      "letter.processedBadge",
+      "letter.copyRaw",
+      "letter.restoreRaw",
+      "letter.restoredNotice",
+      "review.comparisonTitle",
+      "review.tabProcessed",
+      "review.tabRaw",
+      "review.tabComparison",
+      "review.rawNotice",
+      "review.comparisonHint",
+      "review.editInEditor",
+      "write.privacyAssuranceBadge"
     ];
 
     for (const key of keysToCheck) {
@@ -160,5 +183,11 @@ describe("i18n preferences", () => {
     expect(
       translate("zh_CN", "resonance.progressAria", { current: "3", max: "7" })
     ).toBe("已收到 3 / 7 封共振回信");
+  });
+
+  it("reflects empirical Schumann resonance physics in schumannNote across locales", () => {
+    expect(translate("ko_KR", "resonance.schumannNote")).toContain("감쇠");
+    expect(translate("en_US", "resonance.schumannNote")).toContain("damping");
+    expect(translate("zh_CN", "resonance.schumannNote")).toContain("衰减");
   });
 });
