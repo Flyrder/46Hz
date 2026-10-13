@@ -45,4 +45,11 @@ describe("Arm64 Architecture Support", () => {
     expect(content).toContain("postgres:16");
     expect(content).toContain("46hz-letterbox-postgres");
   });
+
+  it("validates Prisma 7 prisma.config.ts configuration exists", () => {
+    const configPath = path.join(process.cwd(), "prisma.config.ts");
+    expect(fs.existsSync(configPath)).toBe(true);
+    const content = fs.readFileSync(configPath, "utf-8");
+    expect(content).toContain("defineConfig");
+  });
 });

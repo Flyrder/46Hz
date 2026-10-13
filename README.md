@@ -41,12 +41,12 @@ It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat 
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router, Server Actions, React 19)
-- **Language**: TypeScript (Strict Mode)
-- **Styling**: Tailwind CSS + Lucide Icons + System/Light/Dark Themes
-- **Database & ORM**: PostgreSQL + Prisma ORM 6.x
-- **Validation**: Zod 3.x
-- **Testing**: Vitest 4.x
+- **Framework**: Next.js 16.4 (App Router, Server Actions, React 19.3)
+- **Language**: TypeScript 7.x (Strict Mode)
+- **Styling**: Tailwind CSS 4.x + Lucide Icons 1.x + System/Light/Dark Themes
+- **Database & ORM**: PostgreSQL + Prisma ORM 7.x (`@prisma/adapter-pg` Driver Adapter)
+- **Validation**: Zod 4.x
+- **Testing**: Vitest 5.x
 - **Containerization**: Multi-arch Docker & Docker Compose
 
 ---
@@ -87,9 +87,10 @@ c:\Users\voide\eko\
 │   ├── zh_CN.ts                  # Simplified Chinese language pack
 │   └── index.ts                  # Locales dictionary aggregator
 ├── prisma/                       # Database schema & migrations
+├── prisma.config.ts              # Prisma 7 datasource & migration configuration
 ├── scripts/                      # Verification & maintenance tools
 │   └── verify_backend.ts         # Comprehensive 7-phase backend integrity test
-├── tests/                        # Vitest automated test suites (11 suites, 62 tests)
+├── tests/                        # Vitest automated test suites (12 suites, 71 tests)
 ├── docker-compose.yml            # PostgreSQL service definition
 ├── Dockerfile                    # Multi-arch production container build
 ├── start.bat                     # Windows one-click batch launcher
