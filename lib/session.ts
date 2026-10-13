@@ -4,11 +4,10 @@ import { prisma } from "@/lib/db";
 import { sessionSettings } from "@/settings";
 
 export const USER_COOKIE = sessionSettings.userCookie;
-export const LEGACY_USER_COOKIE = sessionSettings.legacyUserCookie;
 
 export async function getCurrentUserId(): Promise<string | null> {
   const cookieStore = await cookies();
-  return cookieStore.get(USER_COOKIE)?.value ?? cookieStore.get(LEGACY_USER_COOKIE)?.value ?? null;
+  return cookieStore.get(USER_COOKIE)?.value ?? null;
 }
 
 export async function setCurrentUserId(userId: string): Promise<void> {
@@ -25,7 +24,6 @@ export async function setCurrentUserId(userId: string): Promise<void> {
 export async function clearCurrentUser(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(USER_COOKIE);
-  cookieStore.delete(LEGACY_USER_COOKIE);
 }
 
 import crypto from "crypto";

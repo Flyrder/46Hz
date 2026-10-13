@@ -7,7 +7,6 @@ import { adminSettings } from "@/settings";
 export type AdminRole = "ADMIN" | "MODERATOR";
 
 export const ADMIN_COOKIE = adminSettings.roleCookie;
-export const LEGACY_ADMIN_COOKIE = adminSettings.legacyRoleCookie;
 
 /**
  * Constant-time string comparison using SHA-256 digests to prevent timing attacks.
@@ -49,11 +48,8 @@ export async function getAdminRole(): Promise<AdminRole | null> {
   if (roleVal === "ADMIN" || roleVal === "MODERATOR") {
     return roleVal;
   }
-  // Check fallback cookies
-  if (
-    cookieStore.get("46hz_admin")?.value === "1" ||
-    cookieStore.get(LEGACY_ADMIN_COOKIE)?.value === "1"
-  ) {
+  // Check fallback cookie
+  if (cookieStore.get("46hz_admin")?.value === "1") {
     return "ADMIN";
   }
   return null;
@@ -104,7 +100,6 @@ export async function clearAdminSession(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.delete(ADMIN_COOKIE);
   cookieStore.delete("46hz_admin");
-  cookieStore.delete(LEGACY_ADMIN_COOKIE);
 }
 
 export function canManageUsers(role: AdminRole | null): boolean {

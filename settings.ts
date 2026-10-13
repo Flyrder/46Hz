@@ -42,11 +42,8 @@ export const themeSettings = {
 
 export const sessionSettings = {
   userCookie: "46hz_user_id",
-  legacyUserCookie: "eko_user_id",
   localeCookie: "46hz_locale",
-  legacyLocaleCookie: "eko_locale",
   themeCookie: "46hz_theme",
-  legacyThemeCookie: "eko_theme",
   cookieMaxAgeSeconds: 60 * 60 * 24 * 180, // 180 days
   migrationCodePrefix: "46HZ-",
   migrationCodeAlphabet: "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -54,7 +51,6 @@ export const sessionSettings = {
 
 export const adminSettings = {
   roleCookie: "46hz_admin_role",
-  legacyRoleCookie: "eko_admin",
   defaultAdminPasscode: "local-admin",
   defaultModeratorPasscode: "local-moderator"
 } as const;
