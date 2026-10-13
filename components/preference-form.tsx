@@ -110,27 +110,34 @@ export function PreferenceForm({
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label={localeLabel}
             aria-expanded={menuOpen}
-            className="flex items-center gap-1.5 h-8 px-2.5 rounded-full border border-border bg-surface text-xs font-medium hover:bg-muted/50 active:scale-95 transition-all select-none"
+            aria-haspopup="listbox"
+            className="flex items-center gap-1.5 min-h-[36px] px-2.5 rounded-full border border-border bg-surface text-xs font-medium hover:bg-muted/50 active:scale-95 transition-all select-none focus:outline-none focus:ring-2 focus:ring-accent/40"
           >
-            <Languages className="h-3.5 w-3.5 text-muted-foreground" />
+            <Languages className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
             <span>{getLangCode(localeValue)}</span>
           </button>
 
           {menuOpen && (
-            <div className="absolute right-0 mt-1.5 w-36 rounded-xl border border-border bg-surface p-1 shadow-soft z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div
+              role="listbox"
+              aria-label={localeLabel}
+              className="absolute right-0 mt-1.5 w-36 rounded-xl border border-border bg-surface p-1 shadow-soft z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+            >
               {localeOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
+                  role="option"
+                  aria-selected={localeValue === option.value}
                   onClick={() => {
                     handlePreferenceChange(option.value, themeValue);
                     setMenuOpen(false);
                   }}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left text-xs font-medium hover:bg-muted/50 transition-colors text-foreground"
+                  className="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-left text-xs font-medium hover:bg-muted/50 transition-colors text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
                 >
                   <span>{option.label}</span>
                   {localeValue === option.value && (
-                    <Check className="h-3 w-3 text-accent" />
+                    <Check className="h-3 w-3 text-accent" aria-hidden="true" />
                   )}
                 </button>
               ))}
@@ -139,7 +146,11 @@ export function PreferenceForm({
         </div>
 
         {/* Theme Segmented Toggle */}
-        <div className="relative flex items-center bg-muted/40 border border-border/70 p-0.5 rounded-full h-8 w-24 overflow-hidden select-none">
+        <div
+          role="radiogroup"
+          aria-label={themeLabel}
+          className="relative flex items-center bg-muted/40 border border-border/70 p-0.5 rounded-full h-8 w-24 overflow-hidden select-none"
+        >
           {/* Sliding Pill Background Highlight */}
           <div
             className="absolute top-0.5 bottom-0.5 rounded-full bg-surface shadow-sm transition-all duration-200 ease-out"
@@ -155,9 +166,11 @@ export function PreferenceForm({
               <button
                 key={pref}
                 type="button"
+                role="radio"
+                aria-checked={isActive}
                 onClick={() => handlePreferenceChange(localeValue, pref)}
-                aria-label={pref}
-                className={`relative flex-1 grid place-items-center h-full rounded-full transition-colors z-10 ${
+                aria-label={`${pref} theme`}
+                className={`relative flex-1 grid place-items-center h-full rounded-full transition-colors z-10 focus:outline-none focus:ring-1 focus:ring-accent ${
                   isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                 }`}
               >

@@ -22,7 +22,11 @@ export function ResonanceMeter({
   const clampedCurrent = Math.min(current, max);
 
   return (
-    <div className="rounded-xl border border-border/80 bg-surface p-5 shadow-soft">
+    <section
+      role="region"
+      aria-label={t("resonance.title")}
+      className="rounded-xl border border-border/80 bg-surface p-5 shadow-soft"
+    >
       {/* Header with Title and Harmonics Count */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-foreground font-semibold">
@@ -53,8 +57,16 @@ export function ResonanceMeter({
         </div>
       </div>
 
-      {/* Schumann Harmonic Frequency Nodes (7 or 15) */}
-      <div className="mt-4">
+      {/* Schumann Harmonic Frequency Nodes (7 or 15) with accessible progressbar */}
+      <div
+        className="mt-4"
+        role="progressbar"
+        aria-label={`${t("resonance.title")}: ${clampedCurrent}/${max}`}
+        aria-valuenow={clampedCurrent}
+        aria-valuemin={0}
+        aria-valuemax={max}
+        aria-valuetext={`${clampedCurrent} of ${max} harmonic replies received`}
+      >
         <div className="flex items-center justify-between gap-1 sm:gap-1.5">
           {Array.from({ length: max }).map((_, index) => {
             const isFilled = index < current;
@@ -65,6 +77,7 @@ export function ResonanceMeter({
                 key={index}
                 className="flex flex-1 flex-col items-center gap-1 group"
                 title={`Resonance Harmonic ${index + 1}`}
+                aria-hidden="true"
               >
                 <div
                   className={`h-2.5 w-full rounded-full transition-all duration-300 ${
@@ -89,8 +102,12 @@ export function ResonanceMeter({
         {t("resonance.schumannNote")}
       </p>
 
-      {/* Status Description */}
-      <div className="mt-2 text-xs text-foreground/80 leading-5">
+      {/* Status Description with Live Region */}
+      <div
+        className="mt-2 text-xs text-foreground/80 leading-5"
+        role="status"
+        aria-live="polite"
+      >
         {isFulfilled
           ? t("resonance.fulfilledDesc")
           : isExpanded
@@ -104,7 +121,7 @@ export function ResonanceMeter({
           <input type="hidden" name="letterId" value={letterId} />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="text-xs text-muted-foreground">
-              46Hz (7차) $\to$ 15차 심층 공명
+              46Hz (7차) → 15차 심층 공명
             </span>
             <SubmitButton variant="secondary">
               <Sparkles className="mr-1.5 h-3.5 w-3.5 text-accent" aria-hidden="true" />
@@ -113,6 +130,6 @@ export function ResonanceMeter({
           </div>
         </form>
       )}
-    </div>
+    </section>
   );
 }

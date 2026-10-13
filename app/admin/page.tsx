@@ -7,8 +7,14 @@ import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams
+}: {
+  searchParams?: Promise<{ error?: string }>;
+}) {
   const role = await getAdminRole();
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const errorParam = resolvedSearchParams?.error;
 
   if (!role) {
     return (
@@ -25,9 +31,19 @@ export default async function AdminPage() {
             id="passcode"
             name="passcode"
             type="password"
+            required
             placeholder="Admin or Moderator passcode"
             className="mt-2 w-full rounded-lg border border-border px-3 py-3 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
+          {errorParam === "rate_limited" ? (
+            <p className="mt-3 text-sm text-danger" role="alert">
+              Too many failed login attempts. Please wait 5 minutes before trying again.
+            </p>
+          ) : errorParam ? (
+            <p className="mt-3 text-sm text-danger" role="alert">
+              Invalid passcode. Please verify your staff credentials.
+            </p>
+          ) : null}
           <div className="mt-4">
             <SubmitButton>Enter dashboard</SubmitButton>
           </div>

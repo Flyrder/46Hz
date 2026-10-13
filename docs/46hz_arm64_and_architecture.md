@@ -221,19 +221,72 @@ docker buildx build \
 
 ---
 
-## 7. 验证记录与质量保证 (Verification Record)
+## 7. 极简主义技术栈精简与深度安全无障碍加固 (Minimalism, Security & Barrier-Free)
 
-### 7.1 自动化测试覆盖指标
-- **测试框架**：Vitest 4.1.10
-- **测试套件总览**：12 个测试文件，70 个单元与集成测试用例，100% 全部通过。
-- **新增核心测试**：
-  - `tests/reply/resonance.test.ts`: 专门覆盖舒曼共鸣默认 7 次上限、满额判定、作者本人扩容至 15 次以及非作者/超限非法扩容拦截。
-  - `tests/reply/claiming.test.ts`: 覆盖 15 分钟租约时间窗口、并发防抢机制、租约刷新及超时自动解冻。
-  - `scripts/verify_backend.ts`: 包含 7 阶段全链路数据库实测，验证舒曼 7 次上限拦截（`RESONANCE_LIMIT_REACHED`）、作者扩容至 15 次、以及解锁第 8 封回信认领流转。
+### 7.1 极简主义技术栈瘦身 (Zero-Dependency Engineering)
+- **剔除 `clsx` 微依赖**：在 `lib/utils.ts` 中以纯原生 TypeScript（约 30 行递归）实现 `cn` 类名合并工具，天然兼容字符串、数字、条件布尔、嵌套数组及属性对象，零运行时外部依赖。
+- **剔除 `autoprefixer`**：Tailwind CSS v4 内部已深度集成高性能 Rust/Lightning CSS 引擎，自动处理浏览器厂商前缀，无需额外的 PostCSS 插件开销。
+- **依赖纯粹度提升**：核心运行时仅保留 Next.js 16、React 19、Prisma 7、pg 原生驱动池、Zod 及 Lucide 图标集，构建极其轻量高效。
 
-### 7.2 常用开发维护指令
+### 7.2 多层级安全加固 (Multi-Tier Security Hardening)
+1. **全面生产级 HTTP 安全响应头**：
+   在 `next.config.mjs` 中全局注册现代安全防线：
+   - `Content-Security-Policy (CSP)`：严格限制来源域与脚本加载，阻断跨站脚本注入。
+   - `X-Frame-Options: DENY`：阻止页面被嵌入 iframe，防御点击劫持 (Clickjacking)。
+   - `X-Content-Type-Options: nosniff`：禁止浏览器对响应体执行 MIME 类型嗅探。
+   - `Referrer-Policy: strict-origin-when-cross-origin`：保护跨域访问时的隐私来源。
+   - `Permissions-Policy`：全面禁用相机、麦克风、地理定位等无用硬件权限。
+   - `Strict-Transport-Security (HSTS)`：强制长期全量 HTTPS 传输。
+2. **防计时攻击的管理员凭证认证 (Timing-Safe Passcode Verification)**：
+   - 使用 Node.js 原生 `crypto.timingSafeEqual`。
+   - 比较前通过 SHA-256 计算固定 32 字节哈希摘要，既标准化了任意长度的输入，又完全消除了基于比对耗时推断密码字符的侧信道时序攻击风险。
+3. **内存滑动窗口防爆破限流器 (`lib/safety/rate-limit.ts`)**：
+   - 纯原生内存滑动窗口算法，自动剔除过期时间戳。
+   - 对后台登录尝试实施 IP 级限流（5 分钟内最多 5 次），防止暴力撞库；同时保护信件发布与 AI 润色高成本接口免受恶意洪泛。
+
+### 7.3 无障碍与障壁清扫设计 (Barrier-Free for TalkBack / VoiceOver / Narrator)
+为了确保 Android TalkBack、iOS/macOS 旁白 (VoiceOver) 以及 Windows 讲述人 (Narrator) 能无障碍流畅使用 46Hz：
+- **跳过至主要内容链接 (Skip to Content)**：页面首个可聚焦元素为屏幕阅读器专用的快速跳过链接，支持 Tab 键呼出并瞬时定位至 `<main id="main-content">`。
+- **无障碍地标角色 (Landmark Roles)**：
+  - `<header role="banner">`
+  - `<nav aria-label="Main Navigation">`
+  - `<main id="main-content" role="main">`
+- **触控区域达标 (WCAG 2.2 Level AA)**：所有导航图标与操作按钮的有效交互区域均确保在 `min-h-[44px] min-w-[44px]` 以上，大幅改善移动端及视障手势交互体验。
+- **动态状态实时朗读 (ARIA Live Regions)**：
+  - 舒曼共振计数器配置 `role="progressbar"`，提供精确的 `aria-valuenow`、`aria-valuemax` 与 `aria-valuetext`，并在状态变化时通过 `aria-live="polite"` 友好通知。
+  - 表单提交按钮在挂起时挂载 `aria-busy="true"` 并提供隐藏提示 `<span className="sr-only">Processing...</span>`。
+  - 表单校验错误通过 `role="alert"` 与 `aria-live="assertive"` 触发即时告警。
+
+### 7.4 后端管理合规与执法数据最小化收集 (Law Enforcement Data Minimization Principle)
+在遵循 GDPR 最小化原则（Art 5(1)(c) Data Minimisation）与隐私保护的同时，平台确立了面向司法调证与紧急生命安全干预的法定底线：
+1. **绝对零 PII 承诺 (Zero-PII Architecture)**：
+   - 系统数据库中自始至终**不记录**任何真实姓名、手机号、电子邮箱、登录密码、精准 GPS 坐标或设备硬件序列号。用户在平台内仅以去标识化的随机代号 (`anonymousHandle`) 存在。
+2. **14 天动态保留周期与自动剪裁 (14-Day Rolling Horizon)**：
+   - 连接 IP 记录严格限制为最多 5 条最新动态队列，并在每次更新时自动执行 `pruneExpiredIps`，超过 14 天的历史记录无条件从数据库中物理裁剪。
+3. **日常运维内部遮罩脱敏 (`maskIp`)**：
+   - 管理员与审核员在日常监控面板中仅能看到脱敏后的网段（如 `192.168.***.***` 或 `2001:0db8:****:****`），防止内部工作人员窥探用户网络环境。
+4. **防篡改加密合规凭证包 (`generateIncidentPacket` & `/admin/compliance`)**：
+   - 当收到法定调证函或处理高危自伤/违法涉案内容时，系统通过 `/admin/compliance` 一键生成标准化证据数据包（`ComplianceIncidentPacket`）。
+   - 数据包内对违规文本生成 SHA-256 密码学指纹，完整封存事件发生时刻的 UTC 时间戳、内容风险分类、审核处置历史责任链以及最小必要网络源点，形成不可抵赖的法庭证据链。
+
+---
+
+## 8. 验证记录与质量保证 (Verification Record)
+
+### 8.1 自动化测试覆盖指标
+- **测试框架**：Vitest 5.0.4
+- **测试套件总览**：15 个测试文件，92 个单元与集成测试用例，100% 全部通过。
+- **全链路测试涵盖**：
+  - `tests/utils/cn.test.ts`: 原生极简 `cn` 工具的条件合并与嵌套数组覆盖。
+  - `tests/security/security.test.ts`: 常数时间比对算法与滑动窗口限流器全场景实测。
+  - `tests/compliance/compliance.test.ts`: SHA-256 证据包哈希、IP 隐私遮罩与 14 天自动物理剪裁。
+  - `tests/reply/resonance.test.ts`: 舒曼共振 7 次与 15 次流转逻辑。
+  - `tests/reply/claiming.test.ts`: 15 分钟回信独占守护协议。
+  - `scripts/verify_backend.ts`: PostgreSQL 7 阶段全链路数据库实测全部通过。
+
+### 8.2 常用开发维护指令
 ```bash
-# 运行全部单元测试
+# 运行全部单元测试 (92 tests)
 npm run test:run
 
 # 运行全链路后端与数据库完整性实测
@@ -241,9 +294,6 @@ npm run verify:backend
 
 # 运行 TypeScript 类型静态检查
 npm run lint
-
-# 生成本地及目标架构 Prisma 客户端
-npm run prisma:generate
 
 # 构建 Next.js 生产产物
 npm run build

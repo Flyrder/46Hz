@@ -8,6 +8,7 @@ const links = [
   { href: "/admin/reports", label: "Reports", adminOnly: false },
   { href: "/admin/users", label: "Users", adminOnly: true },
   { href: "/admin/resources", label: "Resources", adminOnly: true },
+  { href: "/admin/compliance", label: "Compliance (Law Enforcement)", adminOnly: false },
   { href: "/admin/moderation-log", label: "Log", adminOnly: false }
 ];
 
