@@ -1,10 +1,24 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 export type AdminRole = "ADMIN" | "MODERATOR";
 
 export const ADMIN_COOKIE = "46hz_admin_role";
 export const LEGACY_ADMIN_COOKIE = "eko_admin";
+
+/**
+ * Constant-time string comparison using SHA-256 digests to prevent timing attacks.
+ * Hashing normalizes input lengths to 32 bytes, satisfying timingSafeEqual length equality requirements.
+ */
+export function timingSafeStringEqual(a: string, b: string): boolean {
+  if (typeof a !== "string" || typeof b !== "string") {
+    return false;
+  }
+  const hashA = createHash("sha256").update(a).digest();
+  const hashB = createHash("sha256").update(b).digest();
+  return timingSafeEqual(hashA, hashB);
+}
 
 export function getAdminPasscode(): string {
   return process.env.ADMIN_PASSCODE ?? "local-admin";
@@ -15,10 +29,13 @@ export function getModeratorPasscode(): string {
 }
 
 export function authenticatePasscode(passcode: string): AdminRole | null {
-  if (passcode === getAdminPasscode()) {
+  if (!passcode) {
+    return null;
+  }
+  if (timingSafeStringEqual(passcode, getAdminPasscode())) {
     return "ADMIN";
   }
-  if (passcode === getModeratorPasscode()) {
+  if (timingSafeStringEqual(passcode, getModeratorPasscode())) {
     return "MODERATOR";
   }
   return null;

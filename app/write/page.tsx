@@ -25,6 +25,7 @@ export default async function WritePage() {
           name="rawText"
           rows={14}
           required
+          aria-required="true"
           minLength={40}
           className="mt-3 w-full resize-y rounded-lg border border-border bg-background p-4 text-base leading-7 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           placeholder={t("write.placeholder")}

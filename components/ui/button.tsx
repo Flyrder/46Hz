@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export const buttonClassName =
-  "inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:cursor-not-allowed disabled:opacity-60";
 
 export function buttonVariants(
   variant: "primary" | "secondary" | "danger" | "ghost" = "primary"

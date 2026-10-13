@@ -46,11 +46,15 @@ export function ReplyComposer({
           rows={8}
           required
           defaultValue={state.ok ? state.rawText : ""}
+          aria-invalid={state.ok === false && !!state.error}
+          aria-describedby={state.ok === false && state.error ? "reply-error" : undefined}
           className="mt-3 w-full resize-y rounded-lg border border-border bg-background p-4 text-base leading-7 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
           placeholder={labels.placeholder}
         />
         {state.ok === false && state.error ? (
-          <p className="mt-3 text-sm text-danger">{state.error}</p>
+          <p id="reply-error" role="alert" aria-live="assertive" className="mt-3 text-sm text-danger">
+            {state.error}
+          </p>
         ) : null}
         <div className="mt-4">
           <SubmitButton>
@@ -61,14 +65,19 @@ export function ReplyComposer({
       </form>
 
       {state.ok ? (
-        <form action={submitReplyAction} className="rounded-lg border border-border bg-surface p-5 shadow-soft">
+        <form
+          action={submitReplyAction}
+          role="region"
+          aria-label={labels.coachSuggestions}
+          className="rounded-lg border border-border bg-surface p-5 shadow-soft"
+        >
           <input type="hidden" name="letterId" value={state.letterId} />
           <input type="hidden" name="rawText" value={state.rawText} />
-          <div className="flex items-center gap-2 text-sm font-semibold">
+          <div className="flex items-center gap-2 text-sm font-semibold" role="status" aria-live="polite">
             <Sparkles className="h-4 w-4 text-accent" aria-hidden="true" />
             {labels.coachSuggestions}
           </div>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-muted-foreground">
+          <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-6 text-muted-foreground" aria-live="polite">
             {state.suggestions.map((suggestion) => (
               <li key={suggestion}>{suggestion}</li>
             ))}
