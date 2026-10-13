@@ -14,7 +14,7 @@ import { requireUser } from "@/lib/session";
 import { formatDate } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { DeleteLetterButton } from "@/components/delete-letter-button";
-import { LetterContentViewer } from "@/components/letter-content-viewer";
+import { LetterInteractiveReader } from "@/components/letter-interactive-reader";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +40,9 @@ export default async function LetterDetailPage({
           }
         },
         orderBy: { createdAt: "desc" }
+      },
+      comments: {
+        orderBy: { createdAt: "asc" }
       }
     }
   });
@@ -91,12 +94,16 @@ export default async function LetterDetailPage({
         </div>
       </div>
 
-      {/* Main Letter Card: Processed vs Raw vs Split Comparison */}
-      <LetterContentViewer
+      {/* Main Letter Card: Processed vs Raw vs Split Comparison & Passage Comments */}
+      <LetterInteractiveReader
+        letterId={letter.id}
         processedText={letter.processedText}
         rawText={letter.rawText}
         isAuthor={letter.authorId === user.id}
         maskContent={maskContent}
+        comments={letter.comments}
+        currentUserId={user.id}
+        letterAuthorId={letter.authorId}
         t={t}
       />
 

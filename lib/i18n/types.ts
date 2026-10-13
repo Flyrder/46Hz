@@ -245,6 +245,19 @@ export type TranslationKey =
   | "review.rawNotice"
   | "review.comparisonHint"
   | "review.editInEditor"
-  | "write.privacyAssuranceBadge";
+  | "write.privacyAssuranceBadge"
+  | "comment.title"
+  | "comment.subtitle"
+  | "comment.badge"
+  | "comment.add"
+  | "comment.commentOnSelection"
+  | "comment.selectedQuote"
+  | "comment.quotePlaceholder"
+  | "comment.contentLabel"
+  | "comment.placeholder"
+  | "comment.submit"
+  | "comment.emptyTitle"
+  | "comment.emptyBody"
+  | "comment.delete";
 
 export type Translations = Record<TranslationKey, string>;

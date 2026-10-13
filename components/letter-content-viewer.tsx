@@ -1,14 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, FileText, SplitSquareVertical, Copy, Check, Eye } from "lucide-react";
+import { ShieldCheck, FileText, SplitSquareVertical, Copy, Check, Eye, Quote, MessageSquareQuote } from "lucide-react";
 
 interface LetterContentViewerProps {
   processedText: string;
   rawText: string;
   isAuthor: boolean;
   maskContent: boolean;
+  highlightedQuotes?: string[];
+  onSelectPassage?: (quote: string) => void;
   t: (key: string, values?: Record<string, string>) => string;
+}
+
+function renderTextWithHighlights(text: string, quotes: string[]) {
+  const validQuotes = quotes.filter((q) => q && q.trim().length > 0 && text.includes(q.trim()));
+  if (validQuotes.length === 0) {
+    return text;
+  }
+
+  const sortedQuotes = [...new Set(validQuotes)].sort((a, b) => b.length - a.length);
+  const escapedQuotes = sortedQuotes.map((q) => q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const regex = new RegExp(`(${escapedQuotes.join("|")})`, "g");
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (sortedQuotes.includes(part)) {
+      return (
+        <mark
+          key={index}
+          className="rounded bg-accent/20 px-1 py-0.5 text-foreground border-b-2 border-accent font-medium select-text"
+          title="코멘트가 작성된 구절"
+        >
+          {part}
+        </mark>
+      );
+    }
+    return part;
+  });
 }
 
 export function LetterContentViewer({
@@ -16,10 +45,24 @@ export function LetterContentViewer({
   rawText,
   isAuthor,
   maskContent,
+  highlightedQuotes = [],
+  onSelectPassage,
   t
 }: LetterContentViewerProps) {
   const [viewMode, setViewMode] = useState<"processed" | "raw" | "split">("processed");
   const [copiedRaw, setCopiedRaw] = useState(false);
+  const [selectionSnippet, setSelectionSnippet] = useState("");
+
+  const handleTextSelection = () => {
+    if (!onSelectPassage) return;
+    const selection = window.getSelection();
+    const text = selection?.toString().trim();
+    if (text && text.length >= 2 && text.length <= 400) {
+      setSelectionSnippet(text);
+    } else {
+      setSelectionSnippet("");
+    }
+  };
 
   if (maskContent) {
     return (
@@ -34,10 +77,34 @@ export function LetterContentViewer({
   // Non-authors only see the approved processed text
   if (!isAuthor) {
     return (
-      <article className="stationery-paper p-6 sm:p-8">
+      <article
+        className="stationery-paper p-6 sm:p-8"
+        onMouseUp={handleTextSelection}
+        onTouchEnd={handleTextSelection}
+      >
         <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-          {processedText}
+          {renderTextWithHighlights(processedText, highlightedQuotes)}
         </div>
+
+        {selectionSnippet && onSelectPassage && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-accent/40 bg-accent/10 p-3 text-xs animate-in fade-in">
+            <div className="flex items-center gap-1.5 text-foreground font-medium truncate max-w-md">
+              <Quote className="h-3.5 w-3.5 text-accent shrink-0" aria-hidden="true" />
+              <span className="truncate">&ldquo;{selectionSnippet}&rdquo;</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onSelectPassage(selectionSnippet);
+                setSelectionSnippet("");
+              }}
+              className="inline-flex min-h-[32px] shrink-0 items-center gap-1 rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground shadow-xs hover:bg-accent/90"
+            >
+              <MessageSquareQuote className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{t("comment.commentOnSelection")}</span>
+            </button>
+          </div>
+        )}
       </article>
     );
   }
@@ -53,7 +120,11 @@ export function LetterContentViewer({
   };
 
   return (
-    <article className="stationery-paper p-6 sm:p-8">
+    <article
+      className="stationery-paper p-6 sm:p-8"
+      onMouseUp={handleTextSelection}
+      onTouchEnd={handleTextSelection}
+    >
       {/* Author Mode Selection Controls */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
         <div
@@ -131,7 +202,7 @@ export function LetterContentViewer({
       {/* Content Rendering based on mode */}
       {viewMode === "processed" && (
         <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-          {processedText}
+          {renderTextWithHighlights(processedText, highlightedQuotes)}
         </div>
       )}
 
@@ -142,7 +213,7 @@ export function LetterContentViewer({
             <span>{t("letter.rawDraftBadge")}</span>
           </div>
           <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-            {rawText}
+            {renderTextWithHighlights(rawText, highlightedQuotes)}
           </div>
         </div>
       )}
@@ -159,7 +230,7 @@ export function LetterContentViewer({
               <span className="text-xs text-muted-foreground">{rawText.length}자</span>
             </div>
             <div className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
-              {rawText}
+              {renderTextWithHighlights(rawText, highlightedQuotes)}
             </div>
           </div>
 
@@ -173,9 +244,30 @@ export function LetterContentViewer({
               <span className="text-xs text-muted-foreground">{processedText.length}자</span>
             </div>
             <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
-              {processedText}
+              {renderTextWithHighlights(processedText, highlightedQuotes)}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Floating Selection Tooltip Action */}
+      {selectionSnippet && onSelectPassage && (
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-accent/40 bg-accent/10 p-3 text-xs animate-in fade-in">
+          <div className="flex items-center gap-1.5 text-foreground font-medium truncate max-w-md">
+            <Quote className="h-3.5 w-3.5 text-accent shrink-0" aria-hidden="true" />
+            <span className="truncate">&ldquo;{selectionSnippet}&rdquo;</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              onSelectPassage(selectionSnippet);
+              setSelectionSnippet("");
+            }}
+            className="inline-flex min-h-[32px] shrink-0 items-center gap-1 rounded-lg bg-accent px-3 py-1 text-xs font-semibold text-accent-foreground shadow-xs hover:bg-accent/90"
+          >
+            <MessageSquareQuote className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>{t("comment.commentOnSelection")}</span>
+          </button>
         </div>
       )}
     </article>

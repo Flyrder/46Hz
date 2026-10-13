@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SCHUMANN_HARMONICS } from "@/components/resonance-meter";
-import { reviewLetterSchema, writeLetterSchema } from "@/lib/validators";
+import { reviewLetterSchema, writeLetterSchema, createCommentSchema } from "@/lib/validators";
 
 describe("Letter Management: Schumann Resonance Physics & Validation", () => {
   it("defines empirical Schumann resonance harmonics with non-linear damping rather than naive linear multiples", () => {
@@ -56,5 +56,35 @@ describe("Letter Management: Schumann Resonance Physics & Validation", () => {
     expect(sampleRaw).toContain("010-1234-5678");
     expect(sampleProcessed).not.toContain("010-1234-5678");
     expect(sampleRaw.length).toBeGreaterThan(sampleProcessed.length);
+  });
+
+  it("validates letter passage comment creation with createCommentSchema", () => {
+    const validWithQuote = createCommentSchema.safeParse({
+      letterId: "letter-abc-123",
+      selectedText: "I feel overwhelmed by work.",
+      content: "This sentence touched my heart deeply."
+    });
+    expect(validWithQuote.success).toBe(true);
+
+    const validGeneralComment = createCommentSchema.safeParse({
+      letterId: "letter-abc-123",
+      selectedText: "",
+      content: "General reflection on this letter."
+    });
+    expect(validGeneralComment.success).toBe(true);
+
+    const emptyContent = createCommentSchema.safeParse({
+      letterId: "letter-abc-123",
+      selectedText: "Some quote",
+      content: "   "
+    });
+    expect(emptyContent.success).toBe(false);
+
+    const missingLetter = createCommentSchema.safeParse({
+      letterId: "",
+      selectedText: "Some quote",
+      content: "Valid reflection"
+    });
+    expect(missingLetter.success).toBe(false);
   });
 });

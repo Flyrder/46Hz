@@ -76,6 +76,12 @@ export const supportResourceSchema = z.object({
   active: z.boolean()
 });
 
+export const createCommentSchema = z.object({
+  letterId: z.string().min(1),
+  selectedText: z.string().trim().max(500).default(""),
+  content: z.string().trim().min(1, "Comment cannot be empty.").max(1000)
+});
+
 export function formValue(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";

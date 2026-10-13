@@ -299,5 +299,20 @@ export const koKR: Translations = {
   "review.rawNotice": "내가 작성했던 원문 그대로의 내용입니다. 개인 식별 정보나 과도한 표현이 AI에 의해 안전하게 정돈되었습니다.",
   "review.comparisonHint": "왼쪽의 원문과 오른쪽의 AI 정돈본을 비교해 보세요. 필요한 경우 직접 내용을 수정할 수 있습니다.",
   "review.editInEditor": "정돈본 탭에서 수정하기",
-  "write.privacyAssuranceBadge": "AI 안심 익명화 적용됨"
+  "write.privacyAssuranceBadge": "AI 안심 익명화 적용됨",
+
+  // Letter Passage Comments
+  "comment.title": "편지 구절 코멘트 & 메모",
+  "comment.subtitle": "마음에 남는 구절을 선택하여 생각이나 감정을 기록할 수 있습니다.",
+  "comment.badge": "{count}개",
+  "comment.add": "구절 코멘트 남기기",
+  "comment.commentOnSelection": "선택 구절에 코멘트",
+  "comment.selectedQuote": "선택한 편지 구절",
+  "comment.quotePlaceholder": "편지에서 기억하고 싶은 구절 (선택 사항)",
+  "comment.contentLabel": "나의 생각 & 메모",
+  "comment.placeholder": "이 구절에 대한 생각이나 마음을 자유롭게 남겨보세요...",
+  "comment.submit": "코멘트 등록",
+  "comment.emptyTitle": "아직 등록된 구절 코멘트가 없습니다",
+  "comment.emptyBody": "편지 본문의 문장을 드래그하거나 선택하여 나만의 메모와 코멘트를 남겨보세요.",
+  "comment.delete": "코멘트 삭제"
 };
