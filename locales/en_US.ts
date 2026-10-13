@@ -321,5 +321,39 @@ export const enUS: Translations = {
   "comment.submit": "Save comment",
   "comment.emptyTitle": "No passage comments yet",
   "comment.emptyBody": "Highlight or select any sentence in the letter to leave personal notes and reflections.",
-  "comment.delete": "Delete comment"
+  "comment.delete": "Delete comment",
+
+  // AI Writing Sparks
+  "write.aiSparksTitle": "AI Writing Sparks",
+  "write.aiSparksDesc": "When finding the first words feels hard, let AI offer gentle opening sentences.",
+  "write.aiSparksGet": "Get Sparks",
+  "write.aiSparksLoading": "Crafting sparks...",
+  "write.aiSparksMoodBurnout": "Burnout / Exhausted",
+  "write.aiSparksMoodAnxious": "Anxious / Worried",
+  "write.aiSparksMoodLonely": "Lonely / Isolated",
+  "write.aiSparksMoodAshamed": "Self-blame / Heavy",
+  "write.aiSparksInsert": "Start with this",
+
+  // Reply Coach Workbench & Tone Radar
+  "reply.toneRadar": "AI Tone Radar",
+  "reply.empathyScore": "Empathy",
+  "reply.gentlenessScore": "Gentleness",
+  "reply.nonJudgmentalScore": "Non-judgmental",
+  "reply.reframingTitle": "Reframe in 3 Healing Tones",
+  "reply.reframingDesc": "Select any tone below to instantly apply it to your reply.",
+  "reply.appliedNotice": "Applied",
+
+  // Semantic Resonance Matcher
+  "reply.aiResonanceRecommended": "AI Semantic Resonance Recommended",
+  "reply.aiResonanceBadge": "Resonance Match",
+  "reply.aiResonanceReason": "Strong healing resonance with your reply preference.",
+
+  // Admin Emotion Climate Radar
+  "admin.emotionRadarTitle": "Emotion Climate Radar",
+  "admin.emotionRadarDesc": "Real-time emotional distribution and collective relief indicators across letterboxes.",
+  "admin.emotionRadarLonely": "Loneliness",
+  "admin.emotionRadarAnxious": "Anxiety",
+  "admin.emotionRadarOverwhelmed": "Burnout",
+  "admin.emotionRadarSad": "Sadness",
+  "admin.emotionRadarTotalAnalyzed": "Total Letters Analyzed"
 };

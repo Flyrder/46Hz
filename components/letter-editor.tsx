@@ -6,6 +6,8 @@ import { processLetterAction } from "@/app/actions/letters";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { createTranslator, type Locale } from "@/lib/i18n";
 
+import { WritingSparksHelper } from "@/components/writing-sparks-helper";
+
 const PROMPT_KEYS = [
   "write.prompt1",
   "write.prompt2",
@@ -41,8 +43,19 @@ export function LetterEditor({
     }
   }
 
+  function handleSelectSpark(sparkText: string) {
+    if (!text.trim()) {
+      setText(`${sparkText} `);
+    } else {
+      setText((prev) => `${prev.trim()}\n\n${sparkText} `);
+    }
+  }
+
   return (
     <div className="space-y-6">
+      {/* AI Writing Sparks Helper */}
+      <WritingSparksHelper locale={locale} onSelectSpark={handleSelectSpark} />
+
       {/* Emotional Reflection Sparks */}
       <div className="rounded-2xl border border-border/80 bg-surface/80 p-4 shadow-2xs backdrop-blur-xs">
         <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -55,7 +68,7 @@ export function LetterEditor({
               key={prompt}
               type="button"
               onClick={() => handleSelectPrompt(prompt)}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background/80 px-3 py-1.5 text-xs text-foreground/85 transition-all hover:border-accent/40 hover:bg-accent/5 hover:text-foreground active:scale-95"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border/80 bg-background/80 px-3 py-1.5 text-xs text-foreground/85 transition-all hover:border-accent/40 hover:bg-accent/5 hover:text-foreground active:scale-95"
             >
               <Heart className="h-3 w-3 text-accent/70" />
               <span>{prompt}</span>

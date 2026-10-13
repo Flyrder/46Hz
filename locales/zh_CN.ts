@@ -316,5 +316,39 @@ export const zhCN: Translations = {
   "comment.submit": "保存批注",
   "comment.emptyTitle": "暂无段落批注",
   "comment.emptyBody": "划选信件正文中的语句，即可留下专属的笔记与感悟。",
-  "comment.delete": "删除批注"
+  "comment.delete": "删除批注",
+
+  // AI Writing Sparks
+  "write.aiSparksTitle": "AI 写作灵感火花",
+  "write.aiSparksDesc": "当千言万语不知从何说起时，AI 为你送来温润的开篇第一句话。",
+  "write.aiSparksGet": "获取灵感",
+  "write.aiSparksLoading": "正在凝聚灵感...",
+  "write.aiSparksMoodBurnout": "疲惫 / 倦怠",
+  "write.aiSparksMoodAnxious": "焦虑 / 迷茫",
+  "write.aiSparksMoodLonely": "孤单 / 寂寥",
+  "write.aiSparksMoodAshamed": "内疚 / 自责",
+  "write.aiSparksInsert": "用此句开头",
+
+  // Reply Coach Workbench & Tone Radar
+  "reply.toneRadar": "AI 语调诊断雷达",
+  "reply.empathyScore": "共情指数",
+  "reply.gentlenessScore": "温润度",
+  "reply.nonJudgmentalScore": "非评判性",
+  "reply.reframingTitle": "三种疗愈语调一键重构",
+  "reply.reframingDesc": "点击下方任意语调，即可一键替换并应用到回复文本框中。",
+  "reply.appliedNotice": "已应用",
+
+  // Semantic Resonance Matcher
+  "reply.aiResonanceRecommended": "AI 语义共鸣推荐",
+  "reply.aiResonanceBadge": "共鸣推荐",
+  "reply.aiResonanceReason": "与你的回复关怀偏好具有高契合度与疗愈共振。",
+
+  // Admin Emotion Climate Radar
+  "admin.emotionRadarTitle": "情感气象雷达 (Emotion Climate Radar)",
+  "admin.emotionRadarDesc": "实时纵览信箱集群的集体情绪分布与疗愈舒缓指标。",
+  "admin.emotionRadarLonely": "孤独",
+  "admin.emotionRadarAnxious": "焦虑",
+  "admin.emotionRadarOverwhelmed": "倦怠",
+  "admin.emotionRadarSad": "悲伤",
+  "admin.emotionRadarTotalAnalyzed": "已分析信件总数"
 };

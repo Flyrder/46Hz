@@ -6,13 +6,17 @@ import type {
   CoachedReplyResult,
   ProcessLetterInput,
   ProcessedLetterResult,
+  ResonanceMatchInput,
+  ResonanceMatchResult,
   RiskClassificationInput,
-  RiskClassificationResult
+  RiskClassificationResult,
+  WritingSparksInput,
+  WritingSparksResult
 } from "@/lib/ai/middleware";
 import { MockAiMiddleware } from "@/lib/ai/mock";
 
 export interface LlmConfig {
-  provider: "openai" | "deepseek" | "custom";
+  provider: "openai" | "deepseek" | "gemini" | "anthropic" | "ollama" | "custom";
   apiKey?: string;
   baseURL?: string;
   model?: string;
@@ -27,10 +31,16 @@ export class LlmAiMiddleware implements AiMiddleware {
     this.fallback = new MockAiMiddleware();
 
     const envProvider = (process.env.AI_PROVIDER ?? "").toLowerCase().trim();
+    const validProviders: LlmConfig["provider"][] = [
+      "openai",
+      "deepseek",
+      "gemini",
+      "anthropic",
+      "ollama",
+      "custom"
+    ];
     const provider = (customConfig?.provider ??
-      (envProvider === "openai" || envProvider === "deepseek" || envProvider === "custom"
-        ? envProvider
-        : "openai")) as "openai" | "deepseek" | "custom";
+      (validProviders.includes(envProvider as any) ? envProvider : "openai")) as LlmConfig["provider"];
 
     let defaultBaseURL = "https://api.openai.com/v1";
     let defaultModel = "gpt-4o-mini";
@@ -40,6 +50,18 @@ export class LlmAiMiddleware implements AiMiddleware {
       defaultBaseURL = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
       defaultModel = process.env.DEEPSEEK_MODEL || "deepseek-chat";
       apiKey = process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY;
+    } else if (provider === "gemini") {
+      defaultBaseURL = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai";
+      defaultModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
+      apiKey = process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
+    } else if (provider === "anthropic") {
+      defaultBaseURL = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1";
+      defaultModel = process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-20241022";
+      apiKey = process.env.ANTHROPIC_API_KEY || process.env.AI_API_KEY;
+    } else if (provider === "ollama") {
+      defaultBaseURL = process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1";
+      defaultModel = process.env.OLLAMA_MODEL || "llama3.2";
+      apiKey = process.env.OLLAMA_API_KEY || "ollama";
     } else if (provider === "openai") {
       defaultBaseURL = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
       defaultModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
@@ -60,6 +82,7 @@ export class LlmAiMiddleware implements AiMiddleware {
   }
 
   get isConfigured(): boolean {
+    if (this.config.provider === "ollama") return true;
     return Boolean(this.config.apiKey && this.config.apiKey.trim().length > 0);
   }
 
@@ -76,21 +99,64 @@ export class LlmAiMiddleware implements AiMiddleware {
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs);
 
     try {
+      if (this.config.provider === "anthropic") {
+        const response = await fetch(`${this.config.baseURL}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": this.config.apiKey ?? "",
+            "anthropic-version": "2023-06-01"
+          },
+          body: JSON.stringify({
+            model: this.config.model,
+            max_tokens: 2048,
+            system: systemPrompt,
+            messages: [{ role: "user", content: userPrompt }]
+          }),
+          signal: controller.signal
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Anthropic API responded with ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        const content = data.content?.[0]?.text;
+        if (!content) {
+          throw new Error("No content returned from Anthropic message.");
+        }
+        return content;
+      }
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json"
+      };
+      if (this.config.apiKey) {
+        headers["Authorization"] = `Bearer ${this.config.apiKey}`;
+      }
+
+      const requestBody: Record<string, any> = {
+        model: this.config.model,
+        temperature: 0.2,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ]
+      };
+
+      if (
+        this.config.provider === "openai" ||
+        this.config.provider === "deepseek" ||
+        this.config.provider === "gemini"
+      ) {
+        requestBody.response_format = { type: "json_object" };
+      }
+
       const response = await fetch(`${this.config.baseURL}/chat/completions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${this.config.apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.config.model,
-          temperature: 0.2,
-          response_format: { type: "json_object" },
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ]
-        }),
+        headers,
+        body: JSON.stringify(requestBody),
         signal: controller.signal
       });
 
@@ -148,12 +214,20 @@ Risk level rules:
 
       return {
         processedText: parsed.processedText ?? input.text,
-        emotionTags: Array.isArray(parsed.emotionTags) && parsed.emotionTags.length > 0 ? parsed.emotionTags : ["reflective"],
-        situationTags: Array.isArray(parsed.situationTags) && parsed.situationTags.length > 0 ? parsed.situationTags : ["life"],
+        emotionTags:
+          Array.isArray(parsed.emotionTags) && parsed.emotionTags.length > 0
+            ? parsed.emotionTags
+            : ["reflective"],
+        situationTags:
+          Array.isArray(parsed.situationTags) && parsed.situationTags.length > 0
+            ? parsed.situationTags
+            : ["life"],
         desiredReplyType: normalizeReplyType(parsed.desiredReplyType, input.preferredReplyType),
         anonymization: {
           text: parsed.anonymization?.text ?? input.text,
-          flaggedTerms: Array.isArray(parsed.anonymization?.flaggedTerms) ? parsed.anonymization.flaggedTerms : []
+          flaggedTerms: Array.isArray(parsed.anonymization?.flaggedTerms)
+            ? parsed.anonymization.flaggedTerms
+            : []
         },
         risk: {
           level: normalizeRiskLevel(parsed.risk?.level),
@@ -180,20 +254,45 @@ Output a valid JSON object strictly matching this schema:
 {
   "coachedText": "a warm, refined, gentle version of the reply that keeps the responder's voice",
   "flags": ["array of detected tone flags e.g. judgmental, too_advice_heavy, invalidating, centers_responder"],
-  "suggestions": ["array of practical gentle suggestions for the responder"]
+  "suggestions": ["array of practical gentle suggestions for the responder"],
+  "reframings": [
+    { "label": "온화한 공감", "text": "...", "tone": "warm" },
+    { "label": "경청 중심", "text": "...", "tone": "listening" },
+    { "label": "차분한 지지", "text": "...", "tone": "grounding" }
+  ],
+  "metrics": {
+    "empathy": 90,
+    "gentleness": 95,
+    "nonJudgmental": 98
+  }
 }`;
 
-      const userPrompt = `Letter excerpt:\n${input.letterText}\n\nDesired Reply Type: ${input.desiredReplyType}\n\nDraft Reply:\n${input.replyText}`;
+      const userPrompt = `Letter excerpt:\n${input.letterText}\n\nDesired Reply Type: ${input.desiredReplyType}\nLanguage: ${input.language}\n\nDraft Reply:\n${input.replyText}`;
 
       const rawJson = await this.callChatCompletion(systemPrompt, userPrompt);
       const parsed = extractJson(rawJson);
 
+      const mockCoached = await this.fallback.coachReply(input);
+
       return {
         coachedText: parsed.coachedText ?? input.replyText,
         flags: Array.isArray(parsed.flags) ? parsed.flags : [],
-        suggestions: Array.isArray(parsed.suggestions) && parsed.suggestions.length > 0
-          ? parsed.suggestions
-          : ["This reply feels considerate and gentle."]
+        suggestions:
+          Array.isArray(parsed.suggestions) && parsed.suggestions.length > 0
+            ? parsed.suggestions
+            : ["This reply feels considerate and gentle."],
+        reframings:
+          Array.isArray(parsed.reframings) && parsed.reframings.length >= 3
+            ? parsed.reframings
+            : mockCoached.reframings,
+        metrics:
+          parsed.metrics && typeof parsed.metrics.empathy === "number"
+            ? {
+                empathy: Math.min(100, Math.max(0, parsed.metrics.empathy)),
+                gentleness: Math.min(100, Math.max(0, parsed.metrics.gentleness ?? 90)),
+                nonJudgmental: Math.min(100, Math.max(0, parsed.metrics.nonJudgmental ?? 90))
+              }
+            : mockCoached.metrics
       };
     } catch (err) {
       console.warn("[LlmAiMiddleware] Error in coachReply, falling back to Mock:", err);
@@ -241,7 +340,7 @@ Output a valid JSON object strictly matching:
 
     try {
       const systemPrompt = `You are the anonymization middleware for 46Hz.
-Remove any personally identifiable information (PII) including full names, telephone numbers, emails, and exact locations. Replace them with [name removed], [phone removed], etc.
+Remove any personally identifiable information (PII) including full names, telephone numbers, emails, resident numbers, and exact locations. Replace them with [name removed], [phone removed], etc.
 Output JSON:
 {
   "text": "anonymized text",
@@ -259,6 +358,88 @@ Output JSON:
     } catch (err) {
       console.warn("[LlmAiMiddleware] Error in anonymize, falling back to Mock:", err);
       return this.fallback.anonymize(input);
+    }
+  }
+
+  async generateWritingSparks(input: WritingSparksInput): Promise<WritingSparksResult> {
+    if (!this.isConfigured) {
+      return this.fallback.generateWritingSparks(input);
+    }
+
+    try {
+      const systemPrompt = `You are the creative writing prompt assistant for 46Hz emotional letterbox.
+Generate 3 gentle, evocative first sentences to help someone begin writing an anonymous letter about their feelings.
+Output a valid JSON object strictly matching this schema:
+{
+  "sparks": [
+    { "id": "spark-1", "text": "first sentence...", "prompt": "short 2-4 word theme label" },
+    { "id": "spark-2", "text": "first sentence...", "prompt": "short 2-4 word theme label" },
+    { "id": "spark-3", "text": "first sentence...", "prompt": "short 2-4 word theme label" }
+  ],
+  "suggestedEmotionTags": ["tag1", "tag2"]
+}`;
+
+      const userPrompt = `Language: ${input.language}\nMood hint: ${input.mood ?? "lonely"}\nSeed text if any: ${input.seedText ?? ""}`;
+
+      const rawJson = await this.callChatCompletion(systemPrompt, userPrompt);
+      const parsed = extractJson(rawJson);
+
+      if (Array.isArray(parsed.sparks) && parsed.sparks.length > 0) {
+        return {
+          sparks: parsed.sparks.map((s: any, idx: number) => ({
+            id: s.id || `spark-${idx + 1}`,
+            text: s.text || "",
+            prompt: s.prompt || "감정 표현하기"
+          })),
+          suggestedEmotionTags: Array.isArray(parsed.suggestedEmotionTags)
+            ? parsed.suggestedEmotionTags
+            : ["reflective"]
+        };
+      }
+
+      return this.fallback.generateWritingSparks(input);
+    } catch (err) {
+      console.warn("[LlmAiMiddleware] Error in generateWritingSparks, falling back to Mock:", err);
+      return this.fallback.generateWritingSparks(input);
+    }
+  }
+
+  async matchResonantLetters(input: ResonanceMatchInput): Promise<ResonanceMatchResult> {
+    if (!this.isConfigured) {
+      return this.fallback.matchResonantLetters(input);
+    }
+
+    try {
+      const systemPrompt = `You are the empathetic resonance matcher for 46Hz.
+Given a responder's preferred reply style and a list of available anonymous letters seeking support, pick the letters that best resonate with the responder.
+Output a valid JSON object strictly matching this schema:
+{
+  "recommendedLetterIds": ["id1", "id2"],
+  "matchReasons": {
+    "id1": "short gentle reason why this resonates",
+    "id2": "short gentle reason why this resonates"
+  }
+}`;
+
+      const userPrompt = `Responder preference: ${input.responderPreference}\nAvailable Letters:\n${JSON.stringify(input.availableLetters, null, 2)}`;
+
+      const rawJson = await this.callChatCompletion(systemPrompt, userPrompt);
+      const parsed = extractJson(rawJson);
+
+      if (Array.isArray(parsed.recommendedLetterIds) && parsed.recommendedLetterIds.length > 0) {
+        return {
+          recommendedLetterIds: parsed.recommendedLetterIds,
+          matchReasons:
+            typeof parsed.matchReasons === "object" && parsed.matchReasons !== null
+              ? parsed.matchReasons
+              : {}
+        };
+      }
+
+      return this.fallback.matchResonantLetters(input);
+    } catch (err) {
+      console.warn("[LlmAiMiddleware] Error in matchResonantLetters, falling back to Mock:", err);
+      return this.fallback.matchResonantLetters(input);
     }
   }
 }
@@ -321,4 +502,3 @@ export function extractJson(raw: string): any {
     throw new Error(`Unable to parse JSON from LLM response: ${raw.slice(0, 100)}...`);
   }
 }
-

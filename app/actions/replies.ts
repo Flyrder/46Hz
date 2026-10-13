@@ -10,6 +10,8 @@ import { coachReplySchema, formValue, submitReplySchema } from "@/lib/validators
 
 import { isMatchActiveClaim, releaseLetterClaim } from "@/lib/reply/claiming";
 
+import type { ReplyReframing, ToneMetrics } from "@/lib/ai/middleware";
+
 export type CoachReplyState =
   | {
       ok: false;
@@ -22,6 +24,8 @@ export type CoachReplyState =
       coachedText: string;
       flags: string[];
       suggestions: string[];
+      reframings?: ReplyReframing[];
+      metrics?: ToneMetrics;
     };
 
 export async function coachReplyAction(
@@ -107,7 +111,9 @@ export async function coachReplyAction(
     rawText: input.data.replyText,
     coachedText: result.coachedText,
     flags: result.flags,
-    suggestions: result.suggestions
+    suggestions: result.suggestions,
+    reframings: result.reframings,
+    metrics: result.metrics
   };
 }
 
