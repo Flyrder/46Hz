@@ -127,7 +127,7 @@ export function AppShell({
             </Link>
             <span className="text-border" aria-hidden="true">·</span>
             <span className="text-[11px] text-muted-foreground/70">
-              Barrier-Free A11y · Zero PII
+              Barrier-Free KWCAG 2.2 · Zero PII
             </span>
           </div>
         </div>

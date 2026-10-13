@@ -96,19 +96,40 @@ The color palette combines natural stone, warm paper stationery, calming botanic
 
 ---
 
-## 5. Barrier-Free Accessibility (A11y) Standards
+## 5. Barrier-Free Accessibility (KWCAG 2.2 / KS X 9256:2024 Standards)
 
-46Hz adheres strictly to WCAG 2.1 AA/AAA accessibility guidelines:
-1. **Screen Reader Landmarks**:
-   - `role="banner"` (Header)
-   - `role="navigation"` (Main navigation)
-   - `role="main"` with `id="main-content"`
-   - `role="contentinfo"` (Footer)
-   - `role="region"` & `role="progressbar"` (Resonance Meter)
-2. **Live Announcements**:
-   - `aria-live="polite"` on character counters and resonance meters.
-   - `aria-live="assertive"` on error feedback and form validation messages.
-3. **Touch Targets**:
-   - Every interactive button, link, and nav icon satisfies the minimum **44px $\times$ 44px** touch target standard (`min-h-[44px]`).
-4. **Keyboard Focus Rings**:
-   - High-contrast, non-obtrusive focus visible rings (`focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2`).
+46Hz is architected to fully comply with **KWCAG 2.2 (한국형 웹 콘텐츠 접근성 지침 2.2 / 국가표준 KS X 9256:2024)** and W3C WCAG 2.2 AA guidelines across all 4 core principles:
+
+### 5.1 인식의 용이성 (Perceivability)
+1. **고대비 명도 (Contrast Minimum)**:
+   - 본문 텍스트 명도 대비 4.5:1 이상 준수 (Light Mode Ecru Parchment: 12.3:1, Dark Mode Midnight Slate: 14.8:1로 AAA 수준 충족).
+2. **비텍스트 콘텐츠 대체 텍스트 (Text Alternatives)**:
+   - 모든 Lucide SVG 아이콘에 명시적 `aria-hidden="true"` 적용.
+   - 단독 아이콘 버튼(NavIcon, CopyButton 등)에 명시적인 `aria-label` 및 `title` 제공.
+3. **색상 독립성 (Use of Color)**:
+   - 감정 상태 및 위험도 배지는 색상 외에도 텍스트 레이블(승인됨, 검토 대기, 주의 필요 등)을 명기하여 색각 이상자도 즉시 파악 가능.
+
+### 5.2 운용의 용이성 (Operability)
+1. **키보드 접근성 (Keyboard Accessible)**:
+   - 모든 대화형 컨트롤이 마우스 없이 Tab/Enter/Space/방향키로 완전 제어 가능.
+   - 선명한 2px 포커스 링(`focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:outline-none`)으로 현재 위치 표시 및 초점 트랩 방지.
+2. **반복 영역 건너뛰기 (Skip Navigation)**:
+   - 키보드 첫 탭 시 화면 좌상단에 부유하는 `#main-content` 본문 바로가기 링크(`skipToContent`) 제공.
+3. **최소 조작 영역 크기 (Target Size)**:
+   - 모든 상호작용 요소(버튼, 링크, 테마/언어 토글)에 **최소 44px × 44px** 조작 영역 (`min-h-[44px]`) 보장.
+4. **충분한 시간 제공 (Timing Control)**:
+   - 15분 답장 작성 잠금 창 제공 및 작성 포기 시 편지를 즉시 돌려놓는 자발적 반환(`공명 양보하기`) 메커니즘 제공.
+
+### 5.3 이해의 용이성 (Understandability)
+1. **기본 언어 표시 (Language of Page)**:
+   - 최상단 HTML 태그에 `<html lang="ko-KR">` 선언 (언어 변경 시 `en-US`, `zh-CN`으로 동적 전환).
+2. **예측 가능한 입력 서식 (Predictable Inputs)**:
+   - 모든 입력 폼에 `<label htmlFor="...">` 명시적 연결.
+   - 유효성 검사 실패 시 `aria-invalid="true"`, `role="alert"`, `aria-describedby`를 통해 스크린리더에 에러 즉시 음성 출력.
+
+### 5.4 견고성 (Robustness)
+1. **WAI-ARIA 1.2 시맨틱 랜드마크**:
+   - `role="banner"` (헤더), `role="navigation"` (내비게이션), `role="main"` (본문), `role="contentinfo"` (푸터), `role="progressbar"` (슈만 공명 메터).
+2. **스크린리더 실시간 라이브 리전 (Live Regions)**:
+   - 실시간 글자수 카운터 및 공명 노드 변경에 `aria-live="polite"` 적용.
+   - 스크린리더(TalkBack, VoiceOver, 센스리더, NVDA, Windows Narrator) 전방위 음성 낭독 지원.

@@ -21,7 +21,7 @@ export function AdminNav({
   t?: (key: string) => string;
 }) {
   return (
-    <nav className="mb-6 flex gap-2 overflow-x-auto pb-1">
+    <nav aria-label="Staff navigation" className="mb-6 flex gap-2 overflow-x-auto pb-1">
       {links.map(({ href, labelKey, fallbackLabel, adminOnly }) => (
         <Link
           key={href}

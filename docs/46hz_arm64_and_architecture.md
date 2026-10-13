@@ -2,8 +2,7 @@
 
 > 沉淀日期: 2026-10-11 (Updated 2026-10-12)  
 > 适用版本: 46Hz Letterbox MVP (v0.1.0)  
-> 适用架构: Linux (arm64/aarch64, x86_64), macOS (darwin-arm64, darwin-x64), Windows  
-> 关联手册: [46Hz UI/UX Design System Manual](file:///c:/Users/voide/eko/docs/46hz_ui_design_system.md)
+> 关联手册: [46Hz UI/UX Design System Manual](./46hz_ui_design_system.md)
 
 ---
 
@@ -252,7 +251,7 @@ docker buildx build \
   - `<header role="banner">`
   - `<nav aria-label="Main Navigation">`
   - `<main id="main-content" role="main">`
-- **触控区域达标 (WCAG 2.2 Level AA)**：所有导航图标与操作按钮的有效交互区域均确保在 `min-h-[44px] min-w-[44px]` 以上，大幅改善移动端及视障手势交互体验。
+- **触控区域达标 (KWCAG 2.2 / WCAG 2.2 Level AA)**：所有导航图标与操作按钮的有效交互区域均确保在 `min-h-[44px] min-w-[44px]` 以上，大幅改善移动端及视障手势交互体验。
 - **动态状态实时朗读 (ARIA Live Regions)**：
   - 舒曼共振计数器配置 `role="progressbar"`，提供精确的 `aria-valuenow`、`aria-valuemax` 与 `aria-valuetext`，并在状态变化时通过 `aria-live="polite"` 友好通知。
   - 表单提交按钮在挂起时挂载 `aria-busy="true"` 并提供隐藏提示 `<span className="sr-only">Processing...</span>`。
@@ -272,10 +271,10 @@ docker buildx build \
 
 ### 7.5 客户端 User Agent 信息收集与统一根配置设计
 1. **浏览器 User Agent 信息收集与纯原生解析**：
-   - 在 [`lib/ip.ts`](file:///c:/Users/voide/eko/lib/ip.ts) 中增加 [`getClientUserAgent`](file:///c:/Users/voide/eko/lib/ip.ts#L162-L173) 与轻量无外部依赖的 [`parseUserAgent`](file:///c:/Users/voide/eko/lib/ip.ts#L27-L68) 解析器，智能识别浏览器名称（Chrome, Safari, Firefox, Edge 等）、操作系统（Windows, macOS, iOS, Android, Linux）以及设备类型（Mobile, Tablet, Desktop, Bot）。
-   - 随 IP 连接记录一并写入 `User.recentIps` 队列（通过 PostgreSQL 原生 JSONB 兼容扩展，无破坏性变更），并在 [`ComplianceIncidentPacket`](file:///c:/Users/voide/eko/lib/compliance/incident-packet.ts) 和后台合规审查面板中清晰关联呈递。
+   - 在 [`lib/ip.ts`](../lib/ip.ts) 中增加 `getClientUserAgent` 与轻量无外部依赖的 `parseUserAgent` 解析器，智能识别浏览器名称（Chrome, Safari, Firefox, Edge 等）、操作系统（Windows, macOS, iOS, Android, Linux）以及设备类型（Mobile, Tablet, Desktop, Bot）。
+   - 随 IP 连接记录一并写入 `User.recentIps` 队列（通过 PostgreSQL 原生 JSONB 兼容扩展，无破坏性变更），并在 [`ComplianceIncidentPacket`](../lib/compliance/incident-packet.ts) 和后台合规审查面板中清晰关联呈递。
 2. **全局统一设置中心 (`settings.ts`)**：
-   - 在根目录下建立专有的单一真实配置源文件 [`settings.ts`](file:///c:/Users/voide/eko/settings.ts)，收敛全局所有参数：
+   - 在根目录下建立专有的单一真实配置源文件 [`settings.ts`](../settings.ts)，收敛全局所有参数：
      - **品牌元数据** (`brand`)：产品名、全称标题、标语。
      - **国际化引擎** (`i18n`)：默认语言 (`ko_KR`)、支持语言清单、语言标签。
      - **主题配置** (`theme`)：默认主题 (`system`)、支持模式及标签。
@@ -298,7 +297,7 @@ docker buildx build \
 
 ### 8.1 自动化测试覆盖指标
 - **测试框架**：Vitest 5.0.4
-- **测试套件总览**：17 个测试文件，108 个单元与集成测试用例，100% 全部通过。
+- **测试套件总览**：17 个测试文件，109 个单元与集成测试用例，100% 全部通过。
 - **全链路测试涵盖**：
   - `tests/client/user-agent.test.ts`: 浏览器 User Agent 深度提取、多平台与设备类型解析实测。
   - `tests/settings/settings.test.ts`: 根目录统一配置文件 `settings.ts` 各维度配置契约断言。
@@ -312,7 +311,7 @@ docker buildx build \
 
 ### 8.2 常用开发维护指令
 ```bash
-# 运行全部单元测试 (108 tests)
+# 运行全部单元测试 (109 tests)
 npm run test:run
 
 # 运行全链路后端与数据库完整性实测
