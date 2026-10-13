@@ -13,6 +13,8 @@ import { shouldMaskLetterContent } from "@/lib/safety/routing";
 import { requireUser } from "@/lib/session";
 import { formatDate } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { DeleteLetterButton } from "@/components/delete-letter-button";
+import { LetterContentViewer } from "@/components/letter-content-viewer";
 
 export const dynamic = "force-dynamic";
 
@@ -60,11 +62,16 @@ export default async function LetterDetailPage({
           <span>{t("letter.backToInbox")}</span>
         </Link>
 
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("letter.title")}</h1>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock className="h-3.5 w-3.5" />
-            <time dateTime={new Date(letter.createdAt).toISOString()}>{formatDate(letter.createdAt)}</time>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="h-3.5 w-3.5" />
+              <time dateTime={new Date(letter.createdAt).toISOString()}>{formatDate(letter.createdAt)}</time>
+            </div>
+            {letter.authorId === user.id && (
+              <DeleteLetterButton letterId={letter.id} t={t} />
+            )}
           </div>
         </div>
 
@@ -84,12 +91,14 @@ export default async function LetterDetailPage({
         </div>
       </div>
 
-      {/* Main Letter Card (Stationery Paper) */}
-      <article className="stationery-paper p-6 sm:p-8">
-        <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-          {maskContent ? t("letter.masked") : letter.processedText}
-        </div>
-      </article>
+      {/* Main Letter Card: Processed vs Raw vs Split Comparison */}
+      <LetterContentViewer
+        processedText={letter.processedText}
+        rawText={letter.rawText}
+        isAuthor={letter.authorId === user.id}
+        maskContent={maskContent}
+        t={t}
+      />
 
       {/* Schumann Resonance Meter */}
       {!maskContent ? (

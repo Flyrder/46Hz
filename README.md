@@ -19,9 +19,16 @@
 
 ## Brand Philosophy: The 46Hz Slow Loop
 
-46Hz is inspired by Earth's **7th Schumann resonance harmonic** (~7.83Hz × 7 ≈ 45.9Hz ≈ 46Hz). In emotional acoustics, extremely low frequencies ground and calm the nervous system. 
+46Hz is inspired by Earth's **7th Schumann resonance mode** (~45.9Hz ≈ 46Hz). In the natural Earth-ionosphere spherical cavity, the electromagnetic resonant frequencies are not a simple arithmetic integer series ($7.83 \times n$), nor do they match an idealized zero-loss conductor ($f_n = \frac{c}{2\pi a}\sqrt{n(n+1)}$). Due to the finite electrical conductivity and damping of the ionospheric D-layer, ELF ground observations record real-world resonant peaks at:
+- **1st Mode (Fundamental)**: ~7.83 Hz
+- **2nd Mode**: ~14.3 Hz
+- **3rd Mode**: ~20.8 Hz
+- **4th Mode**: ~27.3 Hz
+- **5th Mode**: ~33.8 Hz
+- **6th Mode**: ~39.0 Hz
+- **7th Mode**: **~45.9 Hz (~46 Hz)**
 
-In a digital world dominated by instant read receipts, performative metrics, and reactive comments, 46Hz offers an intentional, unhurried space for vulnerable thoughts.
+46Hz is the empirical 7th harmonic mode of our planet. Just as the planetary cavity dampens electromagnetic turbulence into steady, calming standing waves, 46Hz creates an intentional, unhurried space for vulnerable human thoughts.
 
 ```mermaid
 flowchart LR
@@ -62,15 +69,19 @@ flowchart LR
 - **Hot-Swappable Production LLM (`LlmAiMiddleware`)**: Supports `openai`, `deepseek` (with automated `<think>...</think>` reasoning tag stripping and enum sanitization), and `custom` OpenAI-compatible endpoints.
 - **Resilient Fallback**: Automatically falls back to Mock upon upstream timeout or network degradation.
 
-### 5. Zero PII & Crockford Base32 Device Migration
+### 5. Author Control: Letter Deletion & Draft Comparison (Diff)
+- **Original vs Processed Comparison (Diff)**: In the review screen (`/write/review`) and letter detail (`/letters/[id]`), authors can compare their raw writing against the AI-anonymized draft side-by-side or tabbed, confirming private details were shielded before confirming.
+- **Permanent Sovereign Letter Deletion**: Authors can permanently delete their letters at any time with accessible confirmation modals, cleanly cascading across all associated replies, matches, and feedback while releasing any in-progress reply leases.
+
+### 6. Zero PII & Crockford Base32 Device Migration
 - **No Email/Password Database Accounts**: True anonymity with zero personal data collected.
 - **Crockford Base32 Migration Codes**: Cross-device transfer using typo-safe codes (e.g. `46HZ-XXXX-XXXX`), excluding confusing characters (`0`, `1`, `I`, `O`).
 
-### 6. Granular Dual-Role Admin RBAC
+### 7. Granular Dual-Role Admin RBAC
 - **Admin (`ADMIN_PASSCODE`)**: Full access, including user suspensions, crisis resource management, and compliance exports.
 - **Moderator (`MODERATOR_PASSCODE`)**: Dedicated to content safety—reviewing letters and replies, reading reports, and inspecting audit logs.
 
-### 7. Barrier-Free Accessibility (KWCAG 2.2)
+### 8. Barrier-Free Accessibility (KWCAG 2.2)
 46Hz is fully engineered in accordance with **KWCAG 2.2 (한국형 웹 콘텐츠 접근성 지침 2.2 / 국가표준 KS X 9256:2024)** and W3C WCAG 2.2 AA standards:
 
 1. **인식의 용이성 (Perceivability)**:
@@ -301,4 +312,4 @@ npm run build
 
 ## License
 
-AGPL-3.0 License. See [LICENSE](./LICENSE) for details.
+GPL-3.0 License. See [LICENSE](./LICENSE) for details.

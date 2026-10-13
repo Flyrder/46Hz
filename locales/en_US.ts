@@ -135,7 +135,7 @@ export const enUS: Translations = {
     "All resonance slots have been peacefully fulfilled. Take your time reading through each message.",
   "resonance.meterLabel": "Resonance Harmonics ({current} / {max})",
   "resonance.schumannNote":
-    "46Hz represents the 7th harmonic frequency of Earth's Schumann resonance (~46Hz). Each letter is initially held to 7 replies to preserve intimacy and protect you from emotional noise.",
+    "46Hz represents Earth's 7th Schumann resonance mode (~45.9Hz) as empirically observed in the Earth-ionosphere cavity with natural ionospheric damping, rather than a naive linear multiplier. To prevent emotional overwhelm and let words settle gently, letters are held within 7 resonance replies by default.",
   "resonance.title": "46Hz Schumann Resonance",
 
   // Reply Preferences & Types
@@ -277,5 +277,34 @@ export const enUS: Translations = {
   "admin.dashboardTitle": "46Hz Operations Dashboard",
   "admin.dashboardSubtitle": "Real-time letterbox monitoring and safety metrics",
   "admin.roleBadge": "Role: {role}",
-  "admin.logout": "Log out"
+  "admin.logout": "Log out",
+
+  // Letter Deletion & Author Controls
+  "letter.delete": "Delete letter",
+  "letter.deleteConfirmTitle": "Delete this letter?",
+  "letter.deleteConfirmDesc": "This letter and all received replies will be permanently deleted and cannot be recovered.",
+  "letter.deleteConfirmButton": "Confirm delete",
+  "letter.deleteSuccess": "Letter has been safely deleted.",
+  "letter.submitSuccess": "Letter has been successfully submitted.",
+
+  // Letter & Draft Comparison (Diff)
+  "letter.viewModeAria": "Select letter view mode",
+  "letter.viewProcessed": "Processed",
+  "letter.viewRaw": "Original draft",
+  "letter.viewComparison": "Compare",
+  "letter.rawDraftBadge": "Author-only original",
+  "letter.processedBadge": "Published processed text",
+  "letter.copyRaw": "Copy original",
+  "letter.restoreRaw": "Restore original text",
+  "letter.restoredNotice": "Original restored",
+
+  // Review Page Diff & Comparison
+  "review.comparisonTitle": "Review draft and AI processed text",
+  "review.tabProcessed": "AI Processed (Editable)",
+  "review.tabRaw": "Original draft",
+  "review.tabComparison": "Side-by-side comparison",
+  "review.rawNotice": "This is your original draft as written. Personal identifying information and harsh expressions were safely moderated by AI.",
+  "review.comparisonHint": "Compare your original draft on the left with the AI-moderated text on the right. You can edit the text before sending.",
+  "review.editInEditor": "Edit in Processed tab",
+  "write.privacyAssuranceBadge": "AI Anonymization Active"
 };

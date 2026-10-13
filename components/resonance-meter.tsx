@@ -10,8 +10,10 @@ interface ResonanceMeterProps {
   t: (key: string, values?: Record<string, string>) => string;
 }
 
-// Earth's Schumann Harmonic Frequencies (Fundamental ~7.83Hz up to 7th harmonic ~45.9Hz)
-const SCHUMANN_HARMONICS = [
+// Empirical Earth-Ionosphere Schumann Resonance Modes (accounting for ionospheric conductivity & damping).
+// Resonant peaks are not a linear arithmetic multiple (7.83 * n), but non-linear standing wave peaks
+// where Mode 7 naturally settles at ~45.9Hz (approx 46Hz).
+export const SCHUMANN_HARMONICS = [
   "7.8Hz",
   "14.3Hz",
   "20.8Hz",
@@ -27,7 +29,7 @@ const SCHUMANN_HARMONICS = [
   "84.9Hz",
   "91.4Hz",
   "97.9Hz"
-];
+] as const;
 
 export function ResonanceMeter({
   current,

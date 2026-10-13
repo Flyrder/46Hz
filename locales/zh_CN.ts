@@ -129,7 +129,7 @@ export const zhCN: Translations = {
     "所有共鸣席位均已温暖填满。请静心翻阅同伴们留给你的每一段回响。",
   "resonance.meterLabel": "共鸣谐波 ({current} / {max})",
   "resonance.schumannNote":
-    "46Hz 代表地球舒曼共鸣的第 7 阶自然谐波（约 46Hz）。每封信件默认限定 7 封回信，守护倾诉的私密与专注，避免社交信息喧嚣与过载。",
+    "46Hz 象征着地球-电离层空腔在电离层有限电导率与自然衰减（Damping）实测下形成的第7阶舒曼共振峰（~45.9Hz），而非简单的算术倍增。为避免情绪过载并让心意温和沉淀，信件默认由7封共鸣回信守护。",
   "resonance.title": "46Hz 舒曼共鸣",
 
   // Reply Preferences & Types
@@ -272,5 +272,34 @@ export const zhCN: Translations = {
   "admin.dashboardTitle": "46Hz 运营仪表盘",
   "admin.dashboardSubtitle": "实时信箱监控与安全指标",
   "admin.roleBadge": "当前角色: {role}",
-  "admin.logout": "退出登录"
+  "admin.logout": "退出登录",
+
+  // Letter Deletion & Author Controls
+  "letter.delete": "删除信件",
+  "letter.deleteConfirmTitle": "确定要删除这封信件吗？",
+  "letter.deleteConfirmDesc": "信件以及所有已收到的温暖回信将被永久删除，且无法恢复。",
+  "letter.deleteConfirmButton": "确认删除",
+  "letter.deleteSuccess": "信件已安全删除。",
+  "letter.submitSuccess": "信件已成功提交投递。",
+
+  // Letter & Draft Comparison (Diff)
+  "letter.viewModeAria": "选择信件查看模式",
+  "letter.viewProcessed": "整理版",
+  "letter.viewRaw": "撰写原稿",
+  "letter.viewComparison": "对照比较",
+  "letter.rawDraftBadge": "作者专属原稿",
+  "letter.processedBadge": "公开整理版",
+  "letter.copyRaw": "复制原稿",
+  "letter.restoreRaw": "恢复原稿内容",
+  "letter.restoredNotice": "原稿已恢复",
+
+  // Review Page Diff & Comparison
+  "review.comparisonTitle": "原稿与 AI 整理版对照审阅",
+  "review.tabProcessed": "AI 整理版（可编辑）",
+  "review.tabRaw": "查看撰写原稿",
+  "review.tabComparison": "并排对照比较",
+  "review.rawNotice": "这是您最初撰写的原稿。个人身份信息与不妥措辞已由 AI 安全脱敏整理。",
+  "review.comparisonHint": "请对比左侧原稿与右侧 AI 整理版。如有需要，您可在发送前直接编辑修改内容。",
+  "review.editInEditor": "在整理版标签页中修改",
+  "write.privacyAssuranceBadge": "AI 安全脱敏已生效"
 };

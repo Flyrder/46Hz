@@ -151,3 +151,44 @@ export async function expandLetterResonanceAction(formData: FormData): Promise<v
   revalidatePath("/inbox");
   revalidatePath("/reply");
 }
+
+export async function deleteLetterAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const letterId = formValue(formData, "letterId");
+
+  if (!letterId) {
+    throw new Error("Letter ID is required.");
+  }
+
+  const letter = await prisma.letter.findFirst({
+    where: {
+      id: letterId,
+      authorId: user.id
+    }
+  });
+
+  if (!letter) {
+    throw new Error("Letter not found or you are not authorized to delete it.");
+  }
+
+  await prisma.$transaction([
+    prisma.letter.delete({
+      where: { id: letter.id }
+    }),
+    prisma.moderationEvent.create({
+      data: {
+        targetType: "LETTER",
+        targetId: letter.id,
+        action: "DELETED_BY_AUTHOR",
+        reason: "Author chose to permanently delete their letter.",
+        previousStatus: letter.status,
+        newStatus: "DELETED"
+      }
+    })
+  ]);
+
+  revalidatePath("/inbox");
+  revalidatePath("/reply");
+  redirect("/inbox?deleted=1");
+}
+

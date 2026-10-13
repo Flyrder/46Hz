@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, HeartHandshake, AlertCircle, ArrowLeft } from "lucide-react";
 import { cancelDraftLetterAction, confirmLetterAction } from "@/app/actions/letters";
 import { StatusBadge } from "@/components/status-badge";
+import { ReviewComparisonViewer } from "@/components/review-comparison-viewer";
 import { buttonVariants } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { prisma } from "@/lib/db";
@@ -84,24 +85,11 @@ export default async function ReviewLetterPage({
       <div className="stationery-paper p-6 sm:p-8">
         <form action={confirmLetterAction}>
           <input type="hidden" name="letterId" value={letter.id} />
-          
-          <div className="flex items-center justify-between border-b border-border/60 pb-3">
-            <label className="text-sm font-semibold tracking-tight text-foreground flex items-center gap-2" htmlFor="processedText">
-              <ShieldCheck className="h-4 w-4 text-accent" />
-              <span>{t("review.editable")}</span>
-            </label>
-            <span className="text-xs text-muted-foreground">
-              {t("review.directlyEditable")}
-            </span>
-          </div>
 
-          <textarea
-            id="processedText"
-            name="processedText"
-            rows={12}
-            required
-            defaultValue={letter.processedText}
-            className="mt-4 w-full resize-y rounded-xl border border-border/70 bg-background/50 p-4 sm:p-5 text-base leading-relaxed text-foreground outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
+          <ReviewComparisonViewer
+            rawText={letter.rawText}
+            initialProcessedText={letter.processedText}
+            t={t}
           />
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">

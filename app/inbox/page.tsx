@@ -1,4 +1,4 @@
-import { Inbox, Send, PenLine } from "lucide-react";
+import { Inbox, Send, PenLine, CheckCircle2 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { LetterCard } from "@/components/letter-card";
 import { StatusBadge } from "@/components/status-badge";
@@ -10,9 +10,14 @@ import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function InboxPage() {
+export default async function InboxPage({
+  searchParams
+}: {
+  searchParams?: Promise<{ deleted?: string; submitted?: string }>;
+}) {
   const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
   const t = createTranslator(locale);
+  const { deleted, submitted } = (await searchParams) ?? {};
 
   const letters = await prisma.letter.findMany({
     where: { authorId: user.id },
@@ -36,13 +41,37 @@ export default async function InboxPage() {
   });
 
   return (
-    <section className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-[1.15fr_0.85fr] py-2">
-      {/* Left Column: My Letters */}
-      <div>
-        <div className="flex items-center gap-2 border-b border-border/60 pb-3 mb-5">
-          <div className="grid h-8 w-8 place-items-center rounded-xl bg-accent/10 text-accent">
-            <Inbox className="h-4.5 w-4.5" />
-          </div>
+    <div className="mx-auto max-w-4xl py-2">
+      {/* Toast Notification Banners */}
+      {deleted && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-6 flex items-center gap-2.5 rounded-xl border border-border/80 bg-surface p-4 text-xs font-medium text-foreground shadow-xs animate-in fade-in"
+        >
+          <CheckCircle2 className="h-4 w-4 text-accent shrink-0" aria-hidden="true" />
+          <span>{t("letter.deleteSuccess")}</span>
+        </div>
+      )}
+
+      {submitted && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-6 flex items-center gap-2.5 rounded-xl border border-border/80 bg-surface p-4 text-xs font-medium text-foreground shadow-xs animate-in fade-in"
+        >
+          <CheckCircle2 className="h-4 w-4 text-accent shrink-0" aria-hidden="true" />
+          <span>{t("letter.submitSuccess")}</span>
+        </div>
+      )}
+
+      <section className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+        {/* Left Column: My Letters */}
+        <div>
+          <div className="flex items-center gap-2 border-b border-border/60 pb-3 mb-5">
+            <div className="grid h-8 w-8 place-items-center rounded-xl bg-accent/10 text-accent">
+              <Inbox className="h-4.5 w-4.5" />
+            </div>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-foreground">{t("inbox.title")}</h1>
             <p className="text-xs text-muted-foreground">{t("inbox.subtitle")}</p>
@@ -119,5 +148,6 @@ export default async function InboxPage() {
         </div>
       </aside>
     </section>
+  </div>
   );
 }
