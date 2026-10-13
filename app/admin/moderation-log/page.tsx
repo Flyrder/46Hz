@@ -2,39 +2,86 @@ import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
+import { createTranslator } from "@/lib/i18n";
+import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
+import { History, Calendar, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
 export default async function ModerationLogPage() {
-  const role = await requireStaff();
+  const [role, locale] = await Promise.all([requireStaff(), getLocalePreference()]);
+  const t = createTranslator(locale);
+
   const events = await prisma.moderationEvent.findMany({
     orderBy: { createdAt: "desc" },
     take: 100
   });
 
   return (
-    <section className="mx-auto max-w-4xl">
-      <h1 className="text-3xl font-semibold">Moderation log</h1>
-      <AdminNav role={role} />
+    <section className="mx-auto max-w-5xl py-2 sm:py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/15 text-accent">
+            <History className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.logTitle")}</h1>
+              <StatusBadge tone="neutral">{events.length}건</StatusBadge>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              편지 및 답장 승인, 반려, 위험도 재조정 등 운영 조치에 대한 불변 감사 로그입니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <AdminNav role={role} t={t} />
+
       <div className="space-y-3">
         {events.map((event) => (
-          <article key={event.id} className="rounded-lg border border-border bg-surface p-4 shadow-soft">
-            <div className="flex flex-wrap items-center gap-2">
-              <StatusBadge>{event.targetType.toLowerCase()}</StatusBadge>
-              <StatusBadge>{event.action}</StatusBadge>
-              <span className="text-xs text-muted-foreground">{formatDate(event.createdAt)}</span>
+          <article
+            key={event.id}
+            className="rounded-2xl border border-border/80 bg-surface p-4.5 shadow-soft transition-all hover:border-accent/40"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2.5">
+              <div className="flex items-center gap-2">
+                <StatusBadge tone="neutral">{event.targetType.toUpperCase()}</StatusBadge>
+                <StatusBadge tone="neutral">{event.action}</StatusBadge>
+              </div>
+              <span className="text-xs text-muted-foreground flex items-center gap-1 font-mono">
+                <Calendar className="h-3 w-3" />
+                {formatDate(event.createdAt)}
+              </span>
             </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {event.previousStatus ?? "none"} -&gt; {event.newStatus ?? "none"}
+
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-mono">
+              <span className="rounded bg-muted px-2 py-0.5 text-muted-foreground">
+                {event.previousStatus ?? "초기상태"}
+              </span>
+              <ArrowRight className="h-3 w-3 text-muted-foreground" />
+              <span className="rounded bg-accent/15 px-2 py-0.5 font-bold text-accent">
+                {event.newStatus ?? "상태미지정"}
+              </span>
+            </div>
+
+            {event.reason ? (
+              <p className="mt-2 text-xs leading-relaxed text-foreground bg-muted/20 rounded-lg p-2.5 border border-border/40">
+                <strong className="text-muted-foreground font-semibold">사유: </strong>
+                {event.reason}
+              </p>
+            ) : null}
+
+            <p className="mt-2 text-[11px] font-mono text-muted-foreground">
+              대상 식별자: {event.targetId}
             </p>
-            {event.reason ? <p className="mt-2 text-sm">{event.reason}</p> : null}
-            <p className="mt-2 text-xs text-muted-foreground">{event.targetId}</p>
           </article>
         ))}
+
         {events.length === 0 ? (
-          <div className="rounded-lg border border-border bg-surface p-5 text-sm text-muted-foreground shadow-soft">
-            No moderation events yet.
+          <div className="rounded-2xl border border-dashed border-border/80 bg-surface/60 p-10 text-center text-sm text-muted-foreground shadow-soft">
+            {t("admin.noLogs")}
           </div>
         ) : null}
       </div>
