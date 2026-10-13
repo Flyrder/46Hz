@@ -317,4 +317,4 @@ npm run build
 
 ## 기여 및 라이선스 (License)
 
-본 프로젝트는 **GNU General Public License v3.0 (GPL-3.0)**을 따릅니다. 자세한 내용은 [LICENSE](./LICENSE) 파일을 참고하세요.
+본 프로젝트는 **GNU Affero General Public License v3.0 (AGPL-3.0-or-later)**을 따릅니다. 자세한 내용은 [LICENSE](./LICENSE) 파일을 참고하세요.
