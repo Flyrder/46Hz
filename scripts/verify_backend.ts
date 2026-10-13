@@ -170,6 +170,10 @@ async function verifyAll() {
     where: { id: reply.id },
     data: { status: "APPROVED" }
   });
+  await prisma.match.updateMany({
+    where: { letterId: letter.id, responderId: responder.id },
+    data: { status: "RESPONDED" }
+  });
   console.log(`Reply submitted and approved (Status: ${approvedReply.status})`);
 
   // Writer provides feedback
@@ -182,6 +186,64 @@ async function verifyAll() {
   });
   console.log(`Responder Trust Score: ${responder.trustScore} -> ${updatedScore} (expected: +7)`);
   if (updatedScore !== responder.trustScore + 7) throw new Error("Trust score delta should be +7");
+
+  console.log("\n=== Testing 46Hz Schumann Resonance Harmonic Cap (7 -> 15) ===");
+  console.log(`Letter Default Max Replies: ${letter.maxReplies} (expected: 7)`);
+  if (letter.maxReplies !== 7) throw new Error("Letter default maxReplies should be 7");
+
+  // Create additional 6 test users and replies to reach the 7-harmonic cap
+  const fillerResponders = [];
+  for (let i = 2; i <= 7; i++) {
+    const fillerUser = await prisma.user.create({
+      data: {
+        anonymousHandle: createAnonymousHandle(),
+        language: "ko_KR",
+        ageRange: "ADULT",
+        preferredReplyType: "COMFORT"
+      }
+    });
+    fillerResponders.push(fillerUser);
+    await prisma.reply.create({
+      data: {
+        letterId: letter.id,
+        responderId: fillerUser.id,
+        rawText: `Resonant reply harmonic #${i}`,
+        coachedText: `Resonant reply harmonic #${i}`,
+        status: "APPROVED"
+      }
+    });
+  }
+
+  // Now letter has 7 approved replies!
+  // Another user tries to claim the letter -> should fail with RESONANCE_LIMIT_REACHED
+  const testUser8 = await prisma.user.create({
+    data: {
+      anonymousHandle: createAnonymousHandle(),
+      language: "ko_KR",
+      ageRange: "ADULT",
+      preferredReplyType: "COMFORT"
+    }
+  });
+
+  const claimAtCap = await claimLetterForReply(letter.id, testUser8.id);
+  console.log("Claim result at 7 replies cap:", claimAtCap);
+  if (claimAtCap.ok || claimAtCap.reason !== "RESONANCE_LIMIT_REACHED") {
+    throw new Error("Claim at 7 replies cap should fail with RESONANCE_LIMIT_REACHED");
+  }
+
+  // Author explicitly consents and expands resonance capacity to 15
+  await prisma.letter.update({
+    where: { id: letter.id },
+    data: { maxReplies: 15 }
+  });
+  console.log("Author consented and expanded resonance capacity to 15");
+
+  // Now user8 can claim reply #8!
+  const claimExpanded = await claimLetterForReply(letter.id, testUser8.id);
+  console.log("Claim result after expanding to 15:", claimExpanded);
+  if (!claimExpanded.ok) {
+    throw new Error("Claim after expanding to 15 should succeed");
+  }
 
   console.log("\n=== [7/7] Testing RBAC Permissions ===");
   const canAdminManageUsers = canManageUsers("ADMIN");
@@ -205,11 +267,18 @@ async function verifyAll() {
   }
 
   // Cleanup test entities safely
-  await prisma.reply.deleteMany({ where: { id: reply.id } });
+  await prisma.reply.deleteMany({ where: { letterId: letter.id } });
   await prisma.match.deleteMany({ where: { letterId: letter.id } });
   await prisma.letter.deleteMany({ where: { id: letter.id } });
+  const allTestUserIds = [
+    writer.id,
+    responder.id,
+    responder2.id,
+    ...fillerResponders.map((u) => u.id),
+    testUser8.id
+  ];
   await prisma.user.deleteMany({
-    where: { id: { in: [writer.id, responder.id, responder2.id] } }
+    where: { id: { in: allTestUserIds } }
   });
   console.log("\n Cleaned up test data.");
   console.log("\n ALL ARCHITECTURE & BACKEND INTEGRITY CHECKS PASSED SUCCESSFULLY!");

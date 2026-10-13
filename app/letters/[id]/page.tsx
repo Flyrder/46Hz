@@ -3,6 +3,7 @@ import { submitFeedbackAction } from "@/app/actions/feedback";
 import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { ResonanceMeter } from "@/components/resonance-meter";
 import { prisma } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
@@ -61,6 +62,18 @@ export default async function LetterDetailPage({
           ? t("letter.masked")
           : letter.processedText}
       </article>
+
+      {!maskContent ? (
+        <div className="mt-6">
+          <ResonanceMeter
+            current={letter.replies.length}
+            max={letter.maxReplies}
+            letterId={letter.id}
+            isAuthor={letter.authorId === user.id}
+            t={t}
+          />
+        </div>
+      ) : null}
 
       <h2 className="mt-8 text-xl font-semibold">{t("letter.approvedReplies")}</h2>
       <div className="mt-4 space-y-4">

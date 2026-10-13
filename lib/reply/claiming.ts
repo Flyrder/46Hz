@@ -4,6 +4,15 @@ import type { MatchStatus } from "@/lib/domain";
 export const CLAIM_LEASE_MINUTES = 15;
 export const CLAIM_LEASE_MS = CLAIM_LEASE_MINUTES * 60 * 1000;
 
+/**
+ * 46Hz Brand Resonance Caps:
+ * 46Hz corresponds to the 7th Schumann harmonic resonance of Earth (~7.83Hz * 7 ≈ 46Hz).
+ * By default, each letter receives up to 7 resonant replies to prevent emotional overwhelm.
+ * Letter authors can consciously opt-in to expand the resonance space to 15 replies.
+ */
+export const DEFAULT_RESONANCE_CAP = 7;
+export const EXPANDED_RESONANCE_CAP = 15;
+
 export type ClaimResult =
   | {
       ok: true;
@@ -17,8 +26,29 @@ export type ClaimResult =
         | "NOT_FOUND"
         | "CANNOT_REPLY_OWN_LETTER"
         | "ALREADY_REPLIED"
-        | "INELIGIBLE_LETTER";
+        | "INELIGIBLE_LETTER"
+        | "RESONANCE_LIMIT_REACHED";
     };
+
+/**
+ * Pure check: Is resonance capacity full?
+ */
+export function isResonanceFull(
+  currentReplyCount: number,
+  maxReplies: number = DEFAULT_RESONANCE_CAP
+): boolean {
+  return currentReplyCount >= maxReplies;
+}
+
+/**
+ * Pure check: Can the user expand this letter's resonance?
+ */
+export function canExpandResonance(
+  letter: { maxReplies: number; authorId: string },
+  userId: string
+): boolean {
+  return letter.authorId === userId && letter.maxReplies < EXPANDED_RESONANCE_CAP;
+}
 
 /**
  * Pure check: Is the claim expired based on its createdAt timestamp and lease duration?
@@ -63,8 +93,7 @@ export async function claimLetterForReply(
     where: { id: letterId },
     include: {
       replies: {
-        where: { responderId },
-        select: { id: true }
+        select: { id: true, responderId: true, status: true }
       },
       matches: {
         where: {
@@ -86,8 +115,17 @@ export async function claimLetterForReply(
     return { ok: false, reason: "INELIGIBLE_LETTER" };
   }
 
-  if (letter.replies.length > 0) {
+  // Check if responder has already replied to this letter
+  if (letter.replies.some((r) => r.responderId === responderId)) {
     return { ok: false, reason: "ALREADY_REPLIED" };
+  }
+
+  // Count active non-rejected replies towards the Schumann resonance cap (7 default, 15 expanded)
+  const activeRepliesCount = letter.replies.filter((r) => r.status !== "REJECTED").length;
+  const maxReplies = letter.maxReplies ?? DEFAULT_RESONANCE_CAP;
+
+  if (activeRepliesCount >= maxReplies) {
+    return { ok: false, reason: "RESONANCE_LIMIT_REACHED" };
   }
 
   // Check if another user holds an active, unexpired claim
@@ -159,12 +197,24 @@ export async function releaseLetterClaim(letterId: string, responderId: string):
 }
 
 /**
- * Query letters available for peer replies, excluding letters locked by other responders.
+ * Query letters available for peer replies, excluding letters locked by other responders
+ * and letters that have reached their Schumann resonance capacity (7 or 15).
  */
 export async function findAvailableReplyLetters(responderId: string, limit = 6) {
   const leaseCutoff = new Date(Date.now() - CLAIM_LEASE_MS);
 
-  return prisma.letter.findMany({
+  // Opportunistic auto-cleanup of stale OFFERED locks
+  await prisma.match.updateMany({
+    where: {
+      status: "OFFERED",
+      createdAt: { lt: leaseCutoff }
+    },
+    data: {
+      status: "EXPIRED"
+    }
+  });
+
+  const candidates = await prisma.letter.findMany({
     where: {
       authorId: { not: responderId },
       status: "APPROVED",
@@ -182,7 +232,20 @@ export async function findAvailableReplyLetters(responderId: string, limit = 6) 
         }
       }
     },
+    include: {
+      _count: {
+        select: {
+          replies: {
+            where: { status: { not: "REJECTED" } }
+          }
+        }
+      }
+    },
     orderBy: { createdAt: "asc" },
-    take: limit
+    take: limit * 2
   });
+
+  return candidates
+    .filter((l) => l._count.replies < (l.maxReplies ?? DEFAULT_RESONANCE_CAP))
+    .slice(0, limit);
 }

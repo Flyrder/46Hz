@@ -107,11 +107,29 @@ export const koKR: Translations = {
     "한 사람의 마음에 온전히 집중하고 답장이 중복되지 않도록, 지금 다른 동료가 편지를 소중히 읽고 있습니다. 작성에 집중할 수 있도록 편지는 {minutes}분 동안 조용히 보관되며, 작성을 마치지 않거나 자리를 비우면 자동으로 편지함에 다시 채워집니다.",
   "reply.reservedByOtherTitle": "다른 동료가 편지를 읽고 답장을 적고 있어요",
   "reply.reservedForYou": "편지 작성 중 · {minutes}분간 작성 보호",
+  "reply.resonanceFullDesc":
+    "이 편지는 이미 슈만 공명에 따른 따뜻한 답장들로 채워졌습니다. 작성자에게 깊은 위로가 되었을 거예요. 다른 편지를 둘러보며 따뜻한 마음을 나누어 보세요.",
+  "reply.resonanceFullTitle": "공명이 가득 찼습니다",
   "reply.send": "검토로 보내기",
   "reply.skipClaim": "편지함에 다시 넣기 (다른 사람에게 양보)",
   "reply.startOver": "다시 시작",
   "reply.title": "답장 쓰기",
   "reply.yourReply": "내 답장",
+
+  // Schumann Resonance Harmonic Mechanics
+  "resonance.defaultDesc":
+    "기본 7개의 공명 답장 보호가 적용 중입니다. 더 많은 동료들의 마음을 받아들일 준비가 되셨다면, 아래 버튼을 눌러 언제든 15개로 공명을 확장할 수 있습니다.",
+  "resonance.expandButton": "더 깊은 공명 열기 (최대 15개로 확장)",
+  "resonance.expandedBadge": "15차 확장 공명",
+  "resonance.expandedDesc":
+    "작성자의 선택으로 더 깊은 15개의 공명 모드가 열려 있습니다.",
+  "resonance.fulfilledBadge": "공명 완결",
+  "resonance.fulfilledDesc":
+    "모든 공명이 가득 찼습니다. 편지에 전해진 소중한 마음들을 편안히 읽어보세요.",
+  "resonance.meterLabel": "공명 하모닉스 ({current} / {max})",
+  "resonance.schumannNote":
+    "46Hz는 지구의 7차 슈만 공명 주파수(~46Hz)를 상징합니다. 편지가 감정적 과부하에 빠지지 않고 온전히 마음에 닿을 수 있도록 기본 7개의 공명 답장으로 보호됩니다.",
+  "resonance.title": "46Hz 슈만 공명",
 
   // Reply Preferences & Types
   "replyType.ADVICE": "부드러운 조언",
