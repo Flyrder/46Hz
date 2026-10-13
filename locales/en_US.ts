@@ -178,5 +178,28 @@ export const enUS: Translations = {
   "theme.dark": "Pure dark",
   "theme.label": "Theme",
   "theme.light": "Light",
-  "theme.system": "System"
+  "theme.system": "System",
+
+  // Additional UI & Emotional Pacing Translations
+  "letter.backToInbox": "Back to inbox",
+  "letter.peerReplyTitle": "Peer Reply",
+  "letter.replyFeedbackTitle": "Feedback on this reply",
+  "onboarding.startSession": "Start Anonymous Session",
+  "reply.aiHint": "✨ After drafting, AI Coach offers gentle refinement suggestions.",
+  "reply.coachEditableNote": "Feel free to refine the coached thoughts before sending with warmth.",
+  "reply.counter": "{current} / min {min} chars",
+  "reply.draftEncouragement": "Take your time. A gentle reply that listens without trying to fix or judge offers the deepest comfort.",
+  "reply.peerReplyTitle": "Peer Reply",
+  "reply.poolTitle": "Peer Reply Connections",
+  "resonance.expandNote": "46Hz (Default 7th Harmonic) → 15th Deep Harmonic Expansion",
+  "review.directlyEditable": "Directly Editable",
+  "review.moderationNotice": "Will be placed in the letterbox after moderation.",
+  "review.supportConnected": "You will be connected to support resources.",
+  "review.supportNoticeTitle": "Safety Care Routing Notice",
+  "settings.profileTitle": "Anonymous Profile",
+  "settings.subtitle": "Manage your anonymous profile and application preferences.",
+  "write.counter": "{current} / min {min} chars",
+  "write.peacePacing": "Take all the time you need. There is no rush.",
+  "write.privacyAssurance": "46Hz protects your privacy. When submitted, AI cleans names and contact info; you will review and edit the anonymized draft before it is confirmed.",
+  "write.sparks": "Inspiration Sparks (Click to begin)"
 };

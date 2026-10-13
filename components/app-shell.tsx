@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Inbox, PenLine, Settings, ShieldCheck, UserRound } from "lucide-react";
+import { Inbox, PenLine, Settings, ShieldCheck, Waves, HeartHandshake, ShieldAlert } from "lucide-react";
 import { PreferenceForm } from "@/components/preference-form";
 import { localeOptions, type Locale } from "@/lib/i18n";
 import { themeOptions, type ThemePreference } from "@/lib/theme";
@@ -22,34 +22,50 @@ export function AppShell({
       ? "跳至主要内容"
       : "Skip to main content";
 
+  const brandTagline =
+    locale === "ko_KR"
+      ? "느린 마음 편지함"
+      : locale === "zh_CN"
+      ? "慢速心绪回信箱"
+      : "Slow Letterbox";
+
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-24 pt-4 sm:px-6 lg:px-8">
+    <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-16 pt-3 sm:px-6 lg:px-8">
       {/* Skip to Main Content Link for Screen Readers (TalkBack / VoiceOver / Narrator) */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-ring"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-accent focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-accent-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent/50"
       >
         {skipLabel}
       </a>
 
+      {/* Sticky Header with Frosted Glass */}
       <header
         role="banner"
-        className="sticky top-0 z-20 -mx-4 border-b border-border/70 bg-background/92 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+        className="sticky top-0 z-30 -mx-4 border-b border-border/70 bg-background/85 px-4 py-3 backdrop-blur-md transition-colors sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
       >
         <nav
           aria-label="Main Navigation"
           className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3"
         >
+          {/* Logo & Brand Identity */}
           <Link
             href="/"
             aria-label="46Hz Home"
-            className="flex min-h-[44px] items-center gap-2 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-accent/40 rounded-lg pr-2"
+            className="group flex min-h-[44px] items-center gap-2.5 text-sm font-semibold rounded-xl pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-accent-foreground">
-              46
+            <span className="grid h-8.5 w-8.5 place-items-center rounded-xl bg-accent text-accent-foreground shadow-xs transition-transform group-hover:scale-105 active:scale-95">
+              <Waves className="h-4.5 w-4.5" aria-hidden="true" />
             </span>
-            <span>46Hz</span>
+            <div className="flex flex-col">
+              <span className="text-base font-bold tracking-tight text-foreground">46Hz</span>
+              <span className="text-[10px] font-normal text-muted-foreground/80 leading-none hidden sm:inline">
+                {brandTagline}
+              </span>
+            </div>
           </Link>
+
+          {/* Controls & Nav Icons */}
           <div className="flex flex-wrap items-center justify-end gap-2">
             <PreferenceForm
               locale={locale}
@@ -62,26 +78,75 @@ export function AppShell({
                 label: t(option.labelKey)
               }))}
             />
-            <div className="flex items-center gap-1" role="toolbar" aria-label="Navigation actions">
+
+            <div
+              className="flex items-center gap-1 border-l border-border/60 pl-2"
+              role="toolbar"
+              aria-label="Navigation actions"
+            >
               <NavIcon href="/write" label={t("nav.write")}>
-                <PenLine className="h-4 w-4" aria-hidden="true" />
+                <PenLine className="h-4.5 w-4.5" aria-hidden="true" />
               </NavIcon>
               <NavIcon href="/inbox" label={t("nav.inbox")}>
-                <Inbox className="h-4 w-4" aria-hidden="true" />
+                <Inbox className="h-4.5 w-4.5" aria-hidden="true" />
               </NavIcon>
               <NavIcon href="/settings" label={t("nav.settings")}>
-                <Settings className="h-4 w-4" aria-hidden="true" />
+                <Settings className="h-4.5 w-4.5" aria-hidden="true" />
               </NavIcon>
               <NavIcon href="/admin" label={t("nav.admin")}>
-                <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                <ShieldCheck className="h-4.5 w-4.5" aria-hidden="true" />
               </NavIcon>
             </div>
           </div>
         </nav>
       </header>
+
+      {/* Main Content Landmark */}
       <main id="main-content" role="main" tabIndex={-1} className="flex-1 py-8 outline-none">
         {children}
       </main>
+
+      {/* Barrier-Free Quiet Footer */}
+      <footer
+        role="contentinfo"
+        className="mt-16 border-t border-border/70 pt-8 text-xs text-muted-foreground"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-foreground font-medium">
+              <Waves className="h-3.5 w-3.5 text-accent" />
+              <span>46Hz · Schumann Resonance Slow Letterbox</span>
+            </div>
+            <p className="max-w-md text-muted-foreground/80 leading-relaxed text-[11px]">
+              {locale === "ko_KR"
+                ? "지구의 7차 슈만 공명 주파수(~46Hz). 감정의 과부하 없는 7개의 답장으로 마음을 지키는 인간 중심 익명 편지함입니다."
+                : locale === "zh_CN"
+                ? "地球第七谐波舒曼共振频率（~46Hz）。以最多7封克制回信守护心绪，全匿名温润同行。"
+                : "Earth's 7th Schumann harmonic frequency (~46Hz). A quiet anonymous emotional support letterbox capping at 7 resonant replies."}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4 text-xs">
+            <Link
+              href="/support-resources"
+              className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              <ShieldAlert className="h-3.5 w-3.5 text-amber-500/80" />
+              <span>{locale === "ko_KR" ? "위기 지원 자료" : locale === "zh_CN" ? "紧急援助资源" : "Crisis Resources"}</span>
+            </Link>
+            <Link
+              href="/settings"
+              className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              {t("nav.settings")}
+            </Link>
+            <span className="text-border" aria-hidden="true">·</span>
+            <span className="text-[11px] text-muted-foreground/70">
+              Barrier-Free A11y · Zero PII
+            </span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -100,7 +165,7 @@ function NavIcon({
       href={href}
       title={label}
       aria-label={label}
-      className="grid min-h-[44px] min-w-[44px] place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+      className="grid min-h-[44px] min-w-[44px] place-items-center rounded-xl text-muted-foreground transition-all duration-150 hover:bg-muted/70 hover:text-foreground active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
     >
       {children}
     </Link>

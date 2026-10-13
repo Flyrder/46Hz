@@ -171,5 +171,28 @@ export const koKR: Translations = {
   "theme.dark": "다크 모드",
   "theme.label": "테마",
   "theme.light": "라이트 모드",
-  "theme.system": "시스템 설정 따름"
+  "theme.system": "시스템 설정 따름",
+
+  // Additional UI & Emotional Pacing Translations
+  "letter.backToInbox": "받은함으로 돌아가기",
+  "letter.peerReplyTitle": "익명 동료의 답장",
+  "letter.replyFeedbackTitle": "답장에 대한 따뜻한 피드백",
+  "onboarding.startSession": "익명 세션 시작하기",
+  "reply.aiHint": "✨ 작성 후 AI 코치가 부드러운 다듬기 조언을 건네줍니다.",
+  "reply.coachEditableNote": "코칭된 내용을 자유롭게 다듬은 뒤 따뜻한 마음으로 부쳐보세요.",
+  "reply.counter": "{current} / {min}자 이상",
+  "reply.draftEncouragement": "서두르지 마세요. 쓴 사람의 감정을 고치려 하지 않고, 있는 그대로 따뜻하게 들어주는 답장이 가장 큰 위로가 됩니다.",
+  "reply.peerReplyTitle": "익명 동료의 답장",
+  "reply.poolTitle": "또래 답장 연결함",
+  "resonance.expandNote": "46Hz (기본 7차 공명) → 15차 심층 공명 확장",
+  "review.directlyEditable": "직접 수정 가능",
+  "review.moderationNotice": "승인 후 편지함에 안전하게 놓여집니다.",
+  "review.supportConnected": "전문 상담 및 지원 자료로 연결됩니다.",
+  "review.supportNoticeTitle": "안심 보호 라우팅 안내",
+  "settings.profileTitle": "익명 프로필 정보",
+  "settings.subtitle": "내 익명 프로필과 환경설정을 관리합니다.",
+  "write.counter": "{current} / {min}자 이상",
+  "write.peacePacing": "서두르지 않고 당신의 속도대로 쓰셔도 좋습니다.",
+  "write.privacyAssurance": "46Hz는 안심 익명화 기술을 제공합니다. 편지를 보내면 AI가 실명, 연락처 등 민감 정보를 정돈하며, 다음 화면에서 직접 검토·수정한 뒤 최종 제출합니다.",
+  "write.sparks": "마음의 시작점 (클릭하여 영감 얻기)"
 };

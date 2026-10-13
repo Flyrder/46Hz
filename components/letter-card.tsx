@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Clock, MessageCircleHeart, Sparkles } from "lucide-react";
 import type { LetterStatus, ReplyType, RiskLevel } from "@/lib/domain";
 import { shouldMaskLetterContent } from "@/lib/safety/routing";
 import { excerpt, formatDate } from "@/lib/utils";
@@ -31,36 +32,65 @@ export function LetterCard({
     ? t("letter.masked")
     : excerpt(letter.processedText);
 
+  const replyCount = letter._count?.replies;
+
   return (
     <Link
       href={href}
-      className="block rounded-lg border border-border bg-surface p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-accent/40"
+      className="group block rounded-2xl border border-border/85 bg-surface p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-tactile active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={letter.status === "APPROVED" ? "good" : "neutral"}>
-          {t(`status.${letter.status}`)}
-        </StatusBadge>
-        <StatusBadge tone={letter.riskLevel === "NORMAL" ? "good" : "warning"}>
-          {t(`status.${letter.riskLevel}`)}
-        </StatusBadge>
-        {letter.maxReplies ? (
-          <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
-            {letter.maxReplies >= 15 ? t("resonance.expandedBadge") : "7 Harmonics"}
-          </span>
-        ) : null}
-        <span className="text-xs text-muted-foreground">{formatDate(letter.createdAt)}</span>
+      {/* Top Header: Metadata & Badges */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <StatusBadge tone={letter.status === "APPROVED" ? "good" : "neutral"}>
+            {t(`status.${letter.status}`)}
+          </StatusBadge>
+          <StatusBadge tone={letter.riskLevel === "NORMAL" ? "good" : "warning"}>
+            {t(`status.${letter.riskLevel}`)}
+          </StatusBadge>
+          {letter.maxReplies ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 text-[11px] font-medium text-accent">
+              <Sparkles className="h-3 w-3" />
+              <span>{letter.maxReplies >= 15 ? t("resonance.expandedBadge") : "7 Harmonics"}</span>
+            </span>
+          ) : null}
+        </div>
+
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Clock className="h-3.5 w-3.5 opacity-70" />
+          <time dateTime={new Date(letter.createdAt).toISOString()}>{formatDate(letter.createdAt)}</time>
+        </div>
       </div>
-      <p className="mt-4 text-sm leading-6 text-foreground">{preview}</p>
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-        <span>{t(`replyType.${letter.desiredReplyType}`)}</span>
-        <span aria-hidden="true">/</span>
-        <span>{letter.emotionTags.join(", ")}</span>
-        {mode !== "writer" ? (
-          <>
-            <span aria-hidden="true">/</span>
-            <span>{letter.situationTags.join(", ")}</span>
-          </>
-        ) : null}
+
+      {/* Preview Text */}
+      <p className="mt-3.5 text-sm leading-relaxed text-foreground/90 font-normal line-clamp-3 break-words">
+        {preview}
+      </p>
+
+      {/* Footer: Desired Reply Type & Emotional Tags */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">
+        <div className="flex flex-wrap items-center gap-1.5 text-muted-foreground">
+          <span className="inline-flex items-center rounded-md bg-muted/60 px-2 py-0.5 font-medium text-foreground/80">
+            {t(`replyType.${letter.desiredReplyType}`)}
+          </span>
+          {letter.emotionTags.length > 0 && (
+            <span className="text-muted-foreground/80">
+              {letter.emotionTags.map((tag) => `#${tag}`).join(" ")}
+            </span>
+          )}
+          {mode !== "writer" && letter.situationTags.length > 0 && (
+            <span className="text-muted-foreground/60 hidden sm:inline">
+              · {letter.situationTags.join(", ")}
+            </span>
+          )}
+        </div>
+
+        {replyCount !== undefined && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+            <MessageCircleHeart className="h-3.5 w-3.5" />
+            <span>{replyCount}</span>
+          </span>
+        )}
       </div>
     </Link>
   );
