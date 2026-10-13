@@ -132,11 +132,7 @@ export default async function ReplyLetterPage({
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("reply.title")}</h1>
           <p className="mt-1 text-xs text-muted-foreground">
-            {locale === "ko_KR"
-              ? "서두르지 않고 당신의 속도대로 따뜻한 답장을 적어주세요."
-              : locale === "zh_CN"
-              ? "按照您的步调，写下一封满怀温情的回信。"
-              : "Take your time and write a gentle, heartfelt reply."}
+            {t("reply.writingPaceNote")}
           </p>
         </div>
 

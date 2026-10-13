@@ -55,7 +55,7 @@ export function ResonanceMeter({
           <div>
             <span className="text-base tracking-tight">{t("resonance.title")}</span>
             <span className="ml-2 text-xs font-normal text-muted-foreground hidden sm:inline">
-              (~46Hz Earth Schumann Frequency)
+              {t("resonance.frequencySubtitle")}
             </span>
           </div>
         </div>
@@ -73,7 +73,7 @@ export function ResonanceMeter({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-muted/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              7th Harmonic Cap
+              {t("resonance.capBadge")}
             </span>
           )}
 
@@ -91,7 +91,7 @@ export function ResonanceMeter({
         aria-valuenow={clampedCurrent}
         aria-valuemin={0}
         aria-valuemax={max}
-        aria-valuetext={`${clampedCurrent} of ${max} harmonic replies received`}
+        aria-valuetext={t("resonance.progressAria", { current: String(clampedCurrent), max: String(max) })}
       >
         <div className="flex items-center justify-between gap-1.5 sm:gap-2">
           {Array.from({ length: max }).map((_, index) => {

@@ -68,7 +68,13 @@ export default async function SettingsPage() {
               <span className="font-mono text-sm font-bold tracking-wider select-all text-foreground">
                 {user.migrationCode}
               </span>
-              {user.migrationCode && <CopyButton text={user.migrationCode} />}
+              {user.migrationCode && (
+                <CopyButton
+                  text={user.migrationCode}
+                  copyLabel={t("common.copy")}
+                  copiedLabel={t("common.copied")}
+                />
+              )}
             </dd>
             <dd className="mt-2 text-xs leading-relaxed text-muted-foreground">
               ⚠️ {t("settings.migrationCodeHelp")}

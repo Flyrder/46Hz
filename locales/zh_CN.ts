@@ -195,5 +195,82 @@ export const zhCN: Translations = {
   "write.counter": "{current} / 最少{min}字",
   "write.peacePacing": "无需匆忙，按照您的节奏落笔即可。",
   "write.privacyAssurance": "46Hz承诺保护您的隐私。信件提交后，AI将自动过滤姓名、联系方式等敏感信息，您可在下一步自由编辑确认。",
-  "write.sparks": "心绪灵感（点击开启）"
+  "write.sparks": "心绪灵感（点击开启）",
+
+  // Refined Complete Localization Keys
+  "home.schumannBadge": "46Hz · 地球第七谐波舒曼共振",
+  "home.browseLetters": "浏览待回信件",
+  "home.pillar1Title": "7封舒曼共振限额",
+  "home.pillar1Desc":
+    "每封信默认最多仅接收7封温润回信，隔绝泛滥的评价与噪音，让温暖如舒曼共振般深沉入心。",
+  "home.pillar2Title": "15分钟专注锁信机制",
+  "home.pillar2Desc":
+    "当同伴开始写信时，信件将为您静置15分钟，避免多人重复撞车，让回信者心无旁骛。",
+  "home.pillar3Title": "零隐私与无账户转移码",
+  "home.pillar3Desc":
+    "无需手机或邮箱注册，仅凭46HZ转移码在设备间迁移。连接记录遵循GDPR原则14天内彻底清除。",
+  "home.stepsSubtitle": "不疾不徐的四步慢速旅程",
+  "home.step1Desc": "在完全没有催促的私密空间中，写下心中的重量。",
+  "home.step2Desc": "AI滤除姓名与敏感信息，生成由您自主确认的去隐私草稿。",
+  "home.step3Desc": "温暖的人工巡查守护边界，确保彼此不受二次伤害。",
+  "home.step4Desc": "在专注的宁静时光里，一封不带偏见的真诚回信悄然抵达。",
+  "home.crisisTitle": "正在经历紧急的情绪危机吗？"
+  ,
+  "home.crisisDesc":
+    "46Hz非医疗或紧急救援平台。如遇紧急困难，请随时查阅24小时专业危机援助热线。",
+  "home.crisisButton": "查看援助资源",
+
+  "shell.skipToContent": "跳至主要内容",
+  "shell.tagline": "慢速心绪回信箱",
+  "shell.footerDesc":
+    "地球第七谐波舒曼共振频率（~46Hz）。以最多7封克制回信守护心绪，全匿名温润同行。",
+  "shell.crisisLink": "紧急援助资源",
+
+  "write.prompt1": "最近独自承受的那些心绪",
+  "write.prompt2": "从未对人诉说的心里话",
+  "write.prompt3": "不需要说教，只想被静静倾听",
+  "write.prompt4": "给今天疲惫的自己的一封信",
+
+  "reply.writingPaceNote": "按照您的步调，写下一封满怀温情的回信。",
+  "review.aiDraftNotice": "这是AI整理后的去隐私版本信件。若有不妥之处，可直接修改后再行寄出。",
+
+  "resources.helplineBadge": "24/7 专业危机热线",
+  "resources.title": "专业援助资源",
+  "resources.intro":
+    "匿名信件无法替代紧急或危险情况下的即时救助。此处汇集了值得信赖的外部专业危机援助渠道。",
+  "resources.highRiskNotice":
+    "您的信件未发送给同伴回复者。如果您正处于困难中，请联系身边信任的人或寻求以下专业机构的援助。",
+  "resources.website": "官方网站",
+  "resources.empty": "暂无配置生效的援助资源。",
+
+  "resonance.capBadge": "7封基本共振限额",
+  "resonance.frequencySubtitle": "(~46Hz 地球舒曼共振频率)",
+  "resonance.progressAria": "已收到 {current} / {max} 封共振回信",
+  "resonance.seventhBadge": "7阶共振",
+
+  "common.copy": "复制",
+  "common.copied": "已复制！",
+  "common.errorTitle": "出现了一些问题",
+  "common.returnHome": "返回首页",
+
+  "admin.navMetrics": "运营指标",
+  "admin.navLetters": "信件管理",
+  "admin.navReplies": "回信管理",
+  "admin.navReports": "举报处理",
+  "admin.navUsers": "用户管理",
+  "admin.navResources": "援助资源",
+  "admin.navCompliance": "司法合规",
+  "admin.navLog": "审核日志",
+  "admin.adminOnlyBadge": "(仅管理员)",
+  "admin.staffAccessTitle": "工作人员登录",
+  "admin.staffAccessSubtitle": "请输入管理员或巡查员密码以继续。",
+  "admin.passcodeLabel": "访问密码",
+  "admin.passcodePlaceholder": "管理员或巡查员密码",
+  "admin.enterDashboard": "进入控制台",
+  "admin.rateLimited": "登录尝试次数过多，请5分钟后再试。",
+  "admin.invalidPasscode": "密码错误，请核实凭证。",
+  "admin.dashboardTitle": "46Hz 运营仪表盘",
+  "admin.dashboardSubtitle": "实时信箱监控与安全指标",
+  "admin.roleBadge": "当前角色: {role}",
+  "admin.logout": "退出登录"
 };
