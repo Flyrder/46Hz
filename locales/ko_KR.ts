@@ -32,25 +32,25 @@ export const koKR: Translations = {
     "46Hz는 익명의 응원 편지를 쓰고, 안전하지 않은 내용은 또래에게 보이지 않게 라우팅하며, 답장이 부드럽게 유지되도록 검토합니다.",
   "home.openInbox": "받은함 열기",
   "home.stepsTitle": "오늘의 편지함",
-  "home.step1": "비공개로 쓰기",
+  "home.step1": "비공개로 작성",
   "home.step2": "AI가 정리하고 익명화",
   "home.step3": "관리자 검토",
   "home.step4": "또래가 답장",
-  "home.title": "어려운 편지를 조용히 보낼 수 있는 곳.",
+  "home.title": "조용히 마음고민을 보낼 수 있는 곳",
   "home.write": "편지 쓰기",
 
   // Onboarding & Device Migration
   "onboarding.ageRange": "나이 범위",
-  "onboarding.create": "익명 세션 만들기",
+  "onboarding.create": "익명 계정 만들기",
   "onboarding.replyPreference": "선호하는 답장",
   "onboarding.subtitle":
-    "넓은 범위의 선호만 사용합니다. 실명, 전화번호, 정확한 위치, 학교, 직장은 요청하지 않습니다.",
+    "민감한 개인정보는 편지에 포함하지 마시고, 편히 적어보세요",
   "onboarding.title": "익명으로 시작하기",
-  "onboarding.restoreTitle": "세션 복구",
-  "onboarding.restoreHelp": "이전 기기에서 발급받은 마이그레이션 코드를 입력하여 프로필을 이 기기로 가져옵니다.",
+  "onboarding.restoreTitle": "계정 복구",
+  "onboarding.restoreHelp": "이전 기기에서 발급받은 전송코드를 입력하여 계정을 이 기기로 가져옵니다.",
   "onboarding.restorePlaceholder": "46HZ-XXXX-XXXX",
   "onboarding.restoreButton": "복구하기",
-  "onboarding.errorInvalidCode": "마이그레이션 코드가 올바르지 않거나 만료되었습니다.",
+  "onboarding.errorInvalidCode": "전송코드가 올바르지 않거나 만료되었습니다.",
 
   // Letter Writing & Review
   "write.label": "편지 내용",

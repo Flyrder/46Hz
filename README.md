@@ -82,10 +82,33 @@ c:\Users\voide\eko\
 │   ├── zh_CN.ts                  # Simplified Chinese language pack
 │   └── index.ts                  # Locales dictionary aggregator
 ├── prisma/                       # Database schema & migrations
+├── scripts/                      # Verification & maintenance tools
+│   └── verify_backend.ts         # Comprehensive 7-phase backend integrity test
 ├── tests/                        # Vitest automated test suites (11 suites, 62 tests)
 ├── docker-compose.yml            # PostgreSQL service definition
 ├── Dockerfile                    # Multi-arch production container build
+├── start.bat                     # Windows one-click batch launcher
+├── start.ps1                     # PowerShell automated orchestrator & launcher
 └── package.json
+```
+
+---
+
+## Quick Start (One-Click Launcher)
+
+On Windows, you can start PostgreSQL (via WSLC / Docker), verify Prisma client, and launch the development server with a single click:
+
+- **Double-click** `start.bat`, or
+- Run in PowerShell:
+  ```powershell
+  .\start.ps1
+  ```
+
+Options:
+```powershell
+.\start.ps1 -VerifyOnly   # Run end-to-end backend integrity checks without starting server
+.\start.ps1 -Seed         # Seed sample letters and resources before launching
+.\start.ps1 -Prod         # Build Turbopack production bundle and launch on port 3000
 ```
 
 ---
@@ -103,15 +126,19 @@ cp .env.example .env
 Key environment configurations in `.env`:
 
 ```env
-DATABASE_URL="postgresql://46hz:46hz_dev_password@localhost:5432/46hz_letterbox?schema=public"
+DATABASE_URL="postgresql://46hz:46hz@localhost:5432/46hz_letterbox?schema=public"
 ADMIN_PASSCODE="local-admin"
 MODERATOR_PASSCODE="local-moderator"
 AI_PROVIDER="mock" # Options: mock | openai | deepseek | custom
 ```
 
-### 2. Start PostgreSQL
+### 2. Start PostgreSQL (WSLC or Docker)
 
 ```bash
+# Using WSLC (Windows WSL Container CLI):
+wslc run -d --name 46hz-postgres -p 127.0.0.1:5432:5432 -e POSTGRES_USER=46hz -e POSTGRES_PASSWORD=46hz -e POSTGRES_DB=46hz_letterbox -v 46hz_postgres_data:/var/lib/postgresql/data postgres:16-alpine
+
+# Or using Docker Compose:
 docker compose up -d
 ```
 
@@ -119,6 +146,7 @@ docker compose up -d
 
 ```bash
 npm install
+npm run prisma:generate
 npm run prisma:migrate
 npm run prisma:seed
 ```
@@ -134,6 +162,12 @@ Open `http://localhost:3000`. By default, the application opens in Korean (`ko_K
 ---
 
 ## Verification & Quality Assurance
+
+Run the comprehensive end-to-end backend integrity check:
+
+```bash
+npm run verify:backend
+```
 
 Run the automated test suite (Vitest):
 
