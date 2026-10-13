@@ -23,6 +23,35 @@ export type CoachReplyInput = {
   language: string;
 };
 
+export type WritingSparksInput = {
+  mood?: string;
+  seedText?: string;
+  language: string;
+};
+
+export type WritingSpark = {
+  id: string;
+  text: string;
+  prompt: string;
+};
+
+export type WritingSparksResult = {
+  sparks: WritingSpark[];
+  suggestedEmotionTags: string[];
+};
+
+export type ReplyReframing = {
+  label: string;
+  text: string;
+  tone: "warm" | "listening" | "grounding";
+};
+
+export type ToneMetrics = {
+  empathy: number;      // 0-100
+  gentleness: number;   // 0-100
+  nonJudgmental: number; // 0-100
+};
+
 export type RiskClassificationResult = {
   level: RiskLevel;
   reasons: string[];
@@ -48,6 +77,23 @@ export type CoachedReplyResult = {
   coachedText: string;
   flags: string[];
   suggestions: string[];
+  reframings?: ReplyReframing[];
+  metrics?: ToneMetrics;
+};
+
+export type ResonanceMatchInput = {
+  responderPreference: ReplyType;
+  availableLetters: Array<{
+    id: string;
+    emotionTags: string[];
+    situationTags: string[];
+    desiredReplyType: ReplyType;
+  }>;
+};
+
+export type ResonanceMatchResult = {
+  recommendedLetterIds: string[];
+  matchReasons: Record<string, string>;
 };
 
 export interface AiMiddleware {
@@ -55,4 +101,6 @@ export interface AiMiddleware {
   coachReply(input: CoachReplyInput): Promise<CoachedReplyResult>;
   classifyRisk(input: RiskClassificationInput): Promise<RiskClassificationResult>;
   anonymize(input: AnonymizationInput): Promise<AnonymizationResult>;
+  generateWritingSparks(input: WritingSparksInput): Promise<WritingSparksResult>;
+  matchResonantLetters(input: ResonanceMatchInput): Promise<ResonanceMatchResult>;
 }

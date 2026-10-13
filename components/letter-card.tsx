@@ -9,6 +9,8 @@ export function LetterCard({
   letter,
   href,
   mode = "writer",
+  isResonanceRecommended = false,
+  resonanceReason,
   t = (key: string) => key
 }: {
   letter: {
@@ -25,6 +27,8 @@ export function LetterCard({
   };
   href: string;
   mode?: "writer" | "responder" | "admin";
+  isResonanceRecommended?: boolean;
+  resonanceReason?: string;
   t?: (key: string) => string;
 }) {
   const maskContent = mode !== "admin" && shouldMaskLetterContent(letter);
@@ -37,11 +41,21 @@ export function LetterCard({
   return (
     <Link
       href={href}
-      className="group block rounded-2xl border border-border/85 bg-surface p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-tactile active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2"
+      className={`group block rounded-2xl border bg-surface p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-tactile active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 ${
+        isResonanceRecommended
+          ? "border-accent/40 ring-1 ring-accent/15 bg-gradient-to-b from-surface to-accent/[0.03]"
+          : "border-border/85 hover:border-accent/40"
+      }`}
     >
       {/* Top Header: Metadata & Badges */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5">
+          {isResonanceRecommended && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-accent/20 to-teal-500/20 border border-accent/40 px-2.5 py-0.5 text-[11px] font-semibold text-accent shadow-2xs">
+              <Sparkles className="h-3 w-3 text-accent" />
+              <span>{t("reply.aiResonanceBadge")}</span>
+            </span>
+          )}
           <StatusBadge tone={letter.status === "APPROVED" ? "good" : "neutral"}>
             {t(`status.${letter.status}`)}
           </StatusBadge>
@@ -66,6 +80,14 @@ export function LetterCard({
       <p className="mt-3.5 text-sm leading-relaxed text-foreground/90 font-normal line-clamp-3 break-words">
         {preview}
       </p>
+
+      {/* AI Resonance Match Reason */}
+      {isResonanceRecommended && resonanceReason ? (
+        <div className="mt-2.5 flex items-center gap-1.5 rounded-lg border border-accent/20 bg-accent/5 px-2.5 py-1 text-xs text-accent">
+          <Sparkles className="h-3 w-3 shrink-0" aria-hidden="true" />
+          <span className="font-sans text-[11px] font-medium leading-tight">{resonanceReason}</span>
+        </div>
+      ) : null}
 
       {/* Footer: Desired Reply Type & Emotional Tags */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border/60 pt-3 text-xs">

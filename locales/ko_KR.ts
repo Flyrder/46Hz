@@ -314,5 +314,39 @@ export const koKR: Translations = {
   "comment.submit": "코멘트 등록",
   "comment.emptyTitle": "아직 등록된 구절 코멘트가 없습니다",
   "comment.emptyBody": "편지 본문의 문장을 드래그하거나 선택하여 나만의 메모와 코멘트를 남겨보세요.",
-  "comment.delete": "코멘트 삭제"
+  "comment.delete": "코멘트 삭제",
+
+  // AI Writing Sparks
+  "write.aiSparksTitle": "AI 글감 영감 (Writing Sparks)",
+  "write.aiSparksDesc": "어떻게 말을 꺼내야 할지 막막할 때, AI가 따뜻한 첫 문장을 띄워드립니다.",
+  "write.aiSparksGet": "영감 받기",
+  "write.aiSparksLoading": "영감을 빚어내는 중...",
+  "write.aiSparksMoodBurnout": "지침 / 번아웃",
+  "write.aiSparksMoodAnxious": "불안 / 걱정",
+  "write.aiSparksMoodLonely": "외로움 / 고립",
+  "write.aiSparksMoodAshamed": "자책 / 부끄러움",
+  "write.aiSparksInsert": "이 문장으로 시작하기",
+
+  // Reply Coach Workbench & Tone Radar
+  "reply.toneRadar": "AI 어조 진단 레이더",
+  "reply.empathyScore": "공감 지수",
+  "reply.gentlenessScore": "온화함",
+  "reply.nonJudgmentalScore": "비판단성",
+  "reply.reframingTitle": "3가지 치유 어조로 다시 쓰기",
+  "reply.reframingDesc": "원하는 어조를 선택하면 작성 중인 답장 본문이 즉시 교체됩니다.",
+  "reply.appliedNotice": "적용됨",
+
+  // Semantic Resonance Matcher
+  "reply.aiResonanceRecommended": "AI 시맨틱 공명 추천",
+  "reply.aiResonanceBadge": "공명 추천",
+  "reply.aiResonanceReason": "나의 답장 성향과 높은 치유적 공명을 이룹니다.",
+
+  // Admin Emotion Climate Radar
+  "admin.emotionRadarTitle": "감정 기후 레이더 (Emotion Climate Radar)",
+  "admin.emotionRadarDesc": "전체 편지함의 집단적 감정 분포와 완화 지표를 실시간 조망합니다.",
+  "admin.emotionRadarLonely": "외로움",
+  "admin.emotionRadarAnxious": "불안",
+  "admin.emotionRadarOverwhelmed": "번아웃",
+  "admin.emotionRadarSad": "슬픔",
+  "admin.emotionRadarTotalAnalyzed": "총 분석 편지"
 };

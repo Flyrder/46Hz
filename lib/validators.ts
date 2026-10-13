@@ -82,6 +82,24 @@ export const createCommentSchema = z.object({
   content: z.string().trim().min(1, "Comment cannot be empty.").max(1000)
 });
 
+export const writingSparksSchema = z.object({
+  mood: z.string().trim().max(100).optional(),
+  seedText: z.string().trim().max(1000).optional(),
+  language: z.enum(["en_US", "ko_KR", "zh_CN"]).default("ko_KR")
+});
+
+export const resonanceMatchSchema = z.object({
+  responderPreference: replyTypeSchema,
+  availableLetters: z.array(
+    z.object({
+      id: z.string().min(1),
+      emotionTags: z.array(z.string()),
+      situationTags: z.array(z.string()),
+      desiredReplyType: replyTypeSchema
+    })
+  )
+});
+
 export function formValue(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";

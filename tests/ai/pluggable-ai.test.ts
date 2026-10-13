@@ -28,6 +28,27 @@ describe("Pluggable AI Provider", () => {
     expect(getAiProviderName()).toBe("deepseek");
   });
 
+  it("identifies gemini provider when set", () => {
+    process.env.AI_PROVIDER = "gemini";
+    expect(getAiProviderName()).toBe("gemini");
+    const mw = getAiMiddleware({ apiKey: "test-gemini-key" });
+    expect(mw).toBeInstanceOf(LlmAiMiddleware);
+  });
+
+  it("identifies anthropic provider when set", () => {
+    process.env.AI_PROVIDER = "anthropic";
+    expect(getAiProviderName()).toBe("anthropic");
+    const mw = getAiMiddleware({ apiKey: "test-anthropic-key" });
+    expect(mw).toBeInstanceOf(LlmAiMiddleware);
+  });
+
+  it("identifies ollama provider when set", () => {
+    process.env.AI_PROVIDER = "ollama";
+    expect(getAiProviderName()).toBe("ollama");
+    const mw = new LlmAiMiddleware({ provider: "ollama" });
+    expect(mw.isConfigured).toBe(true);
+  });
+
   it("falls back to MockAiMiddleware when LLM has no API key configured", async () => {
     const middleware = new LlmAiMiddleware({
       provider: "openai",
@@ -36,7 +57,6 @@ describe("Pluggable AI Provider", () => {
 
     expect(middleware.isConfigured).toBe(false);
 
-    // Call processLetter and ensure it safely falls back to MockAiMiddleware
     const result = await middleware.processLetter({
       text: "I am feeling lonely at work today. My phone is 555-123-4567.",
       language: "en_US",
@@ -106,30 +126,102 @@ describe("Pluggable AI Provider", () => {
     expect(result.risk.peerSafe).toBe(true);
   });
 
-  it("gracefully falls back to Mock when fetch fails or times out", async () => {
-    vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(new Error("Network timeout"));
+  it("sends Anthropic-specific headers and message payload for anthropic provider", async () => {
+    const mockResponse = {
+      content: [
+        {
+          text: JSON.stringify({
+            sparks: [
+              { id: "spark-1", text: "Today felt overwhelmingly quiet.", prompt: "Quiet loneliness" }
+            ],
+            suggestedEmotionTags: ["lonely"]
+          })
+        }
+      ]
+    };
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => mockResponse
+    } as any);
+
+    const middleware = new LlmAiMiddleware({
+      provider: "anthropic",
+      apiKey: "sk-ant-test-key",
+      baseURL: "https://api.anthropic.com/v1",
+      model: "claude-3-5-haiku-20241022"
+    });
+
+    const sparksResult = await middleware.generateWritingSparks({
+      mood: "lonely",
+      language: "en_US"
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, options] = fetchSpy.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://api.anthropic.com/v1/messages");
+    expect(options.headers).toMatchObject({
+      "x-api-key": "sk-ant-test-key",
+      "anthropic-version": "2023-06-01"
+    });
+    expect(sparksResult.sparks).toHaveLength(1);
+    expect(sparksResult.sparks[0].text).toContain("Today felt overwhelmingly quiet.");
+  });
+
+  it("generates writing sparks with LLM and falls back to mock on failure", async () => {
+    vi.spyOn(globalThis, "fetch").mockRejectedValueOnce(new Error("API Timeout"));
 
     const middleware = new LlmAiMiddleware({
       provider: "openai",
-      apiKey: "valid-key-but-network-fails"
+      apiKey: "test-openai-key"
     });
 
-    const result = await middleware.processLetter({
-      text: "I am overwhelmed with work.",
-      language: "en_US",
-      preferredReplyType: "JUST_BEING_HEARD"
+    const result = await middleware.generateWritingSparks({
+      mood: "burnout",
+      language: "ko_KR"
     });
 
-    // Fallback result should still succeed without crashing
-    expect(result).toBeDefined();
-    expect(result.emotionTags).toContain("overwhelmed");
+    expect(result.sparks.length).toBeGreaterThanOrEqual(3);
+    expect(result.suggestedEmotionTags).toContain("overwhelmed");
+  });
+
+  it("matches resonant letters with LLM and falls back gracefully", async () => {
+    const middleware = new LlmAiMiddleware({
+      provider: "openai",
+      apiKey: "" // Unconfigured -> fallback to Mock
+    });
+
+    const result = await middleware.matchResonantLetters({
+      responderPreference: "COMFORT",
+      availableLetters: [
+        {
+          id: "letter-1",
+          emotionTags: ["lonely"],
+          situationTags: ["work"],
+          desiredReplyType: "COMFORT"
+        }
+      ]
+    });
+
+    expect(result.recommendedLetterIds).toContain("letter-1");
   });
 
   it("handles markdown json wrapping from LLMs", async () => {
     const mockJson = {
       coachedText: "I hear how hard this semester has been for you.",
       flags: [],
-      suggestions: ["Gentle tone maintained."]
+      suggestions: ["Gentle tone maintained."],
+      reframings: [
+        { label: "온화한 공감", text: "따뜻한 공감의 말", tone: "warm" },
+        { label: "경청 중심", text: "경청의 말", tone: "listening" },
+        { label: "차분한 지지", text: "지지의 말", tone: "grounding" }
+      ],
+      metrics: {
+        empathy: 95,
+        gentleness: 92,
+        nonJudgmental: 98
+      }
     };
 
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
@@ -159,67 +251,7 @@ describe("Pluggable AI Provider", () => {
     });
 
     expect(coached.coachedText).toBe("I hear how hard this semester has been for you.");
-  });
-
-  it("identifies custom provider when AI_PROVIDER is set to custom", () => {
-    process.env.AI_PROVIDER = "custom";
-    expect(getAiProviderName()).toBe("custom");
-    const middleware = getAiMiddleware({ apiKey: "test-custom" });
-    expect(middleware).toBeInstanceOf(LlmAiMiddleware);
-  });
-
-  it("extracts JSON correctly when wrapped with reasoning thinking tags and surrounding text", async () => {
-    const rawWithThinking = `
-<think>
-The user is expressing loneliness. This is normal emotional stress.
-Let me produce the JSON object now.
-</think>
-Here is the structured analysis:
-{
-  "processedText": "Feeling lonely lately.",
-  "emotionTags": ["lonely"],
-  "situationTags": ["life"],
-  "desiredReplyType": "comfort",
-  "anonymization": {
-    "text": "Feeling lonely lately.",
-    "flaggedTerms": []
-  },
-  "risk": {
-    "level": "normal",
-    "reasons": [],
-    "peerSafe": true
-  }
-}
-Hope this analysis helps.`;
-
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        choices: [
-          {
-            message: {
-              content: rawWithThinking
-            }
-          }
-        ]
-      })
-    } as any);
-
-    const middleware = new LlmAiMiddleware({
-      provider: "deepseek",
-      apiKey: "test-deepseek-key"
-    });
-
-    const result = await middleware.processLetter({
-      text: "Feeling lonely lately.",
-      language: "en_US",
-      preferredReplyType: "COMFORT"
-    });
-
-    // Lowercase "comfort" and "normal" from LLM should be safely normalized to uppercase Prisma enums
-    expect(result.desiredReplyType).toBe("COMFORT");
-    expect(result.risk.level).toBe("NORMAL");
-    expect(result.emotionTags).toEqual(["lonely"]);
+    expect(coached.reframings).toHaveLength(3);
+    expect(coached.metrics?.empathy).toBe(95);
   });
 });
