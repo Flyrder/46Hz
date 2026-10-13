@@ -16,35 +16,38 @@
     "verify:backend": "tsx scripts/verify_backend.ts"
   },
   "dependencies": {
-    "@prisma/client": "6.19.0",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/pg": "8.23.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.468.0",
-    "next": "^16.2.10",
-    "react": "latest",
-    "react-dom": "latest",
-    "zod": "^3.24.1"
+    "lucide-react": "1.55.0",
+    "next": "16.4.0",
+    "pg": "8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.6"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "autoprefixer": "^10.4.20",
-    "eslint": "^9.17.0",
-    "eslint-config-next": "latest",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "autoprefixer": "10.6.1",
+    "eslint": "10.12.0",
+    "eslint-config-next": "16.4.0",
     "postcss": "^8.4.49",
-    "prisma": "^6.19.3",
-    "tailwindcss": "^3.4.17",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2",
-    "vitest": "^4.1.10"
+    "prisma": "7.10.0",
+    "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.4"
   },
   "allowScripts": {
-    "esbuild@0.28.0": true,
-    "esbuild@0.21.5": true,
-    "unrs-resolver@1.12.1": true,
+    "esbuild@0.28.1": true,
+    "unrs-resolver@1.12.2": true,
     "sharp@0.34.5": true,
-    "prisma@6.19.0": true,
-    "@prisma/engines@6.19.0": true,
-    "@prisma/client@6.19.0": true
+    "prisma@7.10.0": true,
+    "@prisma/engines@7.10.0": true,
+    "@prisma/client@7.10.0": true
   }
 }
