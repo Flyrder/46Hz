@@ -170,7 +170,7 @@ export function PreferenceForm({
                 role="radio"
                 aria-checked={isActive}
                 onClick={() => handlePreferenceChange(localeValue, pref)}
-                aria-label={`${pref} theme`}
+                aria-label={themeOptions.find((o) => o.value === pref)?.label ?? `${pref} theme`}
                 className={`relative flex-1 grid place-items-center h-full min-h-[40px] rounded-full transition-colors z-10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent ${
                   isActive ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground"
                 }`}

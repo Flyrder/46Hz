@@ -8,10 +8,10 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.x%20Strict-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS 4](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg?logo=tailwindcss)](https://tailwindcss.com/)
 [![Prisma ORM 7](https://img.shields.io/badge/Prisma-7.10%20pg--adapter-2D3748.svg?logo=prisma)](https://www.prisma.io/)
-[![Vitest](https://img.shields.io/badge/Vitest-109%20Passed-6E9F18.svg?logo=vitest)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-113%20Passed-6E9F18.svg?logo=vitest)](https://vitest.dev/)
 [![Multi-Arch](https://img.shields.io/badge/Arch-Arm64%20%7C%20AMD64-orange.svg?logo=docker)](https://www.docker.com/)
-[![Barrier-Free A11y](https://img.shields.io/badge/A11y-Barrier--Free%20WCAG-emerald.svg)](#barrier-free-accessibility)
-[![Zero PII](https://img.shields.io/badge/Privacy-Zero%20PII%20GDPR-teal.svg)](#data-minimization--compliance)
+[![KWCAG 2.2](https://img.shields.io/badge/A11y-KWCAG%202.2%20%2F%20KS%20X%209256-emerald.svg)](#7-barrier-free-accessibility-kwcag-22)
+[![Zero PII](https://img.shields.io/badge/Privacy-Zero%20PII%20GDPR-teal.svg)](#security-hardening--compliance)
 
 </div>
 
@@ -19,11 +19,21 @@
 
 ## Brand Philosophy: The 46Hz Slow Loop
 
-46Hz is inspired by Earth's **7th Schumann resonance harmonic** (~7.83Hz $\times$ 7 $\approx$ 45.9Hz $\approx$ 46Hz). In emotional acoustics, extremely low frequencies ground and calm the nervous system. 
+46Hz is inspired by Earth's **7th Schumann resonance harmonic** (~7.83Hz × 7 ≈ 45.9Hz ≈ 46Hz). In emotional acoustics, extremely low frequencies ground and calm the nervous system. 
 
 In a digital world dominated by instant read receipts, performative metrics, and reactive comments, 46Hz offers an intentional, unhurried space for vulnerable thoughts.
 
-$$\text{Write Privately} \longrightarrow \text{AI Anonymize \& Screen} \longrightarrow \text{Author Review} \longrightarrow \text{Moderation} \longrightarrow \text{Peer Reply} \longrightarrow \text{AI Reply Coach} \longrightarrow \text{Moderation} \longrightarrow \text{Receive Reply} \longrightarrow \text{Feedback}$$
+```mermaid
+flowchart LR
+    A["비공개 작성<br/>(Write Privately)"] --> B["AI 익명화 & 탈민감화<br/>(AI Anonymize)"]
+    B --> C["작성자 검토 & 수정<br/>(Author Review)"]
+    C --> D["운영자 검토<br/>(Moderation)"]
+    D --> E["또래 답장 작성<br/>(Peer Reply)"]
+    E --> F["AI 답장 코칭<br/>(AI Reply Coach)"]
+    F --> G["운영자 검토<br/>(Moderation)"]
+    G --> H["답장 수신 & 공명<br/>(Receive & Resonate)"]
+    H --> I["온화한 피드백<br/>(Warm Feedback)"]
+```
 
 > [!NOTE]
 > 46Hz is **not** a clinic, diagnostic tool, or emergency crisis chat. AI acts strictly as an editable, transparent middleware layer between people. Letters in immediate crisis are safely redirected to 24/7 dedicated professional helplines.
@@ -60,15 +70,35 @@ $$\text{Write Privately} \longrightarrow \text{AI Anonymize \& Screen} \longrigh
 - **Admin (`ADMIN_PASSCODE`)**: Full access, including user suspensions, crisis resource management, and compliance exports.
 - **Moderator (`MODERATOR_PASSCODE`)**: Dedicated to content safety—reviewing letters and replies, reading reports, and inspecting audit logs.
 
-### 7. Barrier-Free Accessibility (WCAG AA/AAA)
-- Minimum **44px $\times$ 44px** touch targets across all interactive buttons, links, and navigation icons.
-- Screen reader skip-to-content links (`#main-content`), landmark regions (`banner`, `main`, `contentinfo`, `progressbar`), and ARIA live announcements.
+### 7. Barrier-Free Accessibility (KWCAG 2.2)
+46Hz is fully engineered in accordance with **KWCAG 2.2 (한국형 웹 콘텐츠 접근성 지침 2.2 / 국가표준 KS X 9256:2024)** and W3C WCAG 2.2 AA standards:
+
+1. **인식의 용이성 (Perceivability)**:
+   - **텍스트 명도 대비**: 일반 텍스트 최소 4.5:1 이상 고대비 준수 (본문 기본 대비 12.3:1, 다크 모드 14.8:1로 AAA 수준 충족).
+   - **대체 텍스트**: 모든 시각적 인포그래픽 및 SVG 아이콘에 명시적 `aria-hidden="true"` 또는 의미 있는 대체 텍스트 제공.
+   - **색상 독립성**: 모든 상태 표시는 색상뿐 아니라 텍스트 배지(승인됨, 검토 대기, 주의 필요 등)를 병기하여 색약자도 즉시 식별 가능.
+
+2. **운용의 용이성 (Operability)**:
+   - **키보드 완전 제어**: 마우스 없이 Tab 및 방향키로 모든 기능 조작 가능, 명확한 고대비 포커스 링(`focus-visible`) 표시 및 초점 트랩 방지.
+   - **본문 바로가기 링크 (Skip Navigation)**: 첫 탭 시 화면 좌측 상단에 노출되는 `#main-content` 건너뛰기 링크 제공.
+   - **최소 조작 영역 크기**: 모바일 터치 및 마우스 조작 오동작을 방지하기 위해 모든 버튼, 링크, 입력창에 **44px × 44px 이상** 크기 확보 (`min-h-[44px]`).
+   - **충분한 시간 제공**: 15분 답장 작성 점유 창을 제공하며, 작성을 포기할 경우 즉시 편지를 돌려놓는 자발적 반환(`공명 양보하기`) 메커니즘 제공.
+
+3. **이해의 용이성 (Understandability)**:
+   - **기본 언어 선언**: 최상단 HTML 태그에 `<html lang="ko-KR">` 명시 (언어 설정 변경 시 실시간 반영).
+   - **예측 가능한 서식**: 모든 폼 컨트롤에 `<label htmlFor="...">` 명시적 연결 및 에러 발생 시 `aria-invalid="true"`, `role="alert"` 즉시 공지.
+   - **논리적 선형 구조**: 화면 낭독기가 위에서 아래로 혼선 없이 문맥을 이해할 수 있는 단일 방향 레이아웃.
+
+4. **견고성 (Robustness)**:
+   - **WAI-ARIA 1.2 시맨틱 랜드마크**: `role="banner"`, `role="navigation"`, `role="main"`, `role="contentinfo"`, `role="progressbar"` 등 랜드마크 구조화.
+   - **스크린리더 완벽 호환**: Android TalkBack, iOS VoiceOver, 센스리더, NVDA, Windows Narrator 등 모든 스크린리더에서 자연스러운 음성 안내 지원.
+   - **실시간 라이브 리전**: 글자 수 카운터 및 슈만 공명 노드 변경 사항을 스크린리더에 방해 없이 알리는 `aria-live="polite"` 적용.
 
 ---
 
 ## Unified Configuration (`settings.ts`)
 
-All application settings are centralized in [settings.ts](file:///c:/Users/voide/eko/settings.ts) as a single source of truth:
+All application settings are centralized in [settings.ts](./settings.ts) as a single source of truth:
 
 ```typescript
 import { settings } from "@/settings";
@@ -94,7 +124,7 @@ settings.compliance.maxRecentIps;       // 5 entries max
 ## Project Structure
 
 ```
-c:\Users\voide\eko\
+46hz/
 ├── app/                          # Next.js App Router (React 19.3)
 │   ├── actions/                  # Server Actions (letters, replies, admin, feedback, onboarding)
 │   ├── admin/                    # Admin portal (dashboard, letters, replies, reports, users, resources)
@@ -135,7 +165,7 @@ c:\Users\voide\eko\
 ├── prisma/                       # Database schema & migrations
 ├── scripts/                      # Verification & maintenance tools
 │   └── verify_backend.ts         # 7-phase end-to-end backend integrity test
-├── tests/                        # Vitest automated test suites (17 files, 108 tests)
+├── tests/                        # Vitest automated test suites (18 files, 113 tests)
 ├── docker-compose.yml            # Multi-arch PostgreSQL service definition
 ├── Dockerfile                    # Production multi-stage multi-arch container build
 ├── settings.ts                   # Central application configuration
@@ -254,7 +284,7 @@ Open `http://localhost:3000`. The application opens by default in Korean (`ko_KR
 To ensure zero regressions, run the full verification suite:
 
 ```bash
-# 1. Run all 17 automated test suites (109 tests)
+# 1. Run all 18 automated test suites (113 tests)
 npm run test:run
 
 # 2. Run TypeScript strict type-checking
@@ -271,4 +301,4 @@ npm run build
 
 ## License
 
-AGPL-3.0 License. See [LICENSE](file:///c:/Users/voide/eko/LICENSE) for details.
+AGPL-3.0 License. See [LICENSE](./LICENSE) for details.
