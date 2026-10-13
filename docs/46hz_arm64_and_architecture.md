@@ -20,11 +20,13 @@
    - 服务健康探测端点 `/api/health` 标识为 `46hz-letterbox`。
 2. **多语言国际化 (i18n) 模块分离与韩语默认化**：
    - **默认语言**：系统默认语言全局设定为韩语 (`ko_KR`)。
-   - **架构解耦与文件单独分离**：
-     - `lib/i18n/types.ts`: 独立存放 `Locale`、`TranslationKey`、`Translations` 类型，消除语言字典对英文单文件的倒置依赖。
+   - **彻底解耦合设计（内容与引擎物理隔离）**：
+     - `locales/{ko_KR, en_US, zh_CN}.ts`: 纯粹的语言数据字典包，完全独立于业务代码库。
+     - `locales/index.ts`: 语言包聚合与类型安全绑定。
+     - `lib/i18n/types.ts`: 独立存放 `Locale`、`TranslationKey`、`Translations` 契约类型。
      - `lib/i18n/config.ts`: 集中管理 `defaultLocale = "ko_KR"` 与语言选项。
-     - `lib/i18n/locales/{ko_KR, en_US, zh_CN}.ts`: 独立语言字典包，分别维护中英韩文案。
-     - `lib/i18n/index.ts`: 核心国际化调度与回退引擎，并通过 `lib/i18n.ts` 保持 100% 导入兼容。
+     - `lib/i18n/index.ts`: 纯粹的国际化调度与回退引擎，内部无任何语言文件。
+     - `lib/i18n.ts`: 统一对外平滑转发。
    - 迁移占位提示统一升级为 `46HZ-XXXX-XXXX`。
 3. **Session 与 Cookie 隔离设计**：
    - 匿名用户识别：`46hz_user_id`（向下兼容读取 `eko_user_id`）。

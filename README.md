@@ -15,9 +15,9 @@ It is not a therapy, diagnosis, medical, legal, public forum, or real-time chat 
 - **Human-Centered Letter Holding Protocol (Anti-Shadowban Design)**:
   - When a peer opens a letter to write a reply, the letter is quietly held for a 15-minute focused writing window to prevent multiple overlapping responses.
   - Transparent physical letterbox metaphor: Peers see that someone is thoughtfully drafting a reply, and responders can click "Put back in letterbox" at any time to release it. No confusing "lockout" or "shadowban" states.
-- **Default Korean (`ko_KR`) & Modular Decoupled i18n**:
+- **Default Korean (`ko_KR`) & Thoroughly Decoupled i18n Architecture**:
   - The application defaults to Korean (`ko_KR`), with English (`en_US`) and Simplified Chinese (`zh_CN`) fully supported.
-  - Clean isolated architecture (`lib/i18n/types.ts`, `lib/i18n/config.ts`, `lib/i18n/locales/*`, `lib/i18n/index.ts`) eliminating language-file circular dependencies.
+  - Complete architectural decoupling between translation content data ([locales/](file:///c:/Users/voide/eko/locales)) and engine logic ([lib/i18n/](file:///c:/Users/voide/eko/lib/i18n)). Zero language files reside directly under `lib/i18n/`.
 - **Arm64 & Multi-Arch Platform Support**:
   - Configured with Prisma multi-arch binary targets (`linux-arm64-openssl-3.0.x`, `linux-arm64-openssl-1.1.x`, `linux-musl-arm64-openssl-3.0.x`, `darwin-arm64`, and `native`).
   - Production-ready multi-stage `Dockerfile` (Node 20 Bookworm slim, non-root runner) and `docker-compose.yml` optimized for Apple Silicon, AWS Graviton, and x86_64 servers.
@@ -68,15 +68,19 @@ c:\Users\voide\eko\
 │   ├── admin.ts                  # Admin session & RBAC enforcement
 │   ├── db.ts                     # Prisma client singleton
 │   ├── domain.ts                 # Enums & domain types
-│   ├── i18n/                     # Modular internationalization system
+│   ├── i18n/                     # i18n engine infrastructure (zero language files)
 │   │   ├── config.ts             # Default locale & options
 │   │   ├── types.ts              # Translation keys & locale types
-│   │   ├── locales/              # Language dictionaries (ko_KR, en_US, zh_CN)
 │   │   └── index.ts              # Core translator engine
 │   ├── ai/                       # AI Middleware (interfaces, mock, pluggable LLM)
 │   ├── reply/                    # Concurrency claiming & letter holding protocol
 │   ├── safety/                   # Risk classification & crisis routing
 │   └── session.ts                # Session management & migration codes
+├── locales/                      # Standalone language dictionaries (pure content data)
+│   ├── ko_KR.ts                  # Korean language pack (default)
+│   ├── en_US.ts                  # English language pack
+│   ├── zh_CN.ts                  # Simplified Chinese language pack
+│   └── index.ts                  # Locales dictionary aggregator
 ├── prisma/                       # Database schema & migrations
 ├── tests/                        # Vitest automated test suites (11 suites, 62 tests)
 ├── docker-compose.yml            # PostgreSQL service definition
