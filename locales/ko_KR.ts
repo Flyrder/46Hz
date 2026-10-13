@@ -1,6 +1,7 @@
-import type { Translations } from "../types";
+import type { Translations } from "@/lib/i18n/types";
 
 export const koKR: Translations = {
+  // Account & Auth
   "account.create": "계정 만들기",
   "account.createHelp": "이 세션을 이메일과 비밀번호로 저장합니다.",
   "account.email": "이메일",
@@ -12,17 +13,21 @@ export const koKR: Translations = {
   "account.signInHelp": "저장한 계정으로 돌아옵니다.",
   "account.signOut": "로그아웃",
   "account.title": "계정",
+
+  // Common & Navigation
   "age.adult": "19세 이상",
   "age.under18": "19세 미만",
   "common.cancel": "취소",
   "common.optionalReason": "선택 사유",
   "common.report": "신고",
-  "feedback.feltUnderstood": "이해받는 느낌이 들었어요",
-  "feedback.helpful": "도움이 되었어요",
-  "feedback.judgmental": "판단받는 느낌이었어요",
-  "feedback.saved": "피드백이 저장되었습니다.",
-  "feedback.save": "피드백 저장",
-  "feedback.tooMuchAdvice": "조언이 너무 많았어요",
+  "language.label": "언어",
+  "nav.account": "계정",
+  "nav.admin": "관리",
+  "nav.inbox": "받은함",
+  "nav.settings": "설정",
+  "nav.write": "쓰기",
+
+  // Home Page
   "home.body":
     "46Hz는 익명의 응원 편지를 쓰고, 안전하지 않은 내용은 또래에게 보이지 않게 라우팅하며, 답장이 부드럽게 유지되도록 검토합니다.",
   "home.openInbox": "받은함 열기",
@@ -33,28 +38,8 @@ export const koKR: Translations = {
   "home.step4": "또래가 답장",
   "home.title": "어려운 편지를 조용히 보낼 수 있는 곳.",
   "home.write": "편지 쓰기",
-  "inbox.emptyRepliesBody": "또래 응원을 받을 수 있는 승인된 편지는 답장 영역에 표시됩니다.",
-  "inbox.emptyRepliesTitle": "보낸 답장이 없습니다",
-  "inbox.emptyLettersBody": "편지를 쓰면 검토 상태와 함께 이곳에 표시됩니다.",
-  "inbox.emptyLettersTitle": "아직 편지가 없습니다",
-  "inbox.findLetter": "편지 찾기",
-  "inbox.replyContext": "{type}을 원하는 편지에 대한 답장입니다.",
-  "inbox.sentReplies": "내가 보낸 답장",
-  "inbox.subtitle": "답장은 검토 후 도착합니다. 실시간 대화방은 없습니다.",
-  "inbox.title": "받은함",
-  "language.label": "언어",
-  "letter.approvedReplies": "승인된 답장",
-  "letter.masked": "이 편지는 또래 답장에서 제외되었습니다. 대신 지원 자료를 이용할 수 있습니다.",
-  "letter.noPeerRepliesBody": "안전 라우팅으로 처리되어 또래 응답자에게 표시되지 않습니다.",
-  "letter.noPeerRepliesTitle": "또래 답장이 닫혔습니다",
-  "letter.noRepliesBody": "편지가 편지함에 안전하게 놓여 있습니다. 동료가 편지를 읽고 답장을 적어 보내면 관리자의 따뜻한 검토를 거쳐 여기에 도착합니다.",
-  "letter.noRepliesTitle": "아직 도착한 답장이 없습니다",
-  "letter.title": "내 편지",
-  "nav.account": "계정",
-  "nav.admin": "관리",
-  "nav.inbox": "받은함",
-  "nav.settings": "설정",
-  "nav.write": "쓰기",
+
+  // Onboarding & Device Migration
   "onboarding.ageRange": "나이 범위",
   "onboarding.create": "익명 세션 만들기",
   "onboarding.replyPreference": "선호하는 답장",
@@ -66,6 +51,42 @@ export const koKR: Translations = {
   "onboarding.restorePlaceholder": "46HZ-XXXX-XXXX",
   "onboarding.restoreButton": "복구하기",
   "onboarding.errorInvalidCode": "마이그레이션 코드가 올바르지 않거나 만료되었습니다.",
+
+  // Letter Writing & Review
+  "write.label": "편지 내용",
+  "write.placeholder": "누군가에게, 요즘 마음에 담아두었던 이야기는...",
+  "write.review": "편지 검토하기",
+  "write.subtitle":
+    "지금 마음을 무겁게 하는 것을 편하게 적어주세요. 제출 전 수정 가능한 익명화 버전을 확인하실 수 있습니다.",
+  "write.title": "편지 쓰기",
+  "review.editable": "수정 가능한 익명화 버전",
+  "review.noDraftBody": "준비되면 새 편지부터 시작하세요.",
+  "review.noDraftTitle": "검토할 초안이 없습니다",
+  "review.routeSupport": "지원 자료로 이동",
+  "review.safetyRouted":
+    "이 편지는 또래 응답자에게 전달되지 않습니다. 확인 후 지원 자료로 바로 안내됩니다.",
+  "review.submit": "검토로 제출",
+  "review.title": "제출 전 검토",
+
+  // Inbox & Letter Detail
+  "inbox.emptyRepliesBody": "또래 응원을 받을 수 있는 승인된 편지는 답장 영역에 표시됩니다.",
+  "inbox.emptyRepliesTitle": "보낸 답장이 없습니다",
+  "inbox.emptyLettersBody": "편지를 쓰면 검토 상태와 함께 이곳에 표시됩니다.",
+  "inbox.emptyLettersTitle": "아직 편지가 없습니다",
+  "inbox.findLetter": "편지 찾기",
+  "inbox.replyContext": "{type}을 원하는 편지에 대한 답장입니다.",
+  "inbox.sentReplies": "내가 보낸 답장",
+  "inbox.subtitle": "답장은 검토 후 도착합니다. 실시간 대화방은 없습니다.",
+  "inbox.title": "받은함",
+  "letter.approvedReplies": "승인된 답장",
+  "letter.masked": "이 편지는 또래 답장에서 제외되었습니다. 대신 지원 자료를 이용할 수 있습니다.",
+  "letter.noPeerRepliesBody": "안전 라우팅으로 처리되어 또래 응답자에게 표시되지 않습니다.",
+  "letter.noPeerRepliesTitle": "또래 답장이 닫혔습니다",
+  "letter.noRepliesBody": "편지가 편지함에 안전하게 놓여 있습니다. 동료가 편지를 읽고 답장을 적어 보내면 관리자의 따뜻한 검토를 거쳐 여기에 도착합니다.",
+  "letter.noRepliesTitle": "아직 도착한 답장이 없습니다",
+  "letter.title": "내 편지",
+
+  // Reply Workbench & Human-centered Protection
   "reply.alreadyRepliedDesc":
     "이 편지에 전해주신 마음에 깊이 감사드립니다! 작성해 주신 답장은 검토를 거쳐 작성자의 받은 편지함으로 전달됩니다. 보낸 답장은 내 받은함에서 언제든 확인하실 수 있습니다.",
   "reply.alreadyRepliedTitle": "이미 따뜻한 답장을 보내셨어요",
@@ -91,18 +112,22 @@ export const koKR: Translations = {
   "reply.startOver": "다시 시작",
   "reply.title": "답장 쓰기",
   "reply.yourReply": "내 답장",
+
+  // Reply Preferences & Types
   "replyType.ADVICE": "부드러운 조언",
   "replyType.COMFORT": "위로",
   "replyType.JUST_BEING_HEARD": "그냥 들어주기",
   "replyType.SIMILAR_EXPERIENCES": "비슷한 경험",
-  "review.editable": "수정 가능한 익명화 버전",
-  "review.noDraftBody": "준비되면 새 편지부터 시작하세요.",
-  "review.noDraftTitle": "검토할 초안이 없습니다",
-  "review.routeSupport": "지원 자료로 이동",
-  "review.safetyRouted":
-    "이 편지는 또래 응답자에게 전달되지 않습니다. 확인 후 지원 자료로 바로 안내됩니다.",
-  "review.submit": "검토로 제출",
-  "review.title": "제출 전 검토",
+
+  // Feedback
+  "feedback.feltUnderstood": "이해받는 느낌이 들었어요",
+  "feedback.helpful": "도움이 되었어요",
+  "feedback.judgmental": "판단받는 느낌이었어요",
+  "feedback.saved": "피드백이 저장되었습니다.",
+  "feedback.save": "피드백 저장",
+  "feedback.tooMuchAdvice": "조언이 너무 많았어요",
+
+  // Settings & Preferences
   "settings.anonymousHandle": "익명 핸들",
   "settings.leave": "세션 나가기",
   "settings.preferences": "환경설정",
@@ -112,6 +137,8 @@ export const koKR: Translations = {
   "settings.migrationCode": "기기 이전 코드",
   "settings.migrationCodeHelp": "이 코드를 안전하게 보관하세요. 다른 기기나 브라우저에서 세션을 불러올 때 사용합니다.",
   "settings.title": "설정",
+
+  // Status Labels
   "status.APPROVED": "승인됨",
   "status.BLOCKED": "차단됨",
   "status.DRAFT": "초안",
@@ -121,14 +148,10 @@ export const koKR: Translations = {
   "status.REJECTED": "반려됨",
   "status.ROUTED_TO_SUPPORT": "지원 자료로 이동",
   "status.SENSITIVE": "주의 필요",
+
+  // Themes
   "theme.dark": "다크 모드",
   "theme.label": "테마",
   "theme.light": "라이트 모드",
-  "theme.system": "시스템 설정 따름",
-  "write.label": "편지 내용",
-  "write.placeholder": "누군가에게, 요즘 마음에 담아두었던 이야기는...",
-  "write.review": "편지 검토하기",
-  "write.subtitle":
-    "지금 마음을 무겁게 하는 것을 편하게 적어주세요. 제출 전 수정 가능한 익명화 버전을 확인하실 수 있습니다.",
-  "write.title": "편지 쓰기"
+  "theme.system": "시스템 설정 따름"
 };

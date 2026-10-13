@@ -1,18 +1,10 @@
-import { enUS } from "./locales/en_US";
-import { koKR } from "./locales/ko_KR";
-import { zhCN } from "./locales/zh_CN";
+import { dictionaries, koKR, enUS, zhCN } from "@/locales";
 import { defaultLocale, locales } from "./config";
 import type { Locale, TranslationKey, Translations } from "./types";
 
 export * from "./types";
 export * from "./config";
-export { koKR, enUS, zhCN };
-
-const dictionaries: Record<Locale, Translations> = {
-  ko_KR: koKR,
-  en_US: enUS,
-  zh_CN: zhCN
-};
+export { dictionaries, koKR, enUS, zhCN };
 
 export function normalizeLocale(value: unknown): Locale {
   return locales.includes(value as Locale) ? (value as Locale) : defaultLocale;
