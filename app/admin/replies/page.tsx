@@ -32,11 +32,11 @@ export default async function AdminRepliesPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.repliesTitle")}</h1>
               <StatusBadge tone={replies.length > 0 ? "warning" : "good"}>
-                {replies.length}건
+                {t("admin.countUnit", { count: String(replies.length) })}
               </StatusBadge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              동료 응답자가 작성한 코칭 답장의 온기와 안전성을 검토합니다.
+              {t("admin.repliesSubtitle")}
             </p>
           </div>
         </div>
@@ -53,14 +53,14 @@ export default async function AdminRepliesPage() {
           >
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2.5">
               <div className="flex items-center gap-2">
-                <StatusBadge tone="warning">검토 대기 (PENDING)</StatusBadge>
+                <StatusBadge tone="warning">{t("admin.pendingBadge")}</StatusBadge>
                 <span className="text-xs text-muted-foreground">{formatDate(reply.createdAt)}</span>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <User className="h-3.5 w-3.5 text-accent" />
                 <span>{reply.responder.anonymousHandle}</span>
                 <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono">
-                  신뢰도 {reply.responder.trustScore}
+                  {t("admin.trustScorePrefix")} {reply.responder.trustScore}
                 </span>
               </div>
             </div>
@@ -71,10 +71,10 @@ export default async function AdminRepliesPage() {
 
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <span className="line-clamp-1 italic text-muted-foreground/80">
-                원문 편지: &quot;{excerpt(reply.letter.processedText, 60)}&quot;
+                {t("admin.originalLetterPrefix")} &quot;{excerpt(reply.letter.processedText, 60)}&quot;
               </span>
               <span className="inline-flex items-center gap-1 font-semibold text-accent group-hover:translate-x-0.5 transition-transform">
-                검토하기 <ArrowRight className="h-3.5 w-3.5" />
+                {t("admin.reviewReplyAction")} <ArrowRight className="h-3.5 w-3.5" />
               </span>
             </div>
           </Link>

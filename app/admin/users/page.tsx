@@ -58,10 +58,10 @@ export default async function AdminUsersPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.usersTitle")}</h1>
-              <StatusBadge tone="neutral">{users.length}명</StatusBadge>
+              <StatusBadge tone="neutral">{t("admin.personUnit", { count: String(users.length) })}</StatusBadge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              무계정 익명 세션 사용자 현황 및 이상 행동 계정 제재 관리입니다.
+              {t("admin.usersSubtitle")}
             </p>
           </div>
         </div>
@@ -79,18 +79,18 @@ export default async function AdminUsersPage() {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-foreground">{user.anonymousHandle}</span>
                 <span className="rounded-full bg-accent/10 px-2 py-0.5 text-[10px] font-bold text-accent">
-                  신뢰 점수: {user.trustScore}
+                  {t("admin.userTrustScorePrefix")} {user.trustScore}
                 </span>
                 {user.suspendedAt ? (
                   <StatusBadge tone="danger">
                     <span className="flex items-center gap-1">
-                      <UserX className="h-3 w-3" /> 정지됨 (Suspended)
+                      <UserX className="h-3 w-3" /> {t("admin.userSuspendedBadge")}
                     </span>
                   </StatusBadge>
                 ) : (
                   <StatusBadge tone="good">
                     <span className="flex items-center gap-1">
-                      <UserCheck className="h-3 w-3" /> 활성 (Active)
+                      <UserCheck className="h-3 w-3" /> {t("admin.userActiveBadge")}
                     </span>
                   </StatusBadge>
                 )}
@@ -101,9 +101,9 @@ export default async function AdminUsersPage() {
                   <Calendar className="h-3 w-3" /> {formatDate(user.createdAt)}
                 </span>
                 <span>•</span>
-                <span>편지 <strong>{user._count.letters}</strong>건</span>
+                <span>{t("admin.userLettersCount", { count: String(user._count.letters) })}</span>
                 <span>•</span>
-                <span>답장 <strong>{user._count.replies}</strong>건</span>
+                <span>{t("admin.userRepliesCount", { count: String(user._count.replies) })}</span>
                 <span>•</span>
                 <span className="font-mono text-[11px] opacity-70">ID: {user.id.slice(0, 10)}...</span>
               </div>
@@ -113,10 +113,10 @@ export default async function AdminUsersPage() {
               <form action={suspendUserAction}>
                 <input type="hidden" name="userId" value={user.id} />
                 <input type="hidden" name="reason" value="Suspended from admin user list" />
-                <SubmitButton variant="danger">계정 활동 정지</SubmitButton>
+                <SubmitButton variant="danger">{t("admin.suspendUserButton")}</SubmitButton>
               </form>
             ) : (
-              <span className="text-xs text-danger font-medium">활동 정지 상태</span>
+              <span className="text-xs text-danger font-medium">{t("admin.userSuspendedStatus")}</span>
             )}
           </article>
         ))}

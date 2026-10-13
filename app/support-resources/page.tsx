@@ -32,7 +32,7 @@ export default async function SupportResourcesPage({
           </div>
           <div className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-semibold text-accent select-none">
             <HeartHandshake className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>온기 안심 보호 네트워크</span>
+            <span>{t("resources.protectionNetworkBadge")}</span>
           </div>
         </div>
 
@@ -46,7 +46,7 @@ export default async function SupportResourcesPage({
 
         {isRouted ? (
           <div className="mt-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-800 dark:text-rose-200">
-            손을 뻗으면 닿을 수 있는 전문 상담사들이 24시간 언제나 당신의 이야기를 들을 준비가 되어 있습니다.
+            {t("resources.supportCounselorAvailableNotice")}
           </div>
         ) : null}
       </header>

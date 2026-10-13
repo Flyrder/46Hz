@@ -40,11 +40,11 @@ export default async function AdminReportsPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.reportsTitle")}</h1>
               <StatusBadge tone={reports.length > 0 ? "warning" : "good"}>
-                {reports.length}건
+                {t("admin.countUnit", { count: String(reports.length) })}
               </StatusBadge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              이용자가 부적절한 답장이나 위반 사항에 대해 접수한 신고 목록입니다.
+              {t("admin.reportsSubtitle")}
             </p>
           </div>
         </div>
@@ -60,7 +60,7 @@ export default async function AdminReportsPage() {
           >
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2.5">
               <div className="flex items-center gap-2">
-                <StatusBadge tone="warning">신고 접수</StatusBadge>
+                <StatusBadge tone="warning">{t("admin.reportReceivedBadge")}</StatusBadge>
                 <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {formatDate(report.createdAt)}
@@ -68,24 +68,24 @@ export default async function AdminReportsPage() {
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <User className="h-3.5 w-3.5 text-accent" />
-                <span>신고자: {report.fromUser.anonymousHandle}</span>
+                <span>{t("admin.reporterPrefix")} {report.fromUser.anonymousHandle}</span>
               </div>
             </div>
 
             <div className="mt-3 rounded-xl border border-border/60 bg-muted/20 p-3.5 text-sm leading-relaxed text-foreground">
-              <span className="font-semibold text-xs text-danger block mb-1">신고 사유:</span>
+              <span className="font-semibold text-xs text-danger block mb-1">{t("admin.reportReasonPrefix")}</span>
               {report.reportReason}
             </div>
 
             <div className="mt-3 flex items-center justify-between text-xs pt-1">
               <span className="text-muted-foreground">
-                답장 작성자: {report.reply.responder.anonymousHandle} (신뢰도 {report.reply.responder.trustScore})
+                {t("admin.replyAuthorPrefix")} {report.reply.responder.anonymousHandle} {t("admin.trustScoreSuffix", { score: String(report.reply.responder.trustScore) })}
               </span>
               <Link
                 href={`/admin/replies/${report.replyId}`}
                 className="inline-flex items-center gap-1 font-semibold text-accent hover:underline"
               >
-                해당 답장 검토하기 <ArrowRight className="h-3.5 w-3.5" />
+                {t("admin.reviewReportedReplyAction")} <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           </article>

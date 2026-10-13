@@ -145,7 +145,7 @@ export function ReviewComparisonViewer({
         />
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>{t("write.privacyAssuranceBadge")}</span>
-          <span>{currentText.length}자</span>
+          <span>{t("common.characterCount", { count: String(currentText.length) })}</span>
         </div>
       </div>
 
@@ -212,7 +212,7 @@ export function ReviewComparisonViewer({
             <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
               <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
                 <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("letter.viewRaw")} ({rawText.length}자)
+                {t("letter.viewRaw")} ({t("common.characterCount", { count: String(rawText.length) })})
               </span>
               <button
                 type="button"
@@ -232,7 +232,7 @@ export function ReviewComparisonViewer({
             <div className="flex items-center justify-between border-b border-border/50 pb-2 mb-3">
               <span className="text-xs font-semibold text-accent flex items-center gap-1.5">
                 <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("letter.viewProcessed")} ({currentText.length}자)
+                {t("letter.viewProcessed")} ({t("common.characterCount", { count: String(currentText.length) })})
               </span>
               <button
                 type="button"

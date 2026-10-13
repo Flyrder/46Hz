@@ -144,7 +144,7 @@ export function WritingSparksHelper({
 
           {tags.length > 0 && (
             <div className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <span>추천 감정 태그:</span>
+              <span>{t("write.aiSparksRecommendedTags")}</span>
               <div className="flex flex-wrap gap-1">
                 {tags.map((tag) => (
                   <span

@@ -13,7 +13,7 @@ interface LetterContentViewerProps {
   t: (key: string, values?: Record<string, string>) => string;
 }
 
-function renderTextWithHighlights(text: string, quotes: string[]) {
+function renderTextWithHighlights(text: string, quotes: string[], highlightTitle?: string) {
   const validQuotes = quotes.filter((q) => q && q.trim().length > 0 && text.includes(q.trim()));
   if (validQuotes.length === 0) {
     return text;
@@ -30,7 +30,7 @@ function renderTextWithHighlights(text: string, quotes: string[]) {
         <mark
           key={index}
           className="rounded bg-accent/20 px-1 py-0.5 text-foreground border-b-2 border-accent font-medium select-text"
-          title="코멘트가 작성된 구절"
+          title={highlightTitle ?? "Highlighted passage"}
         >
           {part}
         </mark>
@@ -202,7 +202,7 @@ export function LetterContentViewer({
       {/* Content Rendering based on mode */}
       {viewMode === "processed" && (
         <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-          {renderTextWithHighlights(processedText, highlightedQuotes)}
+          {renderTextWithHighlights(processedText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
         </div>
       )}
 
@@ -213,7 +213,7 @@ export function LetterContentViewer({
             <span>{t("letter.rawDraftBadge")}</span>
           </div>
           <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-            {renderTextWithHighlights(rawText, highlightedQuotes)}
+            {renderTextWithHighlights(rawText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
           </div>
         </div>
       )}
@@ -227,10 +227,10 @@ export function LetterContentViewer({
                 <FileText className="h-3.5 w-3.5" aria-hidden="true" />
                 {t("letter.rawDraftBadge")}
               </span>
-              <span className="text-xs text-muted-foreground">{rawText.length}자</span>
+              <span className="text-xs text-muted-foreground">{t("common.characterCount", { count: String(rawText.length) })}</span>
             </div>
             <div className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
-              {renderTextWithHighlights(rawText, highlightedQuotes)}
+              {renderTextWithHighlights(rawText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
             </div>
           </div>
 
@@ -241,10 +241,10 @@ export function LetterContentViewer({
                 <ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />
                 {t("letter.processedBadge")}
               </span>
-              <span className="text-xs text-muted-foreground">{processedText.length}자</span>
+              <span className="text-xs text-muted-foreground">{t("common.characterCount", { count: String(processedText.length) })}</span>
             </div>
             <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
-              {renderTextWithHighlights(processedText, highlightedQuotes)}
+              {renderTextWithHighlights(processedText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
             </div>
           </div>
         </div>

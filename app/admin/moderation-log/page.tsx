@@ -28,10 +28,10 @@ export default async function ModerationLogPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.logTitle")}</h1>
-              <StatusBadge tone="neutral">{events.length}건</StatusBadge>
+              <StatusBadge tone="neutral">{t("admin.countUnit", { count: String(events.length) })}</StatusBadge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              편지 및 답장 승인, 반려, 위험도 재조정 등 운영 조치에 대한 불변 감사 로그입니다.
+              {t("admin.logSubtitle")}
             </p>
           </div>
         </div>
@@ -58,23 +58,23 @@ export default async function ModerationLogPage() {
 
             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs font-mono">
               <span className="rounded bg-muted px-2 py-0.5 text-muted-foreground">
-                {event.previousStatus ?? "초기상태"}
+                {event.previousStatus ?? t("admin.logInitialStatus")}
               </span>
               <ArrowRight className="h-3 w-3 text-muted-foreground" />
               <span className="rounded bg-accent/15 px-2 py-0.5 font-bold text-accent">
-                {event.newStatus ?? "상태미지정"}
+                {event.newStatus ?? t("admin.logUnspecifiedStatus")}
               </span>
             </div>
 
             {event.reason ? (
               <p className="mt-2 text-xs leading-relaxed text-foreground bg-muted/20 rounded-lg p-2.5 border border-border/40">
-                <strong className="text-muted-foreground font-semibold">사유: </strong>
+                <strong className="text-muted-foreground font-semibold">{t("admin.logReasonPrefix")} </strong>
                 {event.reason}
               </p>
             ) : null}
 
             <p className="mt-2 text-[11px] font-mono text-muted-foreground">
-              대상 식별자: {event.targetId}
+              {t("admin.logTargetIdPrefix")} {event.targetId}
             </p>
           </article>
         ))}

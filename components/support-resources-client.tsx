@@ -84,7 +84,7 @@ export function SupportResourcesClient({
           </div>
           <div className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/30 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-700 dark:text-rose-300">
             <Heart className="h-3.5 w-3.5 fill-current" />
-            <span>비밀 보장 · 통화료 무료 / 免费隐私保障</span>
+            <span>{t("resources.privacyFreeBadge")}</span>
           </div>
         </div>
 
@@ -163,7 +163,7 @@ export function SupportResourcesClient({
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1 mr-1">
             <Filter className="h-3.5 w-3.5" />
-            지역:
+            {t("resources.filterRegionLabel")}
           </span>
           <button
             type="button"
@@ -199,7 +199,7 @@ export function SupportResourcesClient({
             {t("resources.filterCN")}
           </button>
 
-          <span className="text-xs font-semibold text-muted-foreground ml-3 mr-1">언어:</span>
+          <span className="text-xs font-semibold text-muted-foreground ml-3 mr-1">{t("resources.filterLangLabel")}</span>
           <button
             type="button"
             onClick={() => setSelectedLang("ALL")}
@@ -220,7 +220,7 @@ export function SupportResourcesClient({
                 : "border border-border bg-surface text-muted-foreground hover:bg-muted"
             }`}
           >
-            한국어
+            {t("common.langKo")}
           </button>
           <button
             type="button"
@@ -231,7 +231,7 @@ export function SupportResourcesClient({
                 : "border border-border bg-surface text-muted-foreground hover:bg-muted"
             }`}
           >
-            中文
+            {t("common.langZh")}
           </button>
           <button
             type="button"
@@ -242,7 +242,7 @@ export function SupportResourcesClient({
                 : "border border-border bg-surface text-muted-foreground hover:bg-muted"
             }`}
           >
-            English
+            {t("common.langEn")}
           </button>
         </div>
 
@@ -272,7 +272,7 @@ export function SupportResourcesClient({
                   <a
                     href={`tel:${resource.phone.replace(/[^0-9+]/g, "")}`}
                     className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-accent/10 px-3.5 py-2 font-bold text-accent transition-colors hover:bg-accent/20"
-                    aria-label={`${resource.title} 전화 걸기 ${resource.phone}`}
+                    aria-label={`${resource.title} ${t("resources.callAction")} ${resource.phone}`}
                   >
                     <Phone className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>{resource.phone}</span>
@@ -285,7 +285,7 @@ export function SupportResourcesClient({
                     rel="noreferrer"
                     target="_blank"
                     className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-border bg-surface px-3.5 py-2 font-semibold text-muted-foreground transition-colors hover:border-accent/30 hover:text-foreground"
-                    aria-label={`${resource.title} 웹사이트 방문`}
+                    aria-label={`${resource.title} ${t("resources.visitWebsiteAction")}`}
                   >
                     <Globe className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>{t("resources.website")}</span>
@@ -308,7 +308,7 @@ export function SupportResourcesClient({
                 }}
                 className="mt-3 inline-flex min-h-[36px] items-center rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold hover:bg-muted"
               >
-                필터 초기화
+                {t("resources.resetFilter")}
               </button>
             </div>
           ) : null}
