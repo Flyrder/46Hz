@@ -30,11 +30,11 @@ export default async function AdminLettersPage() {
             <div className="flex items-center gap-2">
               <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.lettersTitle")}</h1>
               <StatusBadge tone={letters.length > 0 ? "warning" : "good"}>
-                {letters.length}건
+                {t("admin.countUnit", { count: String(letters.length) })}
               </StatusBadge>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              안전 라우팅 및 또래 공개 전 신뢰성 검토 대기 목록입니다.
+              {t("admin.lettersSubtitle")}
             </p>
           </div>
         </div>
@@ -44,7 +44,7 @@ export default async function AdminLettersPage() {
 
       <div className="space-y-4">
         {letters.map((letter) => (
-          <LetterCard key={letter.id} letter={letter} href={`/admin/letters/${letter.id}`} mode="admin" />
+          <LetterCard key={letter.id} letter={letter} href={`/admin/letters/${letter.id}`} mode="admin" t={t} />
         ))}
         {letters.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border/80 bg-surface/60 p-10 text-center text-sm text-muted-foreground shadow-soft">

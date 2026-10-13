@@ -202,7 +202,9 @@ export default async function AdminPage({
             <div key={item.key} className="rounded-xl border border-border/70 bg-background/60 p-3.5 shadow-soft">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-foreground">{item.label}</span>
-                <span className="font-mono text-muted-foreground">{item.count}건 ({item.percent}%)</span>
+                <span className="font-mono text-muted-foreground">
+                  {t("admin.radarCountFormat", { count: String(item.count), percent: String(item.percent) })}
+                </span>
               </div>
               <div className="mt-2.5 h-2 w-full rounded-full bg-muted overflow-hidden">
                 <div

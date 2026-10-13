@@ -65,7 +65,7 @@ export default async function AdminCompliancePage({
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.complianceTitle")}</h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              법적 요청(압수수색 등) 대응 및 보안 감사를 위한 엄격한 데이터 최소화 규정 준수 관리
+              {t("admin.complianceSubtitle")}
             </p>
           </div>
         </div>
@@ -77,25 +77,25 @@ export default async function AdminCompliancePage({
       <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">
         <div className="flex items-center gap-2 text-base font-bold text-foreground">
           <Scale className="h-5 w-5 text-accent" aria-hidden="true" />
-          <span>46Hz 데이터 최소화 및 사법 공조 표준 (Data Minimization Standard)</span>
+          <span>{t("admin.complianceCharterTitle")}</span>
         </div>
         <div className="mt-4 grid gap-3 text-xs leading-5 text-muted-foreground sm:grid-cols-3">
           <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
-            <span className="font-bold text-foreground block text-sm mb-1">Zero PII (개인식별정보 부존재)</span>
+            <span className="font-bold text-foreground block text-sm mb-1">{t("admin.complianceZeroPiiTitle")}</span>
             <p>
-              실명, 주민등록번호, 연락처, 이메일, 비밀번호, 기기 고유식별값(UDID) 등을 수집하거나 저장하지 않습니다.
+              {t("admin.complianceZeroPiiDesc")}
             </p>
           </div>
           <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
-            <span className="font-bold text-foreground block text-sm mb-1">14일 롤링 보관 및 자동 파기</span>
+            <span className="font-bold text-foreground block text-sm mb-1">{t("admin.compliance14DayTitle")}</span>
             <p>
-              보안 및 방화벽 IP 접속 기록은 최대 5개 항목으로 한정되며, 14일 경과 시 데이터베이스에서 영구 소멸합니다.
+              {t("admin.compliance14DayDesc")}
             </p>
           </div>
           <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
-            <span className="font-bold text-foreground block text-sm mb-1">SHA-256 증거 무결성 해시</span>
+            <span className="font-bold text-foreground block text-sm mb-1">{t("admin.complianceHashTitle")}</span>
             <p>
-              사법기관 제출용 인시던트 패킷은 SHA-256 암호화 해시를 포함하여 위변조 없는 증거 연속성을 보장합니다.
+              {t("admin.complianceHashDesc")}
             </p>
           </div>
         </div>
@@ -107,14 +107,14 @@ export default async function AdminCompliancePage({
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-3">
             <div className="flex items-center gap-2 font-bold text-foreground">
               <FileText className="h-5 w-5 text-accent" aria-hidden="true" />
-              <span>사법 공조 패킷: {generatedPacket.packetHeader.packetId}</span>
+              <span>{t("admin.compliancePacketTitle")} {generatedPacket.packetHeader.packetId}</span>
             </div>
             <div className="flex items-center gap-2">
               <Link
                 href="/admin/compliance"
                 className="rounded-xl border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold hover:bg-muted"
               >
-                검사 닫기
+                {t("admin.complianceClosePacket")}
               </Link>
             </div>
           </div>
@@ -122,26 +122,26 @@ export default async function AdminCompliancePage({
           <div className="mt-4 space-y-3.5 text-xs">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-muted-foreground">
               <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
-                <span className="font-semibold text-foreground block">대상 유형</span>
+                <span className="font-semibold text-foreground block">{t("admin.complianceTargetType")}</span>
                 {generatedPacket.incident.targetType}
               </div>
               <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
-                <span className="font-semibold text-foreground block">작성자 가명</span>
+                <span className="font-semibold text-foreground block">{t("admin.complianceAuthorPseudonym")}</span>
                 {generatedPacket.incident.authorPseudonym}
               </div>
               <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
-                <span className="font-semibold text-foreground block">분류 등급</span>
+                <span className="font-semibold text-foreground block">{t("admin.complianceRiskClassification")}</span>
                 {generatedPacket.incident.riskClassification}
               </div>
               <div className="rounded-lg bg-surface/80 p-2.5 border border-border/50">
-                <span className="font-semibold text-foreground block">생성 일시</span>
+                <span className="font-semibold text-foreground block">{t("admin.complianceGeneratedAt")}</span>
                 {formatDate(generatedPacket.packetHeader.generatedAt)}
               </div>
             </div>
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                SHA-256 증거 무결성 해시
+                {t("admin.complianceSha256Header")}
               </span>
               <code className="block rounded-lg border border-border/60 bg-background p-2.5 font-mono text-[11px] text-accent break-all">
                 {generatedPacket.incident.contentHashSha256}
@@ -150,11 +150,11 @@ export default async function AdminCompliancePage({
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                클라이언트 접속 원본 추적 ({generatedPacket.networkOrigin.retentionPolicy})
+                {t("admin.complianceClientOriginHeader", { policy: generatedPacket.networkOrigin.retentionPolicy })}
               </span>
               <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                 {generatedPacket.networkOrigin.maskedTrace.map((trace, idx) => {
-                  const ua = generatedPacket.networkOrigin.userAgentTrace[idx] ?? "No UA";
+                  const ua = generatedPacket.networkOrigin.userAgentTrace[idx] ?? t("admin.noUserAgent");
                   return (
                     <li key={idx}>
                       <span className="font-medium text-foreground">{trace}</span> — <span className="text-[11px] font-mono">{ua}</span>
@@ -166,7 +166,7 @@ export default async function AdminCompliancePage({
 
             <div>
               <span className="font-semibold text-foreground block mb-1">
-                원시 JSON 증거 패킷
+                {t("admin.complianceRawJsonHeader")}
               </span>
               <pre className="max-h-60 overflow-auto rounded-xl border border-border/60 bg-background p-3 text-[11px] leading-5 text-foreground font-mono">
                 {JSON.stringify(generatedPacket, null, 2)}
@@ -181,7 +181,7 @@ export default async function AdminCompliancePage({
         <div>
           <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
             <ShieldAlert className="h-4 w-4 text-danger" aria-hidden="true" />
-            <span>고위험 편지 인시던트 (High-Risk Letters)</span>
+            <span>{t("admin.complianceHighRiskLettersTitle")}</span>
           </h2>
           <div className="mt-3 space-y-3">
             {flaggedLetters.map((letter) => {
@@ -189,7 +189,7 @@ export default async function AdminCompliancePage({
                 ? (letter.author.recentIps as unknown as IpRecord[])
                 : [];
               const latest = ips.length > 0 ? ips[ips.length - 1] : undefined;
-              const latestIp = latest ? maskIp(latest.ip) : "No trace";
+              const latestIp = latest ? maskIp(latest.ip) : t("admin.noTrace");
               const clientInfo = latest?.browser ? `${latest.browser} on ${latest.os ?? "OS"}` : undefined;
 
               return (
@@ -199,8 +199,8 @@ export default async function AdminCompliancePage({
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <StatusBadge tone="danger">{letter.riskLevel}</StatusBadge>
-                      <StatusBadge>{letter.status}</StatusBadge>
+                      <StatusBadge tone="danger">{t(`status.${letter.riskLevel}` as const)}</StatusBadge>
+                      <StatusBadge>{t(`status.${letter.status}` as const)}</StatusBadge>
                       <span className="text-xs text-muted-foreground font-mono">
                         {formatDate(letter.createdAt)}
                       </span>
@@ -209,7 +209,7 @@ export default async function AdminCompliancePage({
                       {letter.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      작성자: <span className="font-medium text-foreground">{letter.author.anonymousHandle}</span> | 마스킹 접속지: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
+                      {t("admin.authorLabel")}: <span className="font-medium text-foreground">{letter.author.anonymousHandle}</span> | {t("admin.complianceMaskedOrigin")} {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 
@@ -219,13 +219,13 @@ export default async function AdminCompliancePage({
                       className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
                     >
                       <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>증거 패킷 추출</span>
+                      <span>{t("admin.complianceExtractPacket")}</span>
                     </Link>
                     <Link
                       href={`/admin/letters/${letter.id}`}
-                      className="inline-flex min-h-[36px] items-center rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
+                      className="inline-flex min-h-[36px] items-center rounded-xl border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
                     >
-                      검토
+                      {t("admin.complianceReview")}
                     </Link>
                   </div>
                 </article>
@@ -233,7 +233,7 @@ export default async function AdminCompliancePage({
             })}
             {flaggedLetters.length === 0 ? (
               <p className="text-xs text-muted-foreground rounded-2xl border border-dashed border-border/80 bg-surface/50 p-6 text-center">
-                기록된 고위험 편지가 없습니다.
+                {t("admin.complianceNoHighRiskLetters")}
               </p>
             ) : null}
           </div>
@@ -242,7 +242,7 @@ export default async function AdminCompliancePage({
         <div>
           <h2 className="text-base font-bold flex items-center gap-2 text-foreground">
             <ShieldAlert className="h-4 w-4 text-warning" aria-hidden="true" />
-            <span>반려 및 이상 답장 인시던트 (Moderated / Rejected Replies)</span>
+            <span>{t("admin.complianceModeratedRepliesTitle")}</span>
           </h2>
           <div className="mt-3 space-y-3">
             {flaggedReplies.map((reply) => {
@@ -250,7 +250,7 @@ export default async function AdminCompliancePage({
                 ? (reply.responder.recentIps as unknown as IpRecord[])
                 : [];
               const latest = ips.length > 0 ? ips[ips.length - 1] : undefined;
-              const latestIp = latest ? maskIp(latest.ip) : "No trace";
+              const latestIp = latest ? maskIp(latest.ip) : t("admin.noTrace");
               const clientInfo = latest?.browser ? `${latest.browser} on ${latest.os ?? "OS"}` : undefined;
 
               return (
@@ -260,7 +260,7 @@ export default async function AdminCompliancePage({
                 >
                   <div>
                     <div className="flex items-center gap-2">
-                      <StatusBadge tone="danger">{reply.status}</StatusBadge>
+                      <StatusBadge tone="danger">{t(`status.${reply.status}` as const)}</StatusBadge>
                       <span className="text-xs text-muted-foreground font-mono">
                         {formatDate(reply.createdAt)}
                       </span>
@@ -269,7 +269,7 @@ export default async function AdminCompliancePage({
                       {reply.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      응답자: <span className="font-medium text-foreground">{reply.responder.anonymousHandle}</span> | 마스킹 접속지: {latestIp} {clientInfo ? `(${clientInfo})` : ""}
+                      {t("admin.complianceResponderPrefix")} <span className="font-medium text-foreground">{reply.responder.anonymousHandle}</span> | {t("admin.complianceMaskedOrigin")} {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 
@@ -279,13 +279,13 @@ export default async function AdminCompliancePage({
                       className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-accent/40 bg-accent/10 px-3.5 py-1.5 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
                     >
                       <FileText className="h-3.5 w-3.5" aria-hidden="true" />
-                      <span>증거 패킷 추출</span>
+                      <span>{t("admin.complianceExtractPacket")}</span>
                     </Link>
                     <Link
                       href={`/admin/replies/${reply.id}`}
-                      className="inline-flex min-h-[36px] items-center rounded-xl border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
+                      className="inline-flex min-h-[36px] items-center rounded-xl border border-border bg-surface px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
                     >
-                      검토
+                      {t("admin.complianceReview")}
                     </Link>
                   </div>
                 </article>
@@ -293,7 +293,7 @@ export default async function AdminCompliancePage({
             })}
             {flaggedReplies.length === 0 ? (
               <p className="text-xs text-muted-foreground rounded-2xl border border-dashed border-border/80 bg-surface/50 p-6 text-center">
-                기록된 반려 답장이 없습니다.
+                {t("admin.complianceNoModeratedReplies")}
               </p>
             ) : null}
           </div>

@@ -3,7 +3,6 @@ import { moderateLetterAction, overrideLetterRiskAction } from "@/app/actions/ad
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { letterStatusLabels, replyTypeLabels, riskLevelLabels } from "@/lib/domain";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
@@ -37,7 +36,7 @@ export default async function AdminLetterDetailPage({
     <section className="mx-auto max-w-5xl py-2 sm:py-4">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">편지 안전 검토</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.letterReviewTitle")}</h1>
           <p className="mt-1 text-xs text-muted-foreground font-mono">ID: {letter.id}</p>
         </div>
       </div>
@@ -48,37 +47,37 @@ export default async function AdminLetterDetailPage({
         {/* Letter Inspection Card */}
         <article className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">
           <div className="flex flex-wrap items-center gap-2 border-b border-border/50 pb-4">
-            <StatusBadge>{letterStatusLabels[letter.status]}</StatusBadge>
+            <StatusBadge>{t(`status.${letter.status}`)}</StatusBadge>
             <StatusBadge tone={letter.riskLevel === "NORMAL" ? "good" : "warning"}>
-              {riskLevelLabels[letter.riskLevel]}
+              {t(`status.${letter.riskLevel}`)}
             </StatusBadge>
-            <StatusBadge tone="neutral">{replyTypeLabels[letter.desiredReplyType]}</StatusBadge>
+            <StatusBadge tone="neutral">{t(`replyType.${letter.desiredReplyType}`)}</StatusBadge>
           </div>
 
           <dl className="mt-4 grid grid-cols-2 gap-3 rounded-xl border border-border/60 bg-muted/20 p-3.5 text-xs">
             <div>
               <dt className="font-semibold text-muted-foreground flex items-center gap-1.5">
                 <User className="h-3.5 w-3.5 text-accent" />
-                작성자
+                {t("admin.authorLabel")}
               </dt>
               <dd className="mt-1 font-medium text-foreground">
-                {letter.author.anonymousHandle} (신뢰도 {letter.author.trustScore})
+                {letter.author.anonymousHandle} {t("admin.trustScoreSuffix", { score: String(letter.author.trustScore) })}
               </dd>
             </div>
             <div>
               <dt className="font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-accent" />
-                작성 일시
+                {t("admin.createdDateLabel")}
               </dt>
               <dd className="mt-1 font-medium text-foreground">{formatDate(letter.createdAt)}</dd>
             </div>
             <div className="col-span-2 pt-2 border-t border-border/40">
               <dt className="font-semibold text-muted-foreground flex items-center gap-1.5">
                 <Tag className="h-3.5 w-3.5 text-accent" />
-                감정 & 상황 태그
+                {t("admin.tagsLabel")}
               </dt>
               <dd className="mt-1 font-medium text-foreground">
-                {[...letter.emotionTags, ...letter.situationTags].join(", ") || "태그 없음"}
+                {[...letter.emotionTags, ...letter.situationTags].join(", ") || t("admin.noTags")}
               </dd>
             </div>
           </dl>
@@ -86,7 +85,7 @@ export default async function AdminLetterDetailPage({
           <div className="mt-6">
             <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-accent" />
-              정돈본 (Processed Text)
+              {t("admin.processedTextSection")}
             </h2>
             <div className="mt-2.5 rounded-xl border border-border/80 bg-background/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
               {letter.processedText}
@@ -96,7 +95,7 @@ export default async function AdminLetterDetailPage({
           <div className="mt-6">
             <h2 className="text-sm font-bold text-foreground flex items-center gap-1.5">
               <FileText className="h-4 w-4 text-muted-foreground" />
-              작성 원문 (Raw Text)
+              {t("admin.rawTextSection")}
             </h2>
             <div className="mt-2.5 rounded-xl border border-border/60 bg-muted/40 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap font-mono">
               {letter.rawText}
@@ -107,9 +106,9 @@ export default async function AdminLetterDetailPage({
         {/* Moderation Controls Workbench */}
         <div className="space-y-5">
           <form action={moderateLetterAction} className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">
-            <h2 className="text-base font-bold text-foreground">모더레이션 결정</h2>
+            <h2 className="text-base font-bold text-foreground">{t("admin.moderationDecisionTitle")}</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              편지 상태와 위험도를 결정하여 편지함 노출 여부를 조정합니다.
+              {t("admin.moderationDecisionDesc")}
             </p>
 
             <input type="hidden" name="letterId" value={letter.id} />
@@ -117,7 +116,7 @@ export default async function AdminLetterDetailPage({
             <div className="mt-4 space-y-3.5">
               <div>
                 <label className="text-xs font-semibold text-foreground" htmlFor="status">
-                  상태 (Status)
+                  {t("admin.statusSelectLabel")}
                 </label>
                 <select
                   id="status"
@@ -125,16 +124,16 @@ export default async function AdminLetterDetailPage({
                   defaultValue={letter.status}
                   className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
-                  <option value="PENDING">검토 대기 (Pending)</option>
-                  <option value="APPROVED">승인 (Approved - 또래 공개)</option>
-                  <option value="REJECTED">반려 (Rejected)</option>
-                  <option value="ROUTED_TO_SUPPORT">전문 지원 연결 (Routed to Support)</option>
+                  <option value="PENDING">{t("admin.statusPending")}</option>
+                  <option value="APPROVED">{t("admin.statusApproved")}</option>
+                  <option value="REJECTED">{t("admin.statusRejected")}</option>
+                  <option value="ROUTED_TO_SUPPORT">{t("admin.statusRoutedSupport")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-foreground" htmlFor="riskLevel">
-                  위험 등급 (Risk Level)
+                  {t("admin.riskLevelSelectLabel")}
                 </label>
                 <select
                   id="riskLevel"
@@ -142,29 +141,29 @@ export default async function AdminLetterDetailPage({
                   defaultValue={letter.riskLevel}
                   className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
                 >
-                  <option value="NORMAL">일반 (Normal)</option>
-                  <option value="SENSITIVE">주의 필요 (Sensitive)</option>
-                  <option value="HIGH">위기/고위험 (High)</option>
-                  <option value="BLOCKED">차단 (Blocked)</option>
+                  <option value="NORMAL">{t("admin.riskNormal")}</option>
+                  <option value="SENSITIVE">{t("admin.riskSensitive")}</option>
+                  <option value="HIGH">{t("admin.riskHigh")}</option>
+                  <option value="BLOCKED">{t("admin.riskBlocked")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-foreground" htmlFor="reason">
-                  검토 사유 (감사 로그 기록)
+                  {t("admin.reasonLabel")}
                 </label>
                 <textarea
                   id="reason"
                   name="reason"
                   rows={3}
-                  placeholder="상태 변경 사유를 입력하세요 (선택 사항)"
+                  placeholder={t("admin.reasonPlaceholder")}
                   className="mt-1.5 w-full rounded-xl border border-border bg-background p-3 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
               </div>
             </div>
 
             <div className="mt-5">
-              <SubmitButton>모더레이션 저장</SubmitButton>
+              <SubmitButton>{t("admin.saveModeration")}</SubmitButton>
             </div>
           </form>
 
@@ -172,10 +171,10 @@ export default async function AdminLetterDetailPage({
           <form action={overrideLetterRiskAction} className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-warning" />
-              <h3 className="text-sm font-bold text-foreground">신속 위험도 재조정</h3>
+              <h3 className="text-sm font-bold text-foreground">{t("admin.quickRiskOverrideTitle")}</h3>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              긴급 상황 시 상태 변경 없이 위험 등급만 즉시 수정합니다.
+              {t("admin.quickRiskOverrideDesc")}
             </p>
 
             <input type="hidden" name="letterId" value={letter.id} />
@@ -185,18 +184,18 @@ export default async function AdminLetterDetailPage({
                 id="risk-override"
                 name="riskLevel"
                 defaultValue={letter.riskLevel}
-                aria-label="신속 위험도 재조정 선택"
+                aria-label={t("admin.quickRiskOverrideAria")}
                 className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
               >
-                <option value="NORMAL">일반 (Normal)</option>
-                <option value="SENSITIVE">주의 필요 (Sensitive)</option>
-                <option value="HIGH">위기/고위험 (High)</option>
-                <option value="BLOCKED">차단 (Blocked)</option>
+                <option value="NORMAL">{t("admin.riskNormal")}</option>
+                <option value="SENSITIVE">{t("admin.riskSensitive")}</option>
+                <option value="HIGH">{t("admin.riskHigh")}</option>
+                <option value="BLOCKED">{t("admin.riskBlocked")}</option>
               </select>
             </div>
             <input type="hidden" name="reason" value="Admin risk override from detail page" />
             <div className="mt-4">
-              <SubmitButton variant="secondary">위험도 덮어쓰기</SubmitButton>
+              <SubmitButton variant="secondary">{t("admin.riskOverrideButton")}</SubmitButton>
             </div>
           </form>
         </div>

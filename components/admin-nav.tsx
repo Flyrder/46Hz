@@ -44,7 +44,7 @@ export function AdminNav({
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Staff navigation" className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+    <nav aria-label={t ? t("admin.staffNavAria") : "Staff navigation"} className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
       {links.map(({ href, labelKey, fallbackLabel, adminOnly, icon: Icon }) => {
         const isActive =
           href === "/admin"
