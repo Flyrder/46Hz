@@ -201,5 +201,81 @@ export const enUS: Translations = {
   "write.counter": "{current} / min {min} chars",
   "write.peacePacing": "Take all the time you need. There is no rush.",
   "write.privacyAssurance": "46Hz protects your privacy. When submitted, AI cleans names and contact info; you will review and edit the anonymized draft before it is confirmed.",
-  "write.sparks": "Inspiration Sparks (Click to begin)"
+  "write.sparks": "Inspiration Sparks (Click to begin)",
+
+  // Refined Complete Localization Keys
+  "home.schumannBadge": "46Hz · Earth's 7th Schumann Harmonic (~46Hz)",
+  "home.browseLetters": "Browse letters to reply",
+  "home.pillar1Title": "7th Harmonic Reply Cap",
+  "home.pillar1Desc":
+    "Each letter receives at most 7 harmonic replies by default, protecting writers from overwhelm and comment flooding.",
+  "home.pillar2Title": "15-Min Focused Holding",
+  "home.pillar2Desc":
+    "When a peer begins writing, the letter is quietly held for 15 minutes, preventing collision and ensuring full focus.",
+  "home.pillar3Title": "Zero PII & Crockford Code",
+  "home.pillar3Desc":
+    "No emails, passwords, or personal profiles. Transfer devices using Crockford Base32 codes; network traces auto-purge after 14 days.",
+  "home.stepsSubtitle": "A four-step human-centered slow journey",
+  "home.step1Desc": "Share what weighs on your mind without pressure or hurry.",
+  "home.step2Desc": "AI filters PII and creates an editable, safe draft for your preview.",
+  "home.step3Desc": "Human moderation ensures safety without cold algorithms.",
+  "home.step4Desc": "A peer responder writes with unhurried care and gentle presence.",
+  "home.crisisTitle": "Experiencing an immediate crisis?",
+  "home.crisisDesc":
+    "46Hz is not a clinical or emergency service. If you are in crisis, access 24/7 dedicated professional helplines.",
+  "home.crisisButton": "View Support Resources",
+
+  "shell.skipToContent": "Skip to main content",
+  "shell.tagline": "Slow Letterbox",
+  "shell.footerDesc":
+    "Earth's 7th Schumann harmonic frequency (~46Hz). A quiet anonymous emotional support letterbox capping at 7 resonant replies.",
+  "shell.crisisLink": "Crisis Resources",
+
+  "write.prompt1": "Words I've kept to myself lately",
+  "write.prompt2": "Feelings that felt too heavy to carry alone",
+  "write.prompt3": "Just wanting to be heard without unsolicited advice",
+  "write.prompt4": "A quiet letter to my tired self today",
+
+  "reply.writingPaceNote": "Take your time and write a gentle, heartfelt reply.",
+  "review.aiDraftNotice": "Here is your anonymized draft. Feel free to revise any wording before quietly submitting.",
+
+  "resources.helplineBadge": "24/7 Crisis Helplines",
+  "resources.title": "Support Resources",
+  "resources.intro":
+    "Anonymous letters are not the right place for urgent or dangerous moments. These resources connect you with professional local care.",
+  "resources.highRiskNotice":
+    "Your letter was not sent to peer responders. Please consider reaching out to someone you trust nearby or one of the resources below.",
+  "resources.website": "Website",
+  "resources.empty": "No active resources have been configured yet.",
+
+  "resonance.capBadge": "7th Harmonic Cap",
+  "resonance.frequencySubtitle": "(~46Hz Earth Schumann Frequency)",
+  "resonance.progressAria": "{current} of {max} harmonic replies received",
+  "resonance.seventhBadge": "7 Harmonics",
+
+  "common.copy": "Copy",
+  "common.copied": "Copied!",
+  "common.errorTitle": "Something needs attention",
+  "common.returnHome": "Return home",
+
+  "admin.navMetrics": "Metrics",
+  "admin.navLetters": "Letters",
+  "admin.navReplies": "Replies",
+  "admin.navReports": "Reports",
+  "admin.navUsers": "Users",
+  "admin.navResources": "Resources",
+  "admin.navCompliance": "Compliance (Law Enforcement)",
+  "admin.navLog": "Log",
+  "admin.adminOnlyBadge": "(Admin)",
+  "admin.staffAccessTitle": "Staff access",
+  "admin.staffAccessSubtitle": "Enter Administrator or Moderator passcode to continue.",
+  "admin.passcodeLabel": "Passcode",
+  "admin.passcodePlaceholder": "Admin or Moderator passcode",
+  "admin.enterDashboard": "Enter dashboard",
+  "admin.rateLimited": "Too many failed login attempts. Please wait 5 minutes before trying again.",
+  "admin.invalidPasscode": "Invalid passcode. Please verify your staff credentials.",
+  "admin.dashboardTitle": "46Hz Operations Dashboard",
+  "admin.dashboardSubtitle": "Real-time letterbox monitoring and safety metrics",
+  "admin.roleBadge": "Role: {role}",
+  "admin.logout": "Log out"
 };

@@ -54,11 +54,7 @@ export default async function ReviewLetterPage({
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("review.title")}</h1>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          {locale === "ko_KR"
-            ? "AI가 정돈한 익명화 편지입니다. 마음에 들지 않는 문장이 있다면 직접 고친 뒤 부쳐주세요."
-            : locale === "zh_CN"
-            ? "这是AI整理后的去隐私版本信件。若有不妥之处，可直接修改后再行寄出。"
-            : "Here is your anonymized draft. Feel free to revise any wording before quietly submitting."}
+          {t("review.aiDraftNotice")}
         </p>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">

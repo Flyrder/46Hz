@@ -69,18 +69,96 @@ describe("i18n preferences", () => {
       "settings.profileTitle",
       "settings.subtitle",
       "onboarding.startSession",
-      "reply.poolTitle"
+      "reply.poolTitle",
+      "home.schumannBadge",
+      "home.browseLetters",
+      "home.pillar1Title",
+      "home.pillar1Desc",
+      "home.pillar2Title",
+      "home.pillar2Desc",
+      "home.pillar3Title",
+      "home.pillar3Desc",
+      "home.stepsSubtitle",
+      "home.step1Desc",
+      "home.step2Desc",
+      "home.step3Desc",
+      "home.step4Desc",
+      "home.crisisTitle",
+      "home.crisisDesc",
+      "home.crisisButton",
+      "shell.skipToContent",
+      "shell.tagline",
+      "shell.footerDesc",
+      "shell.crisisLink",
+      "write.prompt1",
+      "write.prompt2",
+      "write.prompt3",
+      "write.prompt4",
+      "reply.writingPaceNote",
+      "review.aiDraftNotice",
+      "resources.helplineBadge",
+      "resources.title",
+      "resources.intro",
+      "resources.highRiskNotice",
+      "resources.website",
+      "resources.empty",
+      "resonance.capBadge",
+      "resonance.frequencySubtitle",
+      "resonance.progressAria",
+      "resonance.seventhBadge",
+      "common.copy",
+      "common.copied",
+      "common.errorTitle",
+      "common.returnHome",
+      "admin.navMetrics",
+      "admin.navLetters",
+      "admin.navReplies",
+      "admin.navReports",
+      "admin.navUsers",
+      "admin.navResources",
+      "admin.navCompliance",
+      "admin.navLog",
+      "admin.adminOnlyBadge",
+      "admin.staffAccessTitle",
+      "admin.staffAccessSubtitle",
+      "admin.passcodeLabel",
+      "admin.passcodePlaceholder",
+      "admin.enterDashboard",
+      "admin.rateLimited",
+      "admin.invalidPasscode",
+      "admin.dashboardTitle",
+      "admin.dashboardSubtitle",
+      "admin.roleBadge",
+      "admin.logout"
     ];
 
     for (const key of keysToCheck) {
-      expect(translate("ko_KR", key)).not.toBe(key);
-      expect(translate("en_US", key)).not.toBe(key);
-      expect(translate("zh_CN", key)).not.toBe(key);
+      const ko = translate("ko_KR", key);
+      const en = translate("en_US", key);
+      const zh = translate("zh_CN", key);
+
+      expect(ko).not.toBe(key);
+      expect(en).not.toBe(key);
+      expect(zh).not.toBe(key);
+
+      expect(ko.length).toBeGreaterThan(0);
+      expect(en.length).toBeGreaterThan(0);
+      expect(zh.length).toBeGreaterThan(0);
     }
 
     // Dynamic interpolation check
     expect(translate("ko_KR", "write.counter", { current: "25", min: "40" })).toBe("25 / 40자 이상");
     expect(translate("en_US", "write.counter", { current: "25", min: "40" })).toBe("25 / min 40 chars");
     expect(translate("zh_CN", "write.counter", { current: "25", min: "40" })).toBe("25 / 最少40字");
+
+    expect(
+      translate("ko_KR", "resonance.progressAria", { current: "3", max: "7" })
+    ).toBe("총 7개 공명 중 3개의 답장이 도착했습니다.");
+    expect(
+      translate("en_US", "resonance.progressAria", { current: "3", max: "7" })
+    ).toBe("3 of 7 harmonic replies received");
+    expect(
+      translate("zh_CN", "resonance.progressAria", { current: "3", max: "7" })
+    ).toBe("已收到 3 / 7 封共振回信");
   });
 });

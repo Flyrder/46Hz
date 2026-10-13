@@ -15,19 +15,8 @@ export function AppShell({
   theme: ThemePreference;
   t: (key: string) => string;
 }) {
-  const skipLabel =
-    locale === "ko_KR"
-      ? "본문으로 건너뛰기"
-      : locale === "zh_CN"
-      ? "跳至主要内容"
-      : "Skip to main content";
-
-  const brandTagline =
-    locale === "ko_KR"
-      ? "느린 마음 편지함"
-      : locale === "zh_CN"
-      ? "慢速心绪回信箱"
-      : "Slow Letterbox";
+  const skipLabel = t("shell.skipToContent");
+  const brandTagline = t("shell.tagline");
 
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-16 pt-3 sm:px-6 lg:px-8">
@@ -118,11 +107,7 @@ export function AppShell({
               <span>46Hz · Schumann Resonance Slow Letterbox</span>
             </div>
             <p className="max-w-md text-muted-foreground/80 leading-relaxed text-[11px]">
-              {locale === "ko_KR"
-                ? "지구의 7차 슈만 공명 주파수(~46Hz). 감정의 과부하 없는 7개의 답장으로 마음을 지키는 인간 중심 익명 편지함입니다."
-                : locale === "zh_CN"
-                ? "地球第七谐波舒曼共振频率（~46Hz）。以最多7封克制回信守护心绪，全匿名温润同行。"
-                : "Earth's 7th Schumann harmonic frequency (~46Hz). A quiet anonymous emotional support letterbox capping at 7 resonant replies."}
+              {t("shell.footerDesc")}
             </p>
           </div>
 
@@ -132,7 +117,7 @@ export function AppShell({
               className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
             >
               <ShieldAlert className="h-3.5 w-3.5 text-amber-500/80" />
-              <span>{locale === "ko_KR" ? "위기 지원 자료" : locale === "zh_CN" ? "紧急援助资源" : "Crisis Resources"}</span>
+              <span>{t("shell.crisisLink")}</span>
             </Link>
             <Link
               href="/settings"

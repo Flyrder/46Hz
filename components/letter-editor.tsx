@@ -6,26 +6,12 @@ import { processLetterAction } from "@/app/actions/letters";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { createTranslator, type Locale } from "@/lib/i18n";
 
-const PROMPT_INSPIRATIONS: Record<Locale, string[]> = {
-  ko_KR: [
-    "요즘 혼자 삼켜야 했던 이야기",
-    "누구에게도 털어놓지 못했던 속마음",
-    "충고 대신 그저 묵묵한 위로가 필요할 때",
-    "오늘 하루 지친 내 마음에게"
-  ],
-  zh_CN: [
-    "最近独自承受的那些心绪",
-    "从未对人诉说的心里话",
-    "不需要说教，只想被静静倾听",
-    "给今天疲惫的自己的一封信"
-  ],
-  en_US: [
-    "Words I've kept to myself lately",
-    "Feelings that felt too heavy to carry alone",
-    "Just wanting to be heard without unsolicited advice",
-    "A quiet letter to my tired self today"
-  ]
-};
+const PROMPT_KEYS = [
+  "write.prompt1",
+  "write.prompt2",
+  "write.prompt3",
+  "write.prompt4"
+] as const;
 
 export function LetterEditor({
   locale,
@@ -47,7 +33,7 @@ export function LetterEditor({
   const currentLength = [...text.trim()].length;
   const isSatisfied = currentLength >= minLength;
 
-  const prompts = PROMPT_INSPIRATIONS[locale] || PROMPT_INSPIRATIONS.en_US;
+  const prompts = PROMPT_KEYS.map((key) => t(key));
 
   function handleSelectPrompt(prompt: string) {
     if (!text.trim()) {

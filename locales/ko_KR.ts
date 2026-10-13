@@ -3,7 +3,7 @@ import type { Translations } from "@/lib/i18n/types";
 export const koKR: Translations = {
   // Account & Auth
   "account.create": "계정 만들기",
-  "account.createHelp": "이 세션을 이메일과 비밀번호로 저장합니다.",
+  "account.createHelp": "이 계정을 이메일과 비밀번호로 저장합니다.",
   "account.email": "이메일",
   "account.errorExists": "이미 해당 이메일의 계정이 있습니다.",
   "account.errorInvalid": "이메일 또는 비밀번호를 확인할 수 없습니다.",
@@ -54,10 +54,10 @@ export const koKR: Translations = {
 
   // Letter Writing & Review
   "write.label": "편지 내용",
-  "write.placeholder": "누군가에게, 요즘 마음에 담아두었던 이야기는...",
+  "write.placeholder": "요즘 마음에 담아두었던 이야기는...",
   "write.review": "편지 검토하기",
   "write.subtitle":
-    "지금 마음을 무겁게 하는 것을 편하게 적어주세요. 제출 전 수정 가능한 익명화 버전을 확인하실 수 있습니다.",
+    "지금 마음을 무겁게 하는 것을 편하게 적어보세요. 제출 전 익명화된 버전을 확인하고 수정할 수 있어요.",
   "write.title": "편지 쓰기",
   "review.editable": "수정 가능한 익명화 버전",
   "review.noDraftBody": "준비되면 새 편지부터 시작하세요.",
@@ -65,7 +65,7 @@ export const koKR: Translations = {
   "review.routeSupport": "지원 자료로 이동",
   "review.safetyRouted":
     "이 편지는 또래 응답자에게 전달되지 않습니다. 확인 후 지원 자료로 바로 안내됩니다.",
-  "review.submit": "검토로 제출",
+  "review.submit": "검토 후 제출",
   "review.title": "제출 전 검토",
 
   // Inbox & Letter Detail
@@ -74,7 +74,7 @@ export const koKR: Translations = {
   "inbox.emptyLettersBody": "편지를 쓰면 검토 상태와 함께 이곳에 표시됩니다.",
   "inbox.emptyLettersTitle": "아직 편지가 없습니다",
   "inbox.findLetter": "편지 찾기",
-  "inbox.replyContext": "{type}을 원하는 편지에 대한 답장입니다.",
+  "inbox.replyContext": "{type}을(를) 원하는 편지에 대한 답장입니다.",
   "inbox.sentReplies": "내가 보낸 답장",
   "inbox.subtitle": "답장은 검토 후 도착합니다. 실시간 대화방은 없습니다.",
   "inbox.title": "받은함",
@@ -96,7 +96,7 @@ export const koKR: Translations = {
   "reply.final": "최종 답장",
   "reply.flags": "표시: {flags}",
   "reply.guidance":
-    "쓴 사람의 감정이 그대로 존재하도록 받아주세요. 요청받지 않은 진단, 확신, 압박, 과한 조언은 피합니다.",
+    "쓴 사람의 감정이 그대로 존재하도록 받아주세요. 요청하지 않은 진단, 확신, 압박, 과한 조언은 피합니다.",
   "reply.inboxLink": "받은함으로 이동",
   "reply.noLettersBody": "지금 또래 편지 풀이 비어 있거나 가능한 편지가 아직 검토 중입니다.",
   "reply.noLettersTitle": "가능한 편지가 없습니다",
@@ -140,20 +140,20 @@ export const koKR: Translations = {
   // Feedback
   "feedback.feltUnderstood": "이해받는 느낌이 들었어요",
   "feedback.helpful": "도움이 되었어요",
-  "feedback.judgmental": "판단받는 느낌이었어요",
+  "feedback.judgmental": "단정짓는 느낌이 들었어요",
   "feedback.saved": "피드백이 저장되었습니다.",
   "feedback.save": "피드백 저장",
   "feedback.tooMuchAdvice": "조언이 너무 많았어요",
 
   // Settings & Preferences
   "settings.anonymousHandle": "익명 핸들",
-  "settings.leave": "세션 나가기",
+  "settings.leave": "로그아웃",
   "settings.preferences": "환경설정",
   "settings.replyPreference": "선호하는 답장",
   "settings.save": "환경설정 저장",
   "settings.trustScore": "신뢰 점수",
-  "settings.migrationCode": "기기 이전 코드",
-  "settings.migrationCodeHelp": "이 코드를 안전하게 보관하세요. 다른 기기나 브라우저에서 세션을 불러올 때 사용합니다.",
+  "settings.migrationCode": "전송코드",
+  "settings.migrationCodeHelp": "이 코드를 안전하게 보관하세요. 다른 기기나 브라우저에서 계정을 불러올 때 사용합니다.",
   "settings.title": "설정",
 
   // Status Labels
@@ -192,7 +192,83 @@ export const koKR: Translations = {
   "settings.profileTitle": "익명 프로필 정보",
   "settings.subtitle": "내 익명 프로필과 환경설정을 관리합니다.",
   "write.counter": "{current} / {min}자 이상",
-  "write.peacePacing": "서두르지 않고 당신의 속도대로 쓰셔도 좋습니다.",
+  "write.peacePacing": "서두르지 마시고 편하신 속도대로 적어도 좋습니다.",
   "write.privacyAssurance": "46Hz는 안심 익명화 기술을 제공합니다. 편지를 보내면 AI가 실명, 연락처 등 민감 정보를 정돈하며, 다음 화면에서 직접 검토·수정한 뒤 최종 제출합니다.",
-  "write.sparks": "마음의 시작점 (클릭하여 영감 얻기)"
+  "write.sparks": "마음의 시작점 (클릭하여 영감 얻기)",
+
+  // Refined Complete Localization Keys
+  "home.schumannBadge": "46Hz · 지구의 7차 슈만 공명 주파수",
+  "home.browseLetters": "답장 둘러보기",
+  "home.pillar1Title": "7차 슈만 공명 보호",
+  "home.pillar1Desc":
+    "편지당 기본 7개의 공명 답장만 허용합니다. 넘쳐나는 댓글과 소음으로부터 마음을 보호하고, 한 마디의 위로가 깊이 가닿게 합니다.",
+  "home.pillar2Title": "15분 온전한 집중 보관",
+  "home.pillar2Desc":
+    "동료가 답장을 적는 15분 동안 편지를 조용히 보관합니다. 여러 사람이 겹쳐 쓰지 않아 한 사람의 마음에 온전히 집중할 수 있습니다.",
+  "home.pillar3Title": "100% 무계정 & 제로 PII",
+  "home.pillar3Desc":
+    "이메일도 비밀번호도 저장하지 않습니다. 오직 46HZ 이전 코드로만 기기를 옮기며, IP 흔적은 14일 뒤 흔적 없이 소멸합니다.",
+  "home.stepsSubtitle": "서두르지 않는 4단계의 따뜻한 여정",
+  "home.step1Desc": "마음의 무게를 혼자 짊어지지 않고 편안하게 적어 내려갑니다.",
+  "home.step2Desc": "실명이나 연락처 등 개인정보를 걸러내고 수정 가능한 초안을 만듭니다.",
+  "home.step3Desc": "누구도 상처받지 않도록 안전 가이드라인을 따뜻하게 검토합니다.",
+  "home.step4Desc": "15분의 조용한 집중 속에서 한 동료의 정성 어린 답장이 도착합니다.",
+  "home.crisisTitle": "즉각적인 위기 상황에 처해 계신가요?",
+  "home.crisisDesc":
+    "46Hz는 의료·긴급 치료 서비스가 아닙니다. 지금 힘겨운 위기 상황이라면 24시간 전문 위기 상담 리소스를 확인해주세요.",
+  "home.crisisButton": "전문 지원 자료 보기",
+
+  "shell.skipToContent": "본문으로 건너뛰기",
+  "shell.tagline": "느린 마음 편지함",
+  "shell.footerDesc":
+    "지구의 7차 슈만 공명 주파수(~46Hz). 감정의 과부하 없는 7개의 답장으로 마음을 지키는 인간 중심 익명 편지함입니다.",
+  "shell.crisisLink": "위기 지원 자료",
+
+  "write.prompt1": "요즘 혼자 삼켜야 했던 이야기",
+  "write.prompt2": "누구에게도 털어놓지 못했던 속마음",
+  "write.prompt3": "충고 대신 그저 묵묵한 위로가 필요할 때",
+  "write.prompt4": "오늘 하루 지친 내 마음에게",
+
+  "reply.writingPaceNote": "서두르지 않고 당신의 속도대로 따뜻한 답장을 적어주세요.",
+  "review.aiDraftNotice": "AI가 정돈한 익명화 편지입니다. 마음에 들지 않는 문장이 있다면 직접 고친 뒤 부쳐주세요.",
+
+  "resources.helplineBadge": "24/7 전문 위기 상담 안내",
+  "resources.title": "전문 지원 자료",
+  "resources.intro":
+    "익명의 편지는 즉각적인 위험이나 위기 상황을 대체할 수 없습니다. 이 지원 자료는 신뢰할 수 있는 외부 전문 기관 목록입니다.",
+  "resources.highRiskNotice":
+    "편지가 또래 응답자에게 전달되지 않았습니다. 현재 힘든 상황이라면 곁에 있는 신뢰할 수 있는 사람이나 아래의 전문 지원 기관에 손을 내밀어주세요.",
+  "resources.website": "웹사이트",
+  "resources.empty": "아직 등록된 지원 자료가 없습니다.",
+
+  "resonance.capBadge": "7차 기본 공명 제한",
+  "resonance.frequencySubtitle": "(~46Hz 지구 슈만 공명 주파수)",
+  "resonance.progressAria": "총 {max}개 공명 중 {current}개의 답장이 도착했습니다.",
+  "resonance.seventhBadge": "7차 기본 공명",
+
+  "common.copy": "복사",
+  "common.copied": "복사됨!",
+  "common.errorTitle": "문제가 발생했습니다",
+  "common.returnHome": "홈으로 돌아가기",
+
+  "admin.navMetrics": "지표",
+  "admin.navLetters": "편지",
+  "admin.navReplies": "답장",
+  "admin.navReports": "신고",
+  "admin.navUsers": "사용자",
+  "admin.navResources": "지원 자료",
+  "admin.navCompliance": "사법 공조 (컴플라이언스)",
+  "admin.navLog": "로그",
+  "admin.adminOnlyBadge": "(관리자 전용)",
+  "admin.staffAccessTitle": "관리자 접속",
+  "admin.staffAccessSubtitle": "계속하려면 관리자 또는 모더레이터 암호를 입력하세요.",
+  "admin.passcodeLabel": "접속 암호",
+  "admin.passcodePlaceholder": "관리자 또는 모더레이터 암호",
+  "admin.enterDashboard": "대시보드 입장",
+  "admin.rateLimited": "로그인 시도가 너무 많습니다. 5분 후에 다시 시도하세요.",
+  "admin.invalidPasscode": "암호가 올바르지 않습니다. 관리자 권한을 확인해주세요.",
+  "admin.dashboardTitle": "46Hz 운영 대시보드",
+  "admin.dashboardSubtitle": "실시간 편지함 모니터링 및 안전 지표",
+  "admin.roleBadge": "권한: {role}",
+  "admin.logout": "로그아웃"
 };
