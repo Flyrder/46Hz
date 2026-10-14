@@ -12,7 +12,10 @@ const pool =
   new pg.Pool({
     connectionString:
       process.env.DATABASE_URL ??
-      "postgresql://46hz:46hz@localhost:5432/46hz_letterbox?schema=public"
+      "postgresql://46hz:46hz@localhost:5432/46hz_letterbox?schema=public",
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
   });
 
 const adapter = new PrismaPg(pool);
@@ -24,7 +27,6 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"]
   });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.pgPool = pool;
-}
+globalForPrisma.prisma = prisma;
+globalForPrisma.pgPool = pool;
+
