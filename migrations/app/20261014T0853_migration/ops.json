@@ -1,0 +1,1487 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.AgeRange",
+    "label": "Create enum type \"AgeRange\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "AgeRange"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"AgeRange\"",
+        "sql": "CREATE TYPE \"public\".\"AgeRange\" AS ENUM ('UNDER_18', 'ADULT')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.LetterStatus",
+    "label": "Create enum type \"LetterStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "LetterStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"LetterStatus\"",
+        "sql": "CREATE TYPE \"public\".\"LetterStatus\" AS ENUM ('DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'ROUTED_TO_SUPPORT')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.MatchStatus",
+    "label": "Create enum type \"MatchStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "MatchStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"MatchStatus\"",
+        "sql": "CREATE TYPE \"public\".\"MatchStatus\" AS ENUM ('OFFERED', 'RESPONDED', 'SKIPPED', 'EXPIRED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.ModerationTargetType",
+    "label": "Create enum type \"ModerationTargetType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "ModerationTargetType"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"ModerationTargetType\"",
+        "sql": "CREATE TYPE \"public\".\"ModerationTargetType\" AS ENUM ('LETTER', 'REPLY', 'USER', 'SUPPORT_RESOURCE')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.ReplyStatus",
+    "label": "Create enum type \"ReplyStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "ReplyStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"ReplyStatus\"",
+        "sql": "CREATE TYPE \"public\".\"ReplyStatus\" AS ENUM ('PENDING', 'APPROVED', 'REJECTED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.ReplyType",
+    "label": "Create enum type \"ReplyType\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "ReplyType"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"ReplyType\"",
+        "sql": "CREATE TYPE \"public\".\"ReplyType\" AS ENUM ('COMFORT', 'ADVICE', 'SIMILAR_EXPERIENCES', 'JUST_BEING_HEARD')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.RiskLevel",
+    "label": "Create enum type \"RiskLevel\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "RiskLevel"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"RiskLevel\"",
+        "sql": "CREATE TYPE \"public\".\"RiskLevel\" AS ENUM ('NORMAL', 'SENSITIVE', 'HIGH', 'BLOCKED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.Feedback",
+    "label": "Create table \"Feedback\"",
+    "summary": "Creates table \"Feedback\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Feedback"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Feedback\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Feedback\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Feedback\"",
+        "sql": "CREATE TABLE \"public\".\"Feedback\" (\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"feltUnderstood\" bool DEFAULT false NOT NULL,\n  \"fromUserId\" text NOT NULL,\n  \"helpful\" bool DEFAULT false NOT NULL,\n  \"id\" text NOT NULL,\n  \"replyId\" text NOT NULL,\n  \"reportReason\" text,\n  \"tooJudgmental\" bool DEFAULT false NOT NULL,\n  \"tooMuchAdvice\" bool DEFAULT false NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Feedback\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Feedback\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Letter",
+    "label": "Create table \"Letter\"",
+    "summary": "Creates table \"Letter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Letter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Letter\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Letter\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Letter\"",
+        "sql": "CREATE TABLE \"public\".\"Letter\" (\n  \"authorId\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"desiredReplyType\" \"ReplyType\" NOT NULL,\n  \"emotionTags\" text[],\n  \"id\" text NOT NULL,\n  \"language\" text NOT NULL,\n  \"maxReplies\" int4 DEFAULT 7 NOT NULL,\n  \"processedText\" text NOT NULL,\n  \"rawText\" text NOT NULL,\n  \"riskLevel\" \"RiskLevel\" NOT NULL,\n  \"situationTags\" text[],\n  \"status\" \"LetterStatus\" DEFAULT 'DRAFT'::\"LetterStatus\" NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Letter\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Letter\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.LetterComment",
+    "label": "Create table \"LetterComment\"",
+    "summary": "Creates table \"LetterComment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "LetterComment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"LetterComment\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LetterComment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"LetterComment\"",
+        "sql": "CREATE TABLE \"public\".\"LetterComment\" (\n  \"authorId\" text NOT NULL,\n  \"content\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"letterId\" text NOT NULL,\n  \"selectedText\" text NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"LetterComment\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LetterComment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Match",
+    "label": "Create table \"Match\"",
+    "summary": "Creates table \"Match\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Match"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Match\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Match\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Match\"",
+        "sql": "CREATE TABLE \"public\".\"Match\" (\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"letterId\" text NOT NULL,\n  \"matchReason\" text NOT NULL,\n  \"responderId\" text NOT NULL,\n  \"status\" \"MatchStatus\" DEFAULT 'OFFERED'::\"MatchStatus\" NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Match\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Match\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.ModerationEvent",
+    "label": "Create table \"ModerationEvent\"",
+    "summary": "Creates table \"ModerationEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "ModerationEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"ModerationEvent\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ModerationEvent\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"ModerationEvent\"",
+        "sql": "CREATE TABLE \"public\".\"ModerationEvent\" (\n  \"action\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"newStatus\" text,\n  \"previousStatus\" text,\n  \"reason\" text,\n  \"targetId\" text NOT NULL,\n  \"targetType\" \"ModerationTargetType\" NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"ModerationEvent\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ModerationEvent\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.Reply",
+    "label": "Create table \"Reply\"",
+    "summary": "Creates table \"Reply\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Reply"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Reply\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Reply\"",
+        "sql": "CREATE TABLE \"public\".\"Reply\" (\n  \"coachedText\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"letterId\" text NOT NULL,\n  \"rawText\" text NOT NULL,\n  \"responderId\" text NOT NULL,\n  \"status\" \"ReplyStatus\" DEFAULT 'PENDING'::\"ReplyStatus\" NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Reply\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.SupportResource",
+    "label": "Create table \"SupportResource\"",
+    "summary": "Creates table \"SupportResource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "SupportResource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"SupportResource\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"SupportResource\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"SupportResource\"",
+        "sql": "CREATE TABLE \"public\".\"SupportResource\" (\n  \"active\" bool DEFAULT true NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"description\" text NOT NULL,\n  \"id\" text NOT NULL,\n  \"language\" text NOT NULL,\n  \"phone\" text,\n  \"region\" text NOT NULL,\n  \"title\" text NOT NULL,\n  \"updatedAt\" timestamp(3) NOT NULL,\n  \"url\" text,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"SupportResource\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"SupportResource\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.User",
+    "label": "Create table \"User\"",
+    "summary": "Creates table \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"User\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"User\"",
+        "sql": "CREATE TABLE \"public\".\"User\" (\n  \"ageRange\" \"AgeRange\" NOT NULL,\n  \"anonymousHandle\" text NOT NULL,\n  \"createdAt\" timestamp(3) DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"language\" text NOT NULL,\n  \"migrationCode\" text,\n  \"preferredReplyType\" \"ReplyType\" NOT NULL,\n  \"recentIps\" jsonb DEFAULT '[]'::jsonb NOT NULL,\n  \"suspendedAt\" timestamp(3),\n  \"themePreference\" text DEFAULT 'system' NOT NULL,\n  \"trustScore\" int4 DEFAULT 50 NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"User\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Feedback.Feedback_replyId_fromUserId_key",
+    "label": "Create index \"Feedback_replyId_fromUserId_key\" on \"Feedback\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Feedback_replyId_fromUserId_key",
+        "table": "Feedback"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Feedback_replyId_fromUserId_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Feedback_replyId_fromUserId_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Feedback_replyId_fromUserId_key\"",
+        "sql": "CREATE UNIQUE INDEX \"Feedback_replyId_fromUserId_key\" ON \"public\".\"Feedback\" (\"replyId\", \"fromUserId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Feedback_replyId_fromUserId_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Feedback_replyId_fromUserId_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Feedback.Feedback_reportReason_idx",
+    "label": "Create index \"Feedback_reportReason_idx\" on \"Feedback\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Feedback_reportReason_idx",
+        "table": "Feedback"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Feedback_reportReason_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Feedback_reportReason_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Feedback_reportReason_idx\"",
+        "sql": "CREATE INDEX \"Feedback_reportReason_idx\" ON \"public\".\"Feedback\" (\"reportReason\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Feedback_reportReason_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Feedback_reportReason_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Letter.Letter_authorId_createdAt_idx",
+    "label": "Create index \"Letter_authorId_createdAt_idx\" on \"Letter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Letter_authorId_createdAt_idx",
+        "table": "Letter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Letter_authorId_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Letter_authorId_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Letter_authorId_createdAt_idx\"",
+        "sql": "CREATE INDEX \"Letter_authorId_createdAt_idx\" ON \"public\".\"Letter\" (\"authorId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Letter_authorId_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Letter_authorId_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Letter.Letter_status_riskLevel_maxReplies_createdAt_idx",
+    "label": "Create index \"Letter_status_riskLevel_maxReplies_createdAt_idx\" on \"Letter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Letter_status_riskLevel_maxReplies_createdAt_idx",
+        "table": "Letter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Letter_status_riskLevel_maxReplies_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Letter_status_riskLevel_maxReplies_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Letter_status_riskLevel_maxReplies_createdAt_idx\"",
+        "sql": "CREATE INDEX \"Letter_status_riskLevel_maxReplies_createdAt_idx\" ON \"public\".\"Letter\" (\"status\", \"riskLevel\", \"maxReplies\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Letter_status_riskLevel_maxReplies_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Letter_status_riskLevel_maxReplies_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.LetterComment.LetterComment_authorId_createdAt_idx",
+    "label": "Create index \"LetterComment_authorId_createdAt_idx\" on \"LetterComment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "LetterComment_authorId_createdAt_idx",
+        "table": "LetterComment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"LetterComment_authorId_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LetterComment_authorId_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"LetterComment_authorId_createdAt_idx\"",
+        "sql": "CREATE INDEX \"LetterComment_authorId_createdAt_idx\" ON \"public\".\"LetterComment\" (\"authorId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"LetterComment_authorId_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LetterComment_authorId_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.LetterComment.LetterComment_letterId_createdAt_idx",
+    "label": "Create index \"LetterComment_letterId_createdAt_idx\" on \"LetterComment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "LetterComment_letterId_createdAt_idx",
+        "table": "LetterComment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"LetterComment_letterId_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LetterComment_letterId_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"LetterComment_letterId_createdAt_idx\"",
+        "sql": "CREATE INDEX \"LetterComment_letterId_createdAt_idx\" ON \"public\".\"LetterComment\" (\"letterId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"LetterComment_letterId_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"LetterComment_letterId_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Match.Match_letterId_responderId_key",
+    "label": "Create index \"Match_letterId_responderId_key\" on \"Match\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Match_letterId_responderId_key",
+        "table": "Match"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Match_letterId_responderId_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Match_letterId_responderId_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Match_letterId_responderId_key\"",
+        "sql": "CREATE UNIQUE INDEX \"Match_letterId_responderId_key\" ON \"public\".\"Match\" (\"letterId\", \"responderId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Match_letterId_responderId_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Match_letterId_responderId_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Match.Match_responderId_status_idx",
+    "label": "Create index \"Match_responderId_status_idx\" on \"Match\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Match_responderId_status_idx",
+        "table": "Match"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Match_responderId_status_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Match_responderId_status_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Match_responderId_status_idx\"",
+        "sql": "CREATE INDEX \"Match_responderId_status_idx\" ON \"public\".\"Match\" (\"responderId\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Match_responderId_status_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Match_responderId_status_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ModerationEvent.ModerationEvent_createdAt_idx",
+    "label": "Create index \"ModerationEvent_createdAt_idx\" on \"ModerationEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ModerationEvent_createdAt_idx",
+        "table": "ModerationEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ModerationEvent_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ModerationEvent_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ModerationEvent_createdAt_idx\"",
+        "sql": "CREATE INDEX \"ModerationEvent_createdAt_idx\" ON \"public\".\"ModerationEvent\" (\"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ModerationEvent_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ModerationEvent_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ModerationEvent.ModerationEvent_targetType_targetId_createdAt_idx",
+    "label": "Create index \"ModerationEvent_targetType_targetId_createdAt_idx\" on \"ModerationEvent\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ModerationEvent_targetType_targetId_createdAt_idx",
+        "table": "ModerationEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ModerationEvent_targetType_targetId_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ModerationEvent_targetType_targetId_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ModerationEvent_targetType_targetId_createdAt_idx\"",
+        "sql": "CREATE INDEX \"ModerationEvent_targetType_targetId_createdAt_idx\" ON \"public\".\"ModerationEvent\" (\"targetType\", \"targetId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ModerationEvent_targetType_targetId_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ModerationEvent_targetType_targetId_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Reply.Reply_letterId_status_idx",
+    "label": "Create index \"Reply_letterId_status_idx\" on \"Reply\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Reply_letterId_status_idx",
+        "table": "Reply"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Reply_letterId_status_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply_letterId_status_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Reply_letterId_status_idx\"",
+        "sql": "CREATE INDEX \"Reply_letterId_status_idx\" ON \"public\".\"Reply\" (\"letterId\", \"status\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Reply_letterId_status_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply_letterId_status_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Reply.Reply_responderId_createdAt_idx",
+    "label": "Create index \"Reply_responderId_createdAt_idx\" on \"Reply\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Reply_responderId_createdAt_idx",
+        "table": "Reply"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Reply_responderId_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply_responderId_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Reply_responderId_createdAt_idx\"",
+        "sql": "CREATE INDEX \"Reply_responderId_createdAt_idx\" ON \"public\".\"Reply\" (\"responderId\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Reply_responderId_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply_responderId_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Reply.Reply_status_createdAt_idx",
+    "label": "Create index \"Reply_status_createdAt_idx\" on \"Reply\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Reply_status_createdAt_idx",
+        "table": "Reply"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Reply_status_createdAt_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply_status_createdAt_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Reply_status_createdAt_idx\"",
+        "sql": "CREATE INDEX \"Reply_status_createdAt_idx\" ON \"public\".\"Reply\" (\"status\", \"createdAt\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Reply_status_createdAt_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Reply_status_createdAt_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.SupportResource.SupportResource_active_language_region_idx",
+    "label": "Create index \"SupportResource_active_language_region_idx\" on \"SupportResource\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "SupportResource_active_language_region_idx",
+        "table": "SupportResource"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"SupportResource_active_language_region_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"SupportResource_active_language_region_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"SupportResource_active_language_region_idx\"",
+        "sql": "CREATE INDEX \"SupportResource_active_language_region_idx\" ON \"public\".\"SupportResource\" (\"active\", \"language\", \"region\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"SupportResource_active_language_region_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"SupportResource_active_language_region_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.User.User_anonymousHandle_key",
+    "label": "Create index \"User_anonymousHandle_key\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_anonymousHandle_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_anonymousHandle_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_anonymousHandle_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_anonymousHandle_key\"",
+        "sql": "CREATE UNIQUE INDEX \"User_anonymousHandle_key\" ON \"public\".\"User\" (\"anonymousHandle\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_anonymousHandle_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_anonymousHandle_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.User.User_migrationCode_key",
+    "label": "Create index \"User_migrationCode_key\" on \"User\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "User_migrationCode_key",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"User_migrationCode_key\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_migrationCode_key\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"User_migrationCode_key\"",
+        "sql": "CREATE UNIQUE INDEX \"User_migrationCode_key\" ON \"public\".\"User\" (\"migrationCode\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"User_migrationCode_key\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"User_migrationCode_key\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Feedback.Feedback_replyId_fkey",
+    "label": "Add foreign key \"Feedback_replyId_fkey\" on \"Feedback\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Feedback_replyId_fkey",
+        "table": "Feedback"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Feedback_replyId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Feedback_replyId_fkey",
+          "public",
+          "\"public\".\"Feedback\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Feedback_replyId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Feedback\"\nADD CONSTRAINT \"Feedback_replyId_fkey\"\nFOREIGN KEY (\"replyId\")\nREFERENCES \"public\".\"Reply\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Feedback_replyId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Feedback_replyId_fkey",
+          "public",
+          "\"public\".\"Feedback\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Feedback.Feedback_fromUserId_fkey",
+    "label": "Add foreign key \"Feedback_fromUserId_fkey\" on \"Feedback\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Feedback_fromUserId_fkey",
+        "table": "Feedback"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Feedback_fromUserId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Feedback_fromUserId_fkey",
+          "public",
+          "\"public\".\"Feedback\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Feedback_fromUserId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Feedback\"\nADD CONSTRAINT \"Feedback_fromUserId_fkey\"\nFOREIGN KEY (\"fromUserId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Feedback_fromUserId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Feedback_fromUserId_fkey",
+          "public",
+          "\"public\".\"Feedback\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Letter.Letter_authorId_fkey",
+    "label": "Add foreign key \"Letter_authorId_fkey\" on \"Letter\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Letter_authorId_fkey",
+        "table": "Letter"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Letter_authorId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Letter_authorId_fkey",
+          "public",
+          "\"public\".\"Letter\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Letter_authorId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Letter\"\nADD CONSTRAINT \"Letter_authorId_fkey\"\nFOREIGN KEY (\"authorId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Letter_authorId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Letter_authorId_fkey",
+          "public",
+          "\"public\".\"Letter\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.LetterComment.LetterComment_letterId_fkey",
+    "label": "Add foreign key \"LetterComment_letterId_fkey\" on \"LetterComment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "LetterComment_letterId_fkey",
+        "table": "LetterComment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"LetterComment_letterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LetterComment_letterId_fkey",
+          "public",
+          "\"public\".\"LetterComment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"LetterComment_letterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"LetterComment\"\nADD CONSTRAINT \"LetterComment_letterId_fkey\"\nFOREIGN KEY (\"letterId\")\nREFERENCES \"public\".\"Letter\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"LetterComment_letterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LetterComment_letterId_fkey",
+          "public",
+          "\"public\".\"LetterComment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.LetterComment.LetterComment_authorId_fkey",
+    "label": "Add foreign key \"LetterComment_authorId_fkey\" on \"LetterComment\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "LetterComment_authorId_fkey",
+        "table": "LetterComment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"LetterComment_authorId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LetterComment_authorId_fkey",
+          "public",
+          "\"public\".\"LetterComment\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"LetterComment_authorId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"LetterComment\"\nADD CONSTRAINT \"LetterComment_authorId_fkey\"\nFOREIGN KEY (\"authorId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"LetterComment_authorId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "LetterComment_authorId_fkey",
+          "public",
+          "\"public\".\"LetterComment\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Match.Match_letterId_fkey",
+    "label": "Add foreign key \"Match_letterId_fkey\" on \"Match\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Match_letterId_fkey",
+        "table": "Match"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Match_letterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Match_letterId_fkey",
+          "public",
+          "\"public\".\"Match\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Match_letterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Match\"\nADD CONSTRAINT \"Match_letterId_fkey\"\nFOREIGN KEY (\"letterId\")\nREFERENCES \"public\".\"Letter\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Match_letterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Match_letterId_fkey",
+          "public",
+          "\"public\".\"Match\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Match.Match_responderId_fkey",
+    "label": "Add foreign key \"Match_responderId_fkey\" on \"Match\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Match_responderId_fkey",
+        "table": "Match"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Match_responderId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Match_responderId_fkey",
+          "public",
+          "\"public\".\"Match\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Match_responderId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Match\"\nADD CONSTRAINT \"Match_responderId_fkey\"\nFOREIGN KEY (\"responderId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Match_responderId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Match_responderId_fkey",
+          "public",
+          "\"public\".\"Match\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Reply.Reply_letterId_fkey",
+    "label": "Add foreign key \"Reply_letterId_fkey\" on \"Reply\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Reply_letterId_fkey",
+        "table": "Reply"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Reply_letterId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Reply_letterId_fkey",
+          "public",
+          "\"public\".\"Reply\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Reply_letterId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Reply\"\nADD CONSTRAINT \"Reply_letterId_fkey\"\nFOREIGN KEY (\"letterId\")\nREFERENCES \"public\".\"Letter\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Reply_letterId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Reply_letterId_fkey",
+          "public",
+          "\"public\".\"Reply\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Reply.Reply_responderId_fkey",
+    "label": "Add foreign key \"Reply_responderId_fkey\" on \"Reply\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Reply_responderId_fkey",
+        "table": "Reply"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Reply_responderId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Reply_responderId_fkey",
+          "public",
+          "\"public\".\"Reply\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Reply_responderId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Reply\"\nADD CONSTRAINT \"Reply_responderId_fkey\"\nFOREIGN KEY (\"responderId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE\nON UPDATE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Reply_responderId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Reply_responderId_fkey",
+          "public",
+          "\"public\".\"Reply\""
+        ]
+      }
+    ]
+  }
+]

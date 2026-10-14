@@ -72,11 +72,11 @@ if (-not $isPortOpen) {
             Write-Host "[INFO] Starting existing 46hz-postgres container..." -ForegroundColor Green
             & $cli start 46hz-postgres
         } else {
-            Write-Host "[INFO] Creating and launching 46hz-postgres container..." -ForegroundColor Green
+            Write-Host "[INFO] Creating and launching 46hz-postgres container (PostgreSQL 19 Beta)..." -ForegroundColor Green
             & $cli run -d --name 46hz-postgres -p 127.0.0.1:5432:5432 `
                 -e POSTGRES_USER=46hz -e POSTGRES_PASSWORD=46hz -e POSTGRES_DB=46hz_letterbox `
                 -v 46hz_postgres_data:/var/lib/postgresql/data `
-                postgres:16-alpine
+                postgres:19beta4-alpine3.24
         }
     } elseif ($hasDocker) {
         Write-Host "[INFO] Managing container with Docker CLI..." -ForegroundColor Cyan
@@ -87,7 +87,7 @@ if (-not $isPortOpen) {
             docker run -d --name 46hz-postgres -p 127.0.0.1:5432:5432 `
                 -e POSTGRES_USER=46hz -e POSTGRES_PASSWORD=46hz -e POSTGRES_DB=46hz_letterbox `
                 -v 46hz_postgres_data:/var/lib/postgresql/data `
-                postgres:16-alpine
+                postgres:19beta4-alpine3.24
         }
     } else {
         Write-Host "[ERROR] Neither WSLC nor Docker CLI was found, and PostgreSQL is not listening on 5432." -ForegroundColor Red
@@ -118,7 +118,7 @@ if (-not $isPortOpen) {
 
 # 3. Synchronize Prisma Schema
 Write-Host "`n[2/4] Verifying Prisma Client and Schema sync..." -ForegroundColor White
-& npx prisma generate
+& npx prisma7 generate
 if ($LASTEXITCODE -ne 0) {
     Write-Host "[ERROR] Prisma generate failed." -ForegroundColor Red
     exit 1

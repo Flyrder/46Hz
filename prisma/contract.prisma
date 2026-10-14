@@ -1,0 +1,190 @@
+// use prisma-8
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AgeRange {
+  UNDER_18
+  ADULT
+}
+
+enum ReplyType {
+  COMFORT
+  ADVICE
+  SIMILAR_EXPERIENCES
+  JUST_BEING_HEARD
+}
+
+enum RiskLevel {
+  NORMAL
+  SENSITIVE
+  HIGH
+  BLOCKED
+}
+
+enum LetterStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  ROUTED_TO_SUPPORT
+}
+
+enum ReplyStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MatchStatus {
+  OFFERED
+  RESPONDED
+  SKIPPED
+  EXPIRED
+}
+
+enum ModerationTargetType {
+  LETTER
+  REPLY
+  USER
+  SUPPORT_RESOURCE
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  anonymousHandle    String    @unique
+  migrationCode      String?   @unique
+  language           String
+  themePreference    String    @default("system")
+  ageRange           AgeRange
+  preferredReplyType ReplyType
+  trustScore         Int       @default(50)
+  suspendedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  recentIps          Json      @default("[]")
+
+  letters            Letter[]  @relation("LetterAuthor")
+  replies            Reply[]   @relation("ReplyResponder")
+  matches            Match[]
+  feedback           Feedback[]
+  comments           LetterComment[]
+}
+
+model Letter {
+  id               String       @id @default(cuid())
+  authorId         String
+  author           User         @relation("LetterAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  rawText          String
+  processedText    String
+  emotionTags      String[]
+  situationTags    String[]
+  desiredReplyType ReplyType
+  riskLevel        RiskLevel
+  language         String
+  status           LetterStatus @default(DRAFT)
+  maxReplies       Int          @default(7)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  replies          Reply[]
+  matches          Match[]
+  comments         LetterComment[]
+
+  @@index([status, riskLevel, maxReplies, createdAt])
+  @@index([authorId, createdAt])
+}
+
+model Reply {
+  id          String      @id @default(cuid())
+  letterId    String
+  letter      Letter      @relation(fields: [letterId], references: [id], onDelete: Cascade)
+  responderId String
+  responder   User        @relation("ReplyResponder", fields: [responderId], references: [id], onDelete: Cascade)
+  rawText     String
+  coachedText String
+  status      ReplyStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  feedback    Feedback[]
+
+  @@index([status, createdAt])
+  @@index([letterId, status])
+  @@index([responderId, createdAt])
+}
+
+model Match {
+  id          String      @id @default(cuid())
+  letterId    String
+  letter      Letter      @relation(fields: [letterId], references: [id], onDelete: Cascade)
+  responderId String
+  responder   User        @relation(fields: [responderId], references: [id], onDelete: Cascade)
+  status      MatchStatus @default(OFFERED)
+  matchReason String
+  createdAt   DateTime    @default(now())
+
+  @@unique([letterId, responderId])
+  @@index([responderId, status])
+}
+
+model Feedback {
+  id              String   @id @default(cuid())
+  replyId         String
+  reply           Reply    @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  fromUserId      String
+  fromUser        User     @relation(fields: [fromUserId], references: [id], onDelete: Cascade)
+  feltUnderstood  Boolean  @default(false)
+  helpful         Boolean  @default(false)
+  tooJudgmental   Boolean  @default(false)
+  tooMuchAdvice   Boolean  @default(false)
+  reportReason    String?
+  createdAt       DateTime @default(now())
+
+  @@unique([replyId, fromUserId])
+  @@index([reportReason])
+}
+
+model ModerationEvent {
+  id             String               @id @default(cuid())
+  targetType     ModerationTargetType
+  targetId       String
+  action         String
+  reason         String?
+  previousStatus String?
+  newStatus      String?
+  createdAt      DateTime             @default(now())
+
+  @@index([targetType, targetId, createdAt])
+  @@index([createdAt])
+}
+
+model SupportResource {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  region      String
+  language    String
+  url         String?
+  phone       String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([active, language, region])
+}
+
+model LetterComment {
+  id           String   @id @default(cuid())
+  letterId     String
+  letter       Letter   @relation(fields: [letterId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  selectedText String
+  content      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([letterId, createdAt])
+  @@index([authorId, createdAt])
+}
