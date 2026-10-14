@@ -252,6 +252,7 @@ export const zhCN: Translations = {
   "common.copied": "已复制！",
   "common.errorTitle": "出现了一些问题",
   "common.returnHome": "返回首页",
+  "common.retry": "重试",
 
   "admin.navMetrics": "运营指标",
   "admin.navLetters": "信件管理",
@@ -525,5 +526,10 @@ export const zhCN: Translations = {
   "common.langEn": "English",
   "common.characterCount": "{count} 字",
   "write.aiSparksRecommendedTags": "推荐情绪标签:",
-  "comment.highlightedQuoteTitle": "已添加笔记的句子"
+  "comment.highlightedQuoteTitle": "已添加笔记的句子",
+  "nav.reply": "浏览回信",
+  "notfound.title": "迷路的信件",
+  "notfound.desc": "您寻找的信件或页面可能已被静静归档或移至保密箱。",
+  "notfound.returnInbox": "返回我的信箱",
+  "notfound.returnHome": "返回首页"
 };

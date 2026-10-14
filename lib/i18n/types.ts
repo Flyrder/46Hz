@@ -203,6 +203,7 @@ export type TranslationKey =
   | "common.copied"
   | "common.errorTitle"
   | "common.returnHome"
+  | "common.retry"
   | "admin.navMetrics"
   | "admin.navLetters"
   | "admin.navReplies"
@@ -455,6 +456,11 @@ export type TranslationKey =
   | "common.langEn"
   | "common.characterCount"
   | "write.aiSparksRecommendedTags"
-  | "comment.highlightedQuoteTitle";
+  | "comment.highlightedQuoteTitle"
+  | "nav.reply"
+  | "notfound.title"
+  | "notfound.desc"
+  | "notfound.returnInbox"
+  | "notfound.returnHome";
 
 export type Translations = Record<TranslationKey, string>;

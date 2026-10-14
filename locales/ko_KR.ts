@@ -250,6 +250,7 @@ export const koKR: Translations = {
   "common.copied": "복사됨!",
   "common.errorTitle": "문제가 발생했습니다",
   "common.returnHome": "홈으로 돌아가기",
+  "common.retry": "다시 시도하기",
 
   "admin.navMetrics": "지표",
   "admin.navLetters": "편지",
@@ -523,5 +524,10 @@ export const koKR: Translations = {
   "common.langEn": "English",
   "common.characterCount": "{count}자",
   "write.aiSparksRecommendedTags": "추천 감정 태그:",
-  "comment.highlightedQuoteTitle": "코멘트가 작성된 구절"
+  "comment.highlightedQuoteTitle": "코멘트가 작성된 구절",
+  "nav.reply": "답장 둘러보기",
+  "notfound.title": "길을 잃은 편지",
+  "notfound.desc": "찾으시는 편지나 페이지가 이미 조용히 회수되었거나, 보관함으로 이동했을 수 있습니다.",
+  "notfound.returnInbox": "나의 편지함으로",
+  "notfound.returnHome": "홈으로 돌아가기"
 };

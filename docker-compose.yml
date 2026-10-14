@@ -1,17 +1,47 @@
 services:
   postgres:
-    # postgres:16 is a multi-platform official image supporting both linux/amd64 and linux/arm64
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: 46hz-letterbox-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-46hz}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-46hz}
       POSTGRES_DB: ${POSTGRES_DB:-46hz_letterbox}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-46hz} -d ${POSTGRES_DB:-46hz_letterbox}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/flyrder/46hz:v0.1.0
+    container_name: 46hz-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-46hz}:${POSTGRES_PASSWORD:-46hz}@postgres:5432/${POSTGRES_DB:-46hz_letterbox}?schema=public
+      PORT: 3000
+      NODE_ENV: production
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      ADMIN_PASSCODE: ${ADMIN_PASSCODE:-local-admin}
+      MODERATOR_PASSCODE: ${MODERATOR_PASSCODE:-local-moderator}
+    ports:
+      - "${PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   postgres-data:

@@ -257,6 +257,7 @@ export const enUS: Translations = {
   "common.copied": "Copied!",
   "common.errorTitle": "Something needs attention",
   "common.returnHome": "Return home",
+  "common.retry": "Try again",
 
   "admin.navMetrics": "Metrics",
   "admin.navLetters": "Letters",
@@ -530,5 +531,10 @@ export const enUS: Translations = {
   "common.langEn": "English",
   "common.characterCount": "{count} chars",
   "write.aiSparksRecommendedTags": "Recommended Tags:",
-  "comment.highlightedQuoteTitle": "Highlighted passage"
+  "comment.highlightedQuoteTitle": "Highlighted passage",
+  "nav.reply": "Browse Letters",
+  "notfound.title": "Letter Not Found",
+  "notfound.desc": "The letter or page you are looking for may have been quietly archived or removed.",
+  "notfound.returnInbox": "Back to Inbox",
+  "notfound.returnHome": "Return Home"
 };
