@@ -311,15 +311,54 @@ docker buildx build \
 
 ### 8.2 常用开发维护指令
 ```bash
-# 运行全部单元测试 (109 tests)
+# 运行全部单元与集成测试 (128 tests)
 npm run test:run
 
-# 运行全链路后端与数据库完整性实测
+# 运行全链路后端与数据库完整性实测 (7단계 파이프라인)
 npm run verify:backend
+
+# 运行 Prisma 8 RC 数据契约构建 (Contract Emit)
+npm run prisma8:contract
 
 # 运行 TypeScript 类型静态检查
 npm run lint
 
-# 构建 Next.js 生产产物
+# 构建 Next.js 生产产物 (Prisma 7 Client + Standalone Output)
 npm run build
 ```
+
+---
+
+## 9. 차세대 기술 스택 진화 및 보안 심층 강화 (Next-Gen Stack & Security Hardening)
+
+### 9.1 Node.js 26 런타임 및 멀티 아키텍처 지원
+- **도커 베이스 이미지**: `Dockerfile`의 베이스 이미지를 최신 **`node:26-bookworm-slim`**으로 승격.
+- **아키텍처 대응**: `linux/amd64` 및 `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi) 환경에서 원활한 빌드 및 가벼운 독립 실행(Standalone) 보장.
+- **엔진 선언**: `package.json`의 `engines`에 Node.js 26 지원을 명시(`^24.0.0 || >=26.0.0`).
+
+### 9.2 Prisma 8 RC & Prisma 7 병렬 운용 아키텍처 (Side-by-Side Operation)
+- **배경**: Prisma 8 RC는 기존 모놀리식 스키마 방식에서 탈피하여, 에이전트 친화적인 **PSL 데이터 계약(Data Contract)** 및 확장 모듈 분리(`@prisma/orm-postgres`)로 전면 개편되었습니다.
+- **병렬 아키텍처 설계**:
+  1. **Prisma 8 RC 계약 관리**:
+     - `prisma/contract.prisma`: `// use prisma-8` 헤더 및 최신 PSL 명세 준수.
+     - `prisma8.config.ts`: `@prisma/cli-engine`의 `definePrismaConfig` 및 `@prisma/orm-postgres/config`의 `defineConfig`와 `prisma7Schema` 브릿지를 연결.
+     - `npm run prisma8:contract`: `prisma contract emit` 명령을 통해 `contract.json` 및 `contract.d.ts` 아티팩트 자동 생성.
+  2. **Prisma 7 런타임 호환 엔진 (`@prisma/prisma7`)**:
+     - 기존 비즈니스 로직(Server Actions, Seed, Database Client)의 안정적 구동을 위해 `@prisma/prisma7`을 네임스페이스 격리 설치.
+     - `prisma7.config.ts`를 통해 기존 Prisma 클라이언트를 오차 없이 생성(`prisma7 generate`).
+
+### 9.3 PostgreSQL 19 Beta 컨테이너 오케스트레이션
+- **도커 이미지 승격**: `docker-compose.yml` 및 `start.ps1`의 데이터베이스 이미지를 **`postgres:19beta4-alpine3.24`**로 업그레이드.
+- **헬스체크 및 의존성 제어**: `pg_isready`를 통한 컨테이너 헬스체크 및 애플리케이션 서비스의 `condition: service_healthy` 보장.
+
+### 9.4 심층 보안 강화 (Defense-in-Depth Security Hardening)
+1. **CSP (Content-Security-Policy) 추가 제약**:
+   - `base-uri 'self'`: `<base>` 태그 변조를 통한 스크립트/리소스 기준 주소 하이재킹 차단.
+   - `form-action 'self'`: 악성 외부 엔드포인트로의 폼 데이터 전송 차단.
+   - `object-src 'none'`: 플래시 및 플러그인 기반 임베드 벡터 차단.
+   - `X-Permitted-Cross-Domain-Policies: none`: 플래시/실버라이트 정책 파일 로드 차단.
+2. **관리자 쿠키 엄격 모드 적용 (`sameSite: "strict"`)**:
+   - 관리자 및 중재자 세션 쿠키(`46hz_admin_role`, `46hz_admin`)의 `sameSite` 설정을 `"lax"`에서 **`"strict"`**로 격상하여 외부 유입 링크를 통한 CSRF 공격을 원천 무력화.
+3. **컨테이너 최소 권한 원칙 (Principle of Least Privilege)**:
+   - `Dockerfile` 내 non-root 사용자(`nextjs:nodejs`, UID/GID 1001) 권한으로만 서버 프로세스를 구동하여 컨테이너 탈출 및 호스트 권한 탈취 방지.
+

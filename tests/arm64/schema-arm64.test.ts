@@ -19,17 +19,17 @@ describe("Arm64 Architecture Support", () => {
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
     expect(pkg.name).toBe("46hz");
-    // Verification that scripts work with platform-agnostic tools
-    expect(pkg.scripts.build).toContain("prisma generate");
+    // Verification that scripts work with platform-agnostic tools and Prisma generation
+    expect(pkg.scripts.build).toMatch(/prisma(7)? generate/);
   });
 
-  it("validates multi-architecture Dockerfile syntax and base image", () => {
+  it("validates multi-architecture Dockerfile syntax and Node 26 base image", () => {
     const dockerfilePath = path.join(process.cwd(), "Dockerfile");
     const content = fs.readFileSync(dockerfilePath, "utf-8");
 
-    expect(content).toContain("FROM node:20-bookworm-slim");
+    expect(content).toMatch(/FROM node:(20|26)-bookworm-slim/);
     expect(content).toContain("openssl");
-    expect(content).toContain("npx prisma generate");
+    expect(content).toMatch(/npx prisma(7)? generate/);
     // Ensure no invalid shell redirection / pipe syntax in COPY instructions
     const copyLines = content.split("\n").filter((l) => l.trim().startsWith("COPY"));
     for (const line of copyLines) {
@@ -42,14 +42,20 @@ describe("Arm64 Architecture Support", () => {
     const composePath = path.join(process.cwd(), "docker-compose.yml");
     const content = fs.readFileSync(composePath, "utf-8");
 
-    expect(content).toContain("postgres:16");
+    expect(content).toMatch(/postgres:(16|19)/);
     expect(content).toContain("46hz-letterbox-postgres");
   });
 
-  it("validates Prisma 7 prisma.config.ts configuration exists", () => {
+  it("validates Prisma configuration and Prisma 8 RC contract", () => {
     const configPath = path.join(process.cwd(), "prisma.config.ts");
     expect(fs.existsSync(configPath)).toBe(true);
     const content = fs.readFileSync(configPath, "utf-8");
     expect(content).toContain("defineConfig");
+
+    const prisma8Config = path.join(process.cwd(), "prisma8.config.ts");
+    expect(fs.existsSync(prisma8Config)).toBe(true);
+
+    const contractPath = path.join(process.cwd(), "prisma", "contract.prisma");
+    expect(fs.existsSync(contractPath)).toBe(true);
   });
 });

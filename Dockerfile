@@ -1,6 +1,6 @@
 # Multi-architecture Dockerfile for 46Hz Letterbox
-# Supports linux/amd64 and linux/arm64
-FROM node:20-bookworm-slim AS base
+# Supports linux/amd64 and linux/arm64 on Node.js 26
+FROM node:26-bookworm-slim AS base
 WORKDIR /app
 
 # Install OpenSSL for Prisma multi-arch binary engines
@@ -15,8 +15,8 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
-# Generate Prisma Client for multi-architecture targets
-RUN npx prisma generate
+# Generate Prisma Client using side-by-side architecture
+RUN npx prisma7 generate
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
@@ -35,8 +35,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/prisma7.config.ts ./prisma7.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/prisma8.config.ts ./prisma8.config.ts
 
-# Copy Prisma CLI for automated schema synchronization at startup
+# Copy Prisma CLI and side-by-side modules for schema synchronization at startup
 COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
