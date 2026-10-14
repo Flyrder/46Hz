@@ -199,6 +199,22 @@ settings.compliance.maxRecentIps;       // 세션당 최대 5개 IP 이력 제�
 
 ## 빠른 시작 가이드 (Quick Start)
 
+### 🥇 가장 간편한 방법: Docker Compose 원클릭 실행 (추천)
+
+Docker만 설치되어 있다면 Node.js나 데이터베이스 설정 없이 명령어 한 줄로 웹앱과 PostgreSQL 데이터베이스가 즉시 함께 구동됩니다:
+
+```bash
+docker compose up -d
+```
+
+- **웹 애플리케이션**: `http://localhost:3000`
+- **관리자 포털**: `http://localhost:3000/admin` (비밀번호: `local-admin` / 중재자: `local-moderator`)
+- **실시간 헬스 체크**: `http://localhost:3000/api/health`
+
+---
+
+### 🥈 로컬 개발 환경 실행: PowerShell 자동 런처 (Windows)
+
 Windows 환경에서는 PowerShell 자동 런처 스크립트를 사용하여 원클릭으로 구동할 수 있습니다:
 
 ```powershell
@@ -212,7 +228,7 @@ Windows 환경에서는 PowerShell 자동 런처 스크립트를 사용하여 �
 4. Prisma 클라이언트 생성 및 대기 중인 마이그레이션 적용
 5. Next.js 개발 서버 실행 (`http://localhost:3000`)
 
-### 런처 고급 실행 옵션:
+#### 런처 고급 실행 옵션:
 ```powershell
 .\start.ps1 -VerifyOnly   # 서버 실행 없이 7단계 백엔드 무결성 검증만 수행
 .\start.ps1 -Seed         # 기본 위기 자원 및 샘플 편지 데이터 시드 적용
