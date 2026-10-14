@@ -76,6 +76,9 @@ export function AppShell({
               <NavIcon href="/write" label={t("nav.write")}>
                 <PenLine className="h-4.5 w-4.5" aria-hidden="true" />
               </NavIcon>
+              <NavIcon href="/reply" label={t("nav.reply")}>
+                <HeartHandshake className="h-4.5 w-4.5" aria-hidden="true" />
+              </NavIcon>
               <NavIcon href="/inbox" label={t("nav.inbox")}>
                 <Inbox className="h-4.5 w-4.5" aria-hidden="true" />
               </NavIcon>
