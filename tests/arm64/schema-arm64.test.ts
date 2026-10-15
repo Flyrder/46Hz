@@ -3,15 +3,28 @@ import fs from "fs";
 import path from "path";
 
 describe("Arm64 Architecture Support", () => {
-  it("includes required Arm64 binary targets in prisma schema", () => {
+  it("includes required Arm64 and macOS binary targets in prisma schema", () => {
     const schemaPath = path.join(process.cwd(), "prisma", "schema.prisma");
     const content = fs.readFileSync(schemaPath, "utf-8");
 
     expect(content).toContain("linux-arm64-openssl-3.0.x");
     expect(content).toContain("linux-arm64-openssl-1.1.x");
     expect(content).toContain("linux-musl-arm64-openssl-3.0.x");
+    expect(content).toContain("darwin");
     expect(content).toContain("darwin-arm64");
     expect(content).toContain("native");
+  });
+
+  it("validates macOS and POSIX start.sh launcher script", () => {
+    const startShPath = path.join(process.cwd(), "start.sh");
+    expect(fs.existsSync(startShPath)).toBe(true);
+
+    const content = fs.readFileSync(startShPath, "utf-8");
+    expect(content).toMatch(/^#!\/usr\/bin\/env bash/);
+    expect(content).toContain("uname -s");
+    expect(content).toContain("46hz-postgres");
+    expect(content).toContain("prisma:generate");
+    expect(content).toContain("prisma:migrate");
   });
 
   it("package.json scripts avoid architecture-dependent binaries", () => {
@@ -21,6 +34,7 @@ describe("Arm64 Architecture Support", () => {
     expect(pkg.name).toBe("46hz");
     // Verification that scripts work with platform-agnostic tools and Prisma generation
     expect(pkg.scripts.build).toMatch(/prisma(7)? generate/);
+    expect(pkg.scripts["start:mac"]).toBe("./start.sh");
   });
 
   it("validates multi-architecture Dockerfile syntax and Node 26 base image", () => {
