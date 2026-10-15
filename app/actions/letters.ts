@@ -10,9 +10,15 @@ import { formValue, reviewLetterSchema, writeLetterSchema } from "@/lib/validato
 
 export async function processLetterAction(formData: FormData): Promise<void> {
   const user = await requireUser();
-  const input = writeLetterSchema.parse({
+  const parsed = writeLetterSchema.safeParse({
     rawText: formValue(formData, "rawText")
   });
+
+  if (!parsed.success) {
+    redirect("/write");
+  }
+
+  const input = parsed.data;
 
   const ai = getAiMiddleware();
   const result = await ai.processLetter({
@@ -40,10 +46,16 @@ export async function processLetterAction(formData: FormData): Promise<void> {
 
 export async function confirmLetterAction(formData: FormData): Promise<void> {
   const user = await requireUser();
-  const input = reviewLetterSchema.parse({
+  const parsed = reviewLetterSchema.safeParse({
     letterId: formValue(formData, "letterId"),
     processedText: formValue(formData, "processedText")
   });
+
+  if (!parsed.success) {
+    redirect("/write");
+  }
+
+  const input = parsed.data;
 
   const letter = await prisma.letter.findFirst({
     where: {
