@@ -15,6 +15,8 @@ import {
   History
 } from "lucide-react";
 
+import { useI18n } from "@/lib/i18n";
+
 type AdminNavLink = {
   href: string;
   labelKey: TranslationKey;
@@ -36,15 +38,17 @@ const links: AdminNavLink[] = [
 
 export function AdminNav({
   role,
-  t
+  t: customT
 }: {
   role?: AdminRole | null;
   t?: (key: string) => string;
 }) {
   const pathname = usePathname();
+  const { t: contextT } = useI18n();
+  const t = customT ?? contextT;
 
   return (
-    <nav aria-label={t ? t("admin.staffNavAria") : "Staff navigation"} className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+    <nav aria-label={t("admin.staffNavAria")} className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
       {links.map(({ href, labelKey, fallbackLabel, adminOnly, icon: Icon }) => {
         const isActive =
           href === "/admin"
@@ -55,7 +59,7 @@ export function AdminNav({
           <Link
             key={href}
             href={href}
-            className={`inline-flex min-h-[40px] items-center gap-2 whitespace-nowrap rounded-xl border px-3.5 py-2 text-xs font-semibold transition-all ${
+            className={`inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-xl border px-3.5 py-2 text-xs font-semibold transition-all ${
               isActive
                 ? "border-accent bg-accent/15 text-accent shadow-soft ring-1 ring-accent/30"
                 : "border-border/80 bg-surface text-muted-foreground hover:border-accent/40 hover:bg-muted/70 hover:text-foreground"

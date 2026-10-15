@@ -55,7 +55,7 @@ export default async function SupportResourcesPage({
       <SupportResourcesClient
         resources={resources}
         hotlines={DEFAULT_CRISIS_HOTLINES}
-        t={t}
+        locale={locale}
         isRoutedNotice={isRouted}
       />
     </section>

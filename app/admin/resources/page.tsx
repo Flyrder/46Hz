@@ -22,7 +22,7 @@ export default async function AdminResourcesPage() {
     return (
       <section className="mx-auto max-w-4xl py-2 sm:py-4">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("admin.resourcesTitle")}</h1>
-        <AdminNav role={role} t={t} />
+        <AdminNav role={role} />
         <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-8 text-center shadow-soft">
           <Shield className="mx-auto h-8 w-8 text-amber-600 dark:text-amber-400 mb-2" />
           <h2 className="text-lg font-bold text-foreground">{t("admin.adminRequiredTitle")}</h2>
@@ -57,7 +57,7 @@ export default async function AdminResourcesPage() {
         </div>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       {/* Add New Support Resource Form */}
       <form action={saveSupportResourceAction} className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">

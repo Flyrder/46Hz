@@ -174,3 +174,34 @@ input::placeholder {
 ::selection {
   background: hsl(var(--accent) / 0.22);
 }
+
+/* Mobile Safe Area & Touch Enhancements */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.75rem);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top, 0px), 0.75rem);
+}
+
+/* Modern smooth scrollbar hiding */
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* Prevent blue tap highlights and optimize mobile touch responses */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+}

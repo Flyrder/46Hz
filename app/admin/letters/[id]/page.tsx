@@ -41,7 +41,7 @@ export default async function AdminLetterDetailPage({
         </div>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Letter Inspection Card */}

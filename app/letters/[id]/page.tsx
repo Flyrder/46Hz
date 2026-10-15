@@ -73,7 +73,7 @@ export default async function LetterDetailPage({
               <time dateTime={new Date(letter.createdAt).toISOString()}>{formatDate(letter.createdAt)}</time>
             </div>
             {letter.authorId === user.id && (
-              <DeleteLetterButton letterId={letter.id} t={t} />
+              <DeleteLetterButton letterId={letter.id} />
             )}
           </div>
         </div>
@@ -104,7 +104,6 @@ export default async function LetterDetailPage({
         comments={letter.comments}
         currentUserId={user.id}
         letterAuthorId={letter.authorId}
-        t={t}
       />
 
       {/* Schumann Resonance Meter */}
@@ -177,20 +176,20 @@ export default async function LetterDetailPage({
                         {t("letter.replyFeedbackTitle")}
                       </div>
                       <div className="grid gap-2 sm:grid-cols-2">
-                        <label className="flex items-center gap-2 rounded-xl border border-border/70 p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/30 transition-colors">
-                          <input className="accent-accent h-4 w-4 rounded" name="feltUnderstood" type="checkbox" />
+                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                          <input className="accent-accent h-4.5 w-4.5 rounded" name="feltUnderstood" type="checkbox" />
                           <span>{t("feedback.feltUnderstood")}</span>
                         </label>
-                        <label className="flex items-center gap-2 rounded-xl border border-border/70 p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/30 transition-colors">
-                          <input className="accent-accent h-4 w-4 rounded" name="helpful" type="checkbox" />
+                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                          <input className="accent-accent h-4.5 w-4.5 rounded" name="helpful" type="checkbox" />
                           <span>{t("feedback.helpful")}</span>
                         </label>
-                        <label className="flex items-center gap-2 rounded-xl border border-border/70 p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/30 transition-colors">
-                          <input className="accent-accent h-4 w-4 rounded" name="tooJudgmental" type="checkbox" />
+                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                          <input className="accent-accent h-4.5 w-4.5 rounded" name="tooJudgmental" type="checkbox" />
                           <span>{t("feedback.judgmental")}</span>
                         </label>
-                        <label className="flex items-center gap-2 rounded-xl border border-border/70 p-2.5 text-xs text-foreground cursor-pointer hover:bg-muted/30 transition-colors">
-                          <input className="accent-accent h-4 w-4 rounded" name="tooMuchAdvice" type="checkbox" />
+                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                          <input className="accent-accent h-4.5 w-4.5 rounded" name="tooMuchAdvice" type="checkbox" />
                           <span>{t("feedback.tooMuchAdvice")}</span>
                         </label>
                       </div>
@@ -204,7 +203,7 @@ export default async function LetterDetailPage({
                           id={`report-${reply.id}`}
                           name="reportReason"
                           rows={2}
-                          className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-xs leading-relaxed outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/20"
+                          className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-base sm:text-xs leading-relaxed outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/20"
                           placeholder={t("common.optionalReason")}
                         />
                       </div>

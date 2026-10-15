@@ -158,7 +158,7 @@ export default async function AdminPage({
         </form>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       {/* Metrics Cards Grid */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

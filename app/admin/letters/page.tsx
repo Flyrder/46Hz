@@ -40,7 +40,7 @@ export default async function AdminLettersPage() {
         </div>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       <div className="space-y-4">
         {letters.map((letter) => (

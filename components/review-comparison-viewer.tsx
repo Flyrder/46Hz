@@ -3,18 +3,21 @@
 import { useState, useRef } from "react";
 import { ShieldCheck, FileText, SplitSquareVertical, Copy, RotateCcw, Check } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 
 interface ReviewComparisonViewerProps {
   rawText: string;
   initialProcessedText: string;
-  t: (key: string, values?: Record<string, string>) => string;
+  t?: (key: string, values?: Record<string, string>) => string;
 }
 
 export function ReviewComparisonViewer({
   rawText,
   initialProcessedText,
-  t
+  t: customT
 }: ReviewComparisonViewerProps) {
+  const { t: contextT } = useI18n();
+  const t = customT ?? contextT;
   const [activeTab, setActiveTab] = useState<"processed" | "raw" | "split">("processed");
   const [currentText, setCurrentText] = useState(initialProcessedText);
   const [copiedRaw, setCopiedRaw] = useState(false);

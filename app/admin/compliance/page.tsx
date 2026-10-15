@@ -71,7 +71,7 @@ export default async function AdminCompliancePage({
         </div>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       {/* Data Minimization Principle Charter */}
       <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">

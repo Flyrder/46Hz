@@ -89,7 +89,6 @@ export default async function ReviewLetterPage({
           <ReviewComparisonViewer
             rawText={letter.rawText}
             initialProcessedText={letter.processedText}
-            t={t}
           />
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-4">

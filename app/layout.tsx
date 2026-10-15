@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
-import { createTranslator } from "@/lib/i18n";
+import { createTranslator, I18nProvider } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 import { brandSettings } from "@/settings";
 
@@ -12,7 +12,8 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5
+  maximumScale: 5,
+  viewportFit: "cover"
 };
 
 export const metadata: Metadata = {
@@ -59,9 +60,11 @@ export default async function RootLayout({
   return (
     <html lang={locale.replace("_", "-")} className={`theme-${theme}`} suppressHydrationWarning>
       <body>
-        <AppShell locale={locale} theme={theme} t={t}>
-          {children}
-        </AppShell>
+        <I18nProvider locale={locale}>
+          <AppShell locale={locale} theme={theme} t={t}>
+            {children}
+          </AppShell>
+        </I18nProvider>
       </body>
     </html>
   );

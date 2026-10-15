@@ -37,7 +37,7 @@ export default async function ModerationLogPage() {
         </div>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       <div className="space-y-3">
         {events.map((event) => (
