@@ -17,6 +17,8 @@
     "prisma8:contract": "prisma contract emit --config ./prisma8.config.ts",
     "prisma8:plan": "prisma migration plan --config ./prisma8.config.ts",
     "prisma8:db": "prisma db --config ./prisma8.config.ts",
+    "start:mac": "./start.sh",
+    "start:mac:verify": "./start.sh --verify-only",
     "verify:backend": "tsx scripts/verify_backend.ts"
   },
   "dependencies": {
