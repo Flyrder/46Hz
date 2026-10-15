@@ -4,6 +4,8 @@ import { PreferenceForm } from "@/components/preference-form";
 import { localeOptions, type Locale } from "@/lib/i18n";
 import { themeOptions, type ThemePreference } from "@/lib/theme";
 
+import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+
 export function AppShell({
   children,
   locale,
@@ -19,7 +21,7 @@ export function AppShell({
   const brandTagline = t("shell.tagline");
 
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 pb-16 pt-3 sm:px-6 lg:px-8">
+    <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-3.5 pb-20 pt-2 sm:px-6 sm:pb-16 sm:pt-3 lg:px-8">
       {/* Skip to Main Content Link for Screen Readers (TalkBack / VoiceOver / Narrator) */}
       <a
         href="#main-content"
@@ -31,17 +33,17 @@ export function AppShell({
       {/* Sticky Header with Frosted Glass */}
       <header
         role="banner"
-        className="sticky top-0 z-30 -mx-4 border-b border-border/70 bg-background/85 px-4 py-3 backdrop-blur-md transition-colors sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+        className="sticky top-0 z-30 -mx-3.5 border-b border-border/70 bg-background/85 px-3.5 py-2.5 backdrop-blur-md transition-colors sm:-mx-6 sm:px-6 sm:py-3 lg:-mx-8 lg:px-8"
       >
         <nav
           aria-label="Main Navigation"
-          className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3"
+          className="mx-auto flex max-w-5xl items-center justify-between gap-2 sm:gap-3"
         >
           {/* Logo & Brand Identity */}
           <Link
             href="/"
             aria-label="46Hz Home"
-            className="group flex min-h-[44px] items-center gap-2.5 text-sm font-semibold rounded-xl pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            className="group flex min-h-[44px] items-center gap-2 text-sm font-semibold rounded-xl pr-2 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             <span className="grid h-8.5 w-8.5 place-items-center rounded-xl bg-accent text-accent-foreground shadow-xs transition-transform group-hover:scale-105 active:scale-95">
               <Waves className="h-4.5 w-4.5" aria-hidden="true" />
@@ -55,7 +57,7 @@ export function AppShell({
           </Link>
 
           {/* Controls & Nav Icons */}
-          <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-1.5 sm:gap-2">
             <PreferenceForm
               locale={locale}
               theme={theme}
@@ -68,8 +70,9 @@ export function AppShell({
               }))}
             />
 
+            {/* Desktop Navigation Toolbar */}
             <div
-              className="flex items-center gap-1 border-l border-border/60 pl-2"
+              className="hidden sm:flex items-center gap-1 border-l border-border/60 pl-2"
               role="toolbar"
               aria-label="Navigation actions"
             >
@@ -94,14 +97,17 @@ export function AppShell({
       </header>
 
       {/* Main Content Landmark */}
-      <main id="main-content" role="main" tabIndex={-1} className="flex-1 py-8 outline-none">
+      <main id="main-content" role="main" tabIndex={-1} className="flex-1 py-6 pb-28 sm:py-8 sm:pb-16 outline-none">
         {children}
       </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileBottomNav />
 
       {/* Barrier-Free Quiet Footer */}
       <footer
         role="contentinfo"
-        className="mt-16 border-t border-border/70 pt-8 text-xs text-muted-foreground"
+        className="mt-16 border-t border-border/70 pt-8 pb-12 sm:pb-0 text-xs text-muted-foreground"
       >
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { LetterContentViewer } from "@/components/letter-content-viewer";
 import { LetterPassageComments, CommentItem } from "@/components/letter-passage-comments";
+import { useI18n } from "@/lib/i18n";
 
 interface LetterInteractiveReaderProps {
   letterId: string;
@@ -13,7 +14,7 @@ interface LetterInteractiveReaderProps {
   comments: CommentItem[];
   currentUserId: string;
   letterAuthorId: string;
-  t: (key: string, values?: Record<string, string>) => string;
+  t?: (key: string, values?: Record<string, string>) => string;
 }
 
 export function LetterInteractiveReader({
@@ -25,8 +26,10 @@ export function LetterInteractiveReader({
   comments,
   currentUserId,
   letterAuthorId,
-  t
+  t: customT
 }: LetterInteractiveReaderProps) {
+  const { t: contextT } = useI18n();
+  const t = customT ?? contextT;
   const [prefilledSelectedText, setPrefilledSelectedText] = useState("");
 
   const highlightedQuotes = comments

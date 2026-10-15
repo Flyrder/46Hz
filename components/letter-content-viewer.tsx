@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ShieldCheck, FileText, SplitSquareVertical, Copy, Check, Eye, Quote, MessageSquareQuote } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface LetterContentViewerProps {
   processedText: string;
@@ -10,7 +11,7 @@ interface LetterContentViewerProps {
   maskContent: boolean;
   highlightedQuotes?: string[];
   onSelectPassage?: (quote: string) => void;
-  t: (key: string, values?: Record<string, string>) => string;
+  t?: (key: string, values?: Record<string, string>) => string;
 }
 
 function renderTextWithHighlights(text: string, quotes: string[], highlightTitle?: string) {
@@ -47,8 +48,10 @@ export function LetterContentViewer({
   maskContent,
   highlightedQuotes = [],
   onSelectPassage,
-  t
+  t: customT
 }: LetterContentViewerProps) {
+  const { t: contextT } = useI18n();
+  const t = customT ?? contextT;
   const [viewMode, setViewMode] = useState<"processed" | "raw" | "split">("processed");
   const [copiedRaw, setCopiedRaw] = useState(false);
   const [selectionSnippet, setSelectionSnippet] = useState("");
@@ -130,14 +133,14 @@ export function LetterContentViewer({
         <div
           role="tablist"
           aria-label={t("letter.viewModeAria")}
-          className="inline-flex rounded-xl border border-border/70 bg-muted/30 p-1"
+          className="inline-flex max-w-full overflow-x-auto rounded-xl border border-border/70 bg-muted/30 p-1 scrollbar-none"
         >
           <button
             type="button"
             role="tab"
             aria-selected={viewMode === "processed"}
             onClick={() => setViewMode("processed")}
-            className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
               viewMode === "processed"
                 ? "bg-surface text-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"
@@ -152,7 +155,7 @@ export function LetterContentViewer({
             role="tab"
             aria-selected={viewMode === "raw"}
             onClick={() => setViewMode("raw")}
-            className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
               viewMode === "raw"
                 ? "bg-surface text-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"
@@ -167,7 +170,7 @@ export function LetterContentViewer({
             role="tab"
             aria-selected={viewMode === "split"}
             onClick={() => setViewMode("split")}
-            className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
               viewMode === "split"
                 ? "bg-surface text-foreground shadow-2xs"
                 : "text-muted-foreground hover:text-foreground"

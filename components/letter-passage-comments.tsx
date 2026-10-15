@@ -6,6 +6,7 @@ import { createLetterCommentAction, deleteLetterCommentAction } from "@/app/acti
 import { SubmitButton } from "@/components/ui/submit-button";
 import { buttonVariants } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 export interface CommentItem {
   id: string;
@@ -23,7 +24,7 @@ interface LetterPassageCommentsProps {
   letterAuthorId: string;
   prefilledSelectedText?: string;
   onClearPrefill?: () => void;
-  t: (key: string, values?: Record<string, string>) => string;
+  t?: (key: string, values?: Record<string, string>) => string;
 }
 
 export function LetterPassageComments({
@@ -33,8 +34,10 @@ export function LetterPassageComments({
   letterAuthorId,
   prefilledSelectedText = "",
   onClearPrefill,
-  t
+  t: customT
 }: LetterPassageCommentsProps) {
+  const { t: contextT } = useI18n();
+  const t = customT ?? contextT;
   const [isAdding, setIsAdding] = useState(Boolean(prefilledSelectedText));
   const [selectedQuote, setSelectedQuote] = useState(prefilledSelectedText);
 
@@ -85,7 +88,7 @@ export function LetterPassageComments({
             <button
               type="button"
               onClick={() => handleOpenComposer()}
-              className={`${buttonVariants("secondary")} text-xs min-h-[36px] py-1.5 px-3`}
+              className={`${buttonVariants("secondary")} text-xs min-h-[44px] py-2 px-3.5`}
             >
               <Plus className="h-3.5 w-3.5 text-accent" aria-hidden="true" />
               <span>{t("comment.add")}</span>

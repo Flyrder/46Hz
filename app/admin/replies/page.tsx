@@ -42,7 +42,7 @@ export default async function AdminRepliesPage() {
         </div>
       </div>
 
-      <AdminNav role={role} t={t} />
+      <AdminNav role={role} />
 
       <div className="space-y-3.5">
         {replies.map((reply) => (

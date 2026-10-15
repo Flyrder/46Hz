@@ -5,20 +5,23 @@ import { Trash2, AlertTriangle, X } from "lucide-react";
 import { deleteLetterAction } from "@/app/actions/letters";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { buttonVariants } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 
 interface DeleteLetterButtonProps {
   letterId: string;
-  t: (key: string, values?: Record<string, string>) => string;
+  t?: (key: string, values?: Record<string, string>) => string;
   className?: string;
   variant?: "danger" | "ghost" | "secondary";
 }
 
 export function DeleteLetterButton({
   letterId,
-  t,
+  t: customT,
   className = "",
   variant = "ghost"
 }: DeleteLetterButtonProps) {
+  const { t: contextT } = useI18n();
+  const t = customT ?? contextT;
   const [isOpen, setIsOpen] = useState(false);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
 
