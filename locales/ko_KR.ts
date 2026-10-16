@@ -529,5 +529,16 @@ export const koKR: Translations = {
   "notfound.title": "길을 잃은 편지",
   "notfound.desc": "찾으시는 편지나 페이지가 이미 조용히 회수되었거나, 보관함으로 이동했을 수 있습니다.",
   "notfound.returnInbox": "나의 편지함으로",
-  "notfound.returnHome": "홈으로 돌아가기"
+  "notfound.returnHome": "홈으로 돌아가기",
+  "admin.navSettings": "시스템 설정",
+  "admin.settingsTitle": "통합 시스템 설정 스튜디오 (settings.ts)",
+  "admin.settingsSubtitle": "브랜드 정체성, 슈만 공명 한도, 15분 홀딩 시간, 보안 속도 제한 및 AI 엔진 설정을 실시간으로 수정하고 settings.ts에 즉시 반영합니다.",
+  "admin.settingsSavedBanner": "시스템 설정이 저장되었으며 런타임 및 settings.ts 파일에 성공적으로 반영되었습니다.",
+  "admin.settingsResetBanner": "모든 시스템 설정이 초기 기본값(Factory Defaults)으로 복원되었습니다.",
+  "admin.settingsValidationError": "입력값 형식이 올바르지 않습니다. 각 항목의 허용 범위를 확인해 주세요.",
+  "admin.settingsSaveButton": "settings.ts에 설정 반영 및 저장",
+  "admin.settingsResetButton": "기본값으로 초기화",
+  "admin.settingsCodePreviewTitle": "실시간 settings.ts 코드 동기화 미리보기",
+  "admin.settingsCodePreviewDesc": "현재 설정값이 루트 settings.ts 파일과 런타임 메모리에 어떻게 반영되는지 실시간으로 보여줍니다."
 };
+

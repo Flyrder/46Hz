@@ -531,5 +531,16 @@ export const zhCN: Translations = {
   "notfound.title": "迷路的信件",
   "notfound.desc": "您寻找的信件或页面可能已被静静归档或移至保密箱。",
   "notfound.returnInbox": "返回我的信箱",
-  "notfound.returnHome": "返回首页"
+  "notfound.returnHome": "返回首页",
+  "admin.navSettings": "系统设置",
+  "admin.settingsTitle": "统一系统配置工作台 (settings.ts)",
+  "admin.settingsSubtitle": "实时修改品牌信息、舒曼共振回复上限、15分钟认领锁定期、安全速率限制与 AI 引擎设置，并同步反映至 settings.ts。",
+  "admin.settingsSavedBanner": "系统配置已保存，并成功同步至运行时内存与 settings.ts 文件。",
+  "admin.settingsResetBanner": "所有系统配置已恢复为出厂默认值。",
+  "admin.settingsValidationError": "输入值格式有误，请检查各项参数的允许范围。",
+  "admin.settingsSaveButton": "保存并同步至 settings.ts",
+  "admin.settingsResetButton": "恢复默认值",
+  "admin.settingsCodePreviewTitle": "实时 settings.ts 代码同步预览",
+  "admin.settingsCodePreviewDesc": "实时展示当前参数在根目录 settings.ts 与运行时内存中的 TypeScript 映射代码。"
 };
+

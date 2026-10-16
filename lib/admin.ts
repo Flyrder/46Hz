@@ -110,6 +110,11 @@ export function canManageResources(role: AdminRole | null): boolean {
   return role === "ADMIN";
 }
 
+export function canManageSettings(role: AdminRole | null): boolean {
+  return role === "ADMIN";
+}
+
 export function canModerateContent(role: AdminRole | null): boolean {
   return role === "ADMIN" || role === "MODERATOR";
 }
+

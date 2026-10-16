@@ -3,6 +3,7 @@ import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 import { createTranslator, I18nProvider } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
+import { ensureSettingsLoadedFromDisk } from "@/lib/settings-store";
 import { brandSettings } from "@/settings";
 
 export const viewport: Viewport = {
@@ -54,6 +55,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  ensureSettingsLoadedFromDisk();
   const [locale, theme] = await Promise.all([getLocalePreference(), getThemePreference()]);
   const t = createTranslator(locale);
 

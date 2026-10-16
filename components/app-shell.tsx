@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Inbox, PenLine, Settings, ShieldCheck, Waves, HeartHandshake, ShieldAlert } from "lucide-react";
+import { Inbox, PenLine, Settings, ShieldCheck, Waves, HeartHandshake, ShieldAlert, Sliders } from "lucide-react";
 import { PreferenceForm } from "@/components/preference-form";
 import { localeOptions, type Locale } from "@/lib/i18n";
 import { themeOptions, type ThemePreference } from "@/lib/theme";
+import { brandSettings, resonanceSettings } from "@/settings";
 
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
@@ -42,14 +43,21 @@ export function AppShell({
           {/* Logo & Brand Identity */}
           <Link
             href="/"
-            aria-label="46Hz Home"
-            className="group flex min-h-[44px] items-center gap-2 text-sm font-semibold rounded-xl pr-2 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            aria-label={`${brandSettings.name} Home`}
+            className="group flex min-h-[44px] items-center gap-2.5 text-sm font-semibold rounded-xl pr-2 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            <span className="grid h-8.5 w-8.5 place-items-center rounded-xl bg-accent text-accent-foreground shadow-xs transition-transform group-hover:scale-105 active:scale-95">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-accent-foreground shadow-xs ring-1 ring-accent/20 transition-transform group-hover:scale-105 active:scale-95">
               <Waves className="h-4.5 w-4.5" aria-hidden="true" />
             </span>
             <div className="flex flex-col">
-              <span className="text-base font-bold tracking-tight text-foreground">46Hz</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold tracking-tight text-foreground">
+                  {brandSettings.name}
+                </span>
+                <span className="hidden md:inline-flex items-center rounded-full border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[9px] font-semibold text-accent">
+                  {resonanceSettings.defaultMaxReplies}→{resonanceSettings.expandedMaxReplies}
+                </span>
+              </div>
               <span className="text-[10px] font-normal text-muted-foreground/80 leading-none hidden sm:inline">
                 {brandTagline}
               </span>
@@ -113,7 +121,7 @@ export function AppShell({
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-foreground font-medium">
               <Waves className="h-3.5 w-3.5 text-accent" />
-              <span>46Hz · Schumann Resonance Slow Letterbox</span>
+              <span>{brandSettings.name} · {brandSettings.tagline}</span>
             </div>
             <p className="max-w-md text-muted-foreground/80 leading-relaxed text-[11px]">
               {t("shell.footerDesc")}
@@ -133,6 +141,13 @@ export function AppShell({
               className="text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
             >
               {t("nav.settings")}
+            </Link>
+            <Link
+              href="/admin/settings"
+              className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              <Sliders className="h-3 w-3 text-accent/80" />
+              <span>{t("admin.navSettings")}</span>
             </Link>
             <span className="text-border" aria-hidden="true">·</span>
             <span className="text-[11px] text-muted-foreground/70">

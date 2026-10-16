@@ -19,13 +19,12 @@
     "prisma8:db": "prisma db --config ./prisma8.config.ts",
     "start:mac": "./start.sh",
     "start:mac:verify": "./start.sh --verify-only",
+    "purge:modules": "tsx scripts/purge_standalone.ts",
     "verify:backend": "tsx scripts/verify_backend.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
-    "@tailwindcss/postcss": "4.3.3",
-    "@types/pg": "8.23.1",
     "lucide-react": "1.55.0",
     "next": "16.4.0",
     "pg": "8.23.1",
@@ -36,11 +35,11 @@
   "devDependencies": {
     "@prisma/orm-postgres": "8.0.0-rc.18",
     "@prisma/prisma7": "^7.10.0",
+    "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.5",
+    "@types/pg": "8.23.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "eslint": "10.12.0",
-    "eslint-config-next": "16.4.0",
     "postcss": "^8.4.49",
     "prisma": "8.0.0-rc.23",
     "tailwindcss": "4.3.3",
@@ -60,6 +59,6 @@
     "@prisma/engines@7.10.0": true,
     "@prisma/client@7.10.0": true,
     "@prisma/prisma7@7.10.0": true,
-    "workerd@1.20261002.1": true
+    "workerd@1.20261002.1": false
   }
 }

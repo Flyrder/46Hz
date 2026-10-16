@@ -100,6 +100,43 @@ export const resonanceMatchSchema = z.object({
   )
 });
 
+export const systemSettingsSchema = z
+  .object({
+    brandName: z.string().trim().min(1).max(40),
+    brandTitle: z.string().trim().min(2).max(80),
+    brandTagline: z.string().trim().min(5).max(160),
+    brandVersion: z.string().trim().min(1).max(24),
+    defaultLocale: z.enum(["ko_KR", "en_US", "zh_CN"]),
+    defaultTheme: z.enum(["system", "light", "dark"]),
+    cookieMaxAgeDays: z.coerce.number().int().min(1).max(365),
+    migrationCodePrefix: z
+      .string()
+      .trim()
+      .min(2)
+      .max(12)
+      .regex(/^[A-Z0-9-]+$/, "Prefix must contain uppercase letters, numbers, or hyphens."),
+    defaultMaxReplies: z.coerce.number().int().min(1).max(30),
+    expandedMaxReplies: z.coerce.number().int().min(2).max(50),
+    leaseDurationMinutes: z.coerce.number().int().min(1).max(120),
+    adminLoginMaxRequests: z.coerce.number().int().min(1).max(100),
+    adminLoginWindowSeconds: z.coerce.number().int().min(10).max(3600),
+    writeLetterMaxRequests: z.coerce.number().int().min(1).max(100),
+    writeLetterWindowSeconds: z.coerce.number().int().min(10).max(3600),
+    coachReplyMaxRequests: z.coerce.number().int().min(1).max(100),
+    coachReplyWindowSeconds: z.coerce.number().int().min(10).max(3600),
+    ipRetentionDays: z.coerce.number().int().min(1).max(90),
+    maxRecentIps: z.coerce.number().int().min(1).max(20),
+    legalBasis: z.string().trim().min(5).max(300),
+    dataMinimizationNotice: z.string().trim().min(10).max(500),
+    aiDefaultProvider: z.enum(["mock", "openai", "deepseek"]),
+    aiTimeoutMs: z.coerce.number().int().min(1000).max(60000),
+    aiMockDelayMs: z.coerce.number().int().min(0).max(5000)
+  })
+  .refine((data) => data.expandedMaxReplies >= data.defaultMaxReplies, {
+    message: "Expanded max replies must be greater than or equal to default max replies.",
+    path: ["expandedMaxReplies"]
+  });
+
 export function formValue(formData: FormData, key: string): string {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
@@ -108,3 +145,4 @@ export function formValue(formData: FormData, key: string): string {
 export function formBoolean(formData: FormData, key: string): boolean {
   return formData.get(key) === "on" || formData.get(key) === "true";
 }
+

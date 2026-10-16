@@ -461,6 +461,17 @@ export type TranslationKey =
   | "notfound.title"
   | "notfound.desc"
   | "notfound.returnInbox"
-  | "notfound.returnHome";
+  | "notfound.returnHome"
+  | "admin.navSettings"
+  | "admin.settingsTitle"
+  | "admin.settingsSubtitle"
+  | "admin.settingsSavedBanner"
+  | "admin.settingsResetBanner"
+  | "admin.settingsValidationError"
+  | "admin.settingsSaveButton"
+  | "admin.settingsResetButton"
+  | "admin.settingsCodePreviewTitle"
+  | "admin.settingsCodePreviewDesc";
 
 export type Translations = Record<TranslationKey, string>;
+

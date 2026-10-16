@@ -38,9 +38,14 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.
 COPY --from=builder --chown=nextjs:nodejs /app/prisma7.config.ts ./prisma7.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/prisma8.config.ts ./prisma8.config.ts
 
-# Copy Prisma CLI and side-by-side modules for schema synchronization at startup
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+# Copy only required Prisma 7 CLI & engine modules for startup schema sync (excluding ~1.9GB @prisma/composer & studio-core)
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/prisma7 ./node_modules/@prisma/prisma7
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/engines-version ./node_modules/@prisma/engines-version
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/config ./node_modules/@prisma/config
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/debug ./node_modules/@prisma/debug
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/fetch-engine ./node_modules/@prisma/fetch-engine
+COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/get-platform ./node_modules/@prisma/get-platform
 
 # Copy and set permissions for entrypoint script
 COPY --from=builder /app/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

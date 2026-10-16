@@ -12,7 +12,8 @@ import {
   Users,
   HeartHandshake,
   ShieldCheck,
-  History
+  History,
+  Sliders
 } from "lucide-react";
 
 import { useI18n } from "@/lib/i18n";
@@ -33,7 +34,8 @@ const links: AdminNavLink[] = [
   { href: "/admin/users", labelKey: "admin.navUsers", fallbackLabel: "Users", adminOnly: true, icon: Users },
   { href: "/admin/resources", labelKey: "admin.navResources", fallbackLabel: "Resources", adminOnly: true, icon: HeartHandshake },
   { href: "/admin/compliance", labelKey: "admin.navCompliance", fallbackLabel: "Compliance", adminOnly: false, icon: ShieldCheck },
-  { href: "/admin/moderation-log", labelKey: "admin.navLog", fallbackLabel: "Log", adminOnly: false, icon: History }
+  { href: "/admin/moderation-log", labelKey: "admin.navLog", fallbackLabel: "Log", adminOnly: false, icon: History },
+  { href: "/admin/settings", labelKey: "admin.navSettings", fallbackLabel: "Settings", adminOnly: true, icon: Sliders }
 ];
 
 export function AdminNav({

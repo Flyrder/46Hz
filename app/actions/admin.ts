@@ -19,8 +19,10 @@ import {
   adminReplySchema,
   formValue,
   riskLevelSchema,
-  supportResourceSchema
+  supportResourceSchema,
+  systemSettingsSchema
 } from "@/lib/validators";
+import { resetSystemSettings, saveSystemSettings } from "@/lib/settings-store";
 
 export async function adminLoginAction(formData: FormData): Promise<void> {
   const ip = await getClientIp();
@@ -243,3 +245,85 @@ export async function saveSupportResourceAction(formData: FormData): Promise<voi
   revalidatePath("/admin/resources");
   revalidatePath("/support-resources");
 }
+
+export async function saveSystemSettingsAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+
+  const parsed = systemSettingsSchema.safeParse({
+    brandName: formValue(formData, "brandName"),
+    brandTitle: formValue(formData, "brandTitle"),
+    brandTagline: formValue(formData, "brandTagline"),
+    brandVersion: formValue(formData, "brandVersion"),
+    defaultLocale: formValue(formData, "defaultLocale"),
+    defaultTheme: formValue(formData, "defaultTheme"),
+    cookieMaxAgeDays: formValue(formData, "cookieMaxAgeDays"),
+    migrationCodePrefix: formValue(formData, "migrationCodePrefix"),
+    defaultMaxReplies: formValue(formData, "defaultMaxReplies"),
+    expandedMaxReplies: formValue(formData, "expandedMaxReplies"),
+    leaseDurationMinutes: formValue(formData, "leaseDurationMinutes"),
+    adminLoginMaxRequests: formValue(formData, "adminLoginMaxRequests"),
+    adminLoginWindowSeconds: formValue(formData, "adminLoginWindowSeconds"),
+    writeLetterMaxRequests: formValue(formData, "writeLetterMaxRequests"),
+    writeLetterWindowSeconds: formValue(formData, "writeLetterWindowSeconds"),
+    coachReplyMaxRequests: formValue(formData, "coachReplyMaxRequests"),
+    coachReplyWindowSeconds: formValue(formData, "coachReplyWindowSeconds"),
+    ipRetentionDays: formValue(formData, "ipRetentionDays"),
+    maxRecentIps: formValue(formData, "maxRecentIps"),
+    legalBasis: formValue(formData, "legalBasis"),
+    dataMinimizationNotice: formValue(formData, "dataMinimizationNotice"),
+    aiDefaultProvider: formValue(formData, "aiDefaultProvider"),
+    aiTimeoutMs: formValue(formData, "aiTimeoutMs"),
+    aiMockDelayMs: formValue(formData, "aiMockDelayMs")
+  });
+
+  if (!parsed.success) {
+    redirect("/admin/settings?error=validation");
+  }
+
+  const { settings: updated, syncedSettingsTs } = saveSystemSettings(parsed.data, {
+    syncSourceFile: true
+  });
+
+  await prisma.moderationEvent.create({
+    data: {
+      targetType: "SUPPORT_RESOURCE",
+      targetId: "settings.ts",
+      action: "SYSTEM_SETTINGS_UPDATED",
+      reason: `Updated settings.ts (Replies: ${updated.defaultMaxReplies}->${updated.expandedMaxReplies}, Lease: ${updated.leaseDurationMinutes}m, AI: ${updated.aiDefaultProvider})`,
+      previousStatus: "LIVE",
+      newStatus: syncedSettingsTs ? "SYNCED_TO_SETTINGS_TS" : "RUNTIME_OVERRIDDEN"
+    }
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/settings");
+  revalidatePath("/reply");
+  revalidatePath("/settings");
+  redirect("/admin/settings?saved=1");
+}
+
+export async function resetSystemSettingsAction(): Promise<void> {
+  await requireAdmin();
+
+  resetSystemSettings({ syncSourceFile: true });
+
+  await prisma.moderationEvent.create({
+    data: {
+      targetType: "SUPPORT_RESOURCE",
+      targetId: "settings.ts",
+      action: "SYSTEM_SETTINGS_RESET",
+      reason: "Restored settings.ts to factory default values",
+      previousStatus: "CUSTOM",
+      newStatus: "FACTORY_DEFAULT"
+    }
+  });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  revalidatePath("/admin/settings");
+  revalidatePath("/reply");
+  revalidatePath("/settings");
+  redirect("/admin/settings?reset=1");
+}
+
