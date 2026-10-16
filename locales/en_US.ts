@@ -536,5 +536,16 @@ export const enUS: Translations = {
   "notfound.title": "Letter Not Found",
   "notfound.desc": "The letter or page you are looking for may have been quietly archived or removed.",
   "notfound.returnInbox": "Back to Inbox",
-  "notfound.returnHome": "Return Home"
+  "notfound.returnHome": "Return Home",
+  "admin.navSettings": "System Settings",
+  "admin.settingsTitle": "Unified System Settings Studio (settings.ts)",
+  "admin.settingsSubtitle": "Configure brand metadata, Schumann resonance limits, 15-minute holding lease, rate limits, and AI provider defaults with live synchronization to settings.ts.",
+  "admin.settingsSavedBanner": "System settings have been saved and synchronized with runtime memory and settings.ts.",
+  "admin.settingsResetBanner": "All system settings have been restored to factory defaults.",
+  "admin.settingsValidationError": "One or more fields failed validation. Please check the allowed ranges.",
+  "admin.settingsSaveButton": "Save & Sync to settings.ts",
+  "admin.settingsResetButton": "Reset to Defaults",
+  "admin.settingsCodePreviewTitle": "Live settings.ts Synchronization Preview",
+  "admin.settingsCodePreviewDesc": "Real-time TypeScript snapshot reflecting how current parameters are persisted in root settings.ts."
 };
+

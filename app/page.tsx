@@ -13,6 +13,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { createTranslator, type TranslationKey } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { getCurrentUser } from "@/lib/session";
+import { resonanceSettings, claimingSettings } from "@/settings";
 
 export const dynamic = "force-dynamic";
 
@@ -42,18 +43,26 @@ export default async function HomePage() {
   return (
     <div className="space-y-16 py-4">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/80 bg-surface/90 p-8 sm:p-12 shadow-soft backdrop-blur-xs">
+      <section className="stationery-paper animate-entry relative overflow-hidden p-8 sm:p-12">
         {/* Subtle Ambient Background Gradient */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-accent/10 blur-3xl"
+          className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-accent/12 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-28 -left-28 h-72 w-72 rounded-full bg-accent/6 blur-3xl"
         />
 
-        <div className="max-w-2xl">
+        <div className="relative max-w-2xl">
           {/* Schumann Frequency Ripple Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3.5 py-1 text-xs font-semibold text-accent mb-6 select-none">
+          <div className="inline-flex flex-wrap items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3.5 py-1 text-xs font-semibold text-accent mb-6 select-none">
             <Waves className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
             <span>{t("home.schumannBadge")}</span>
+            <span className="text-accent/50" aria-hidden="true">·</span>
+            <span className="font-mono text-[11px]">
+              {resonanceSettings.defaultMaxReplies}→{resonanceSettings.expandedMaxReplies} Resonance Cap
+            </span>
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-5xl sm:leading-[1.18]">
@@ -96,7 +105,7 @@ export default async function HomePage() {
       {/* 3 Core Philosophy Pillars */}
       <section aria-label="Brand Philosophy" className="grid gap-5 md:grid-cols-3">
         {/* Pillar 1 */}
-        <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-xs transition-all hover:border-accent/40 hover:shadow-tactile">
+        <div className="stationery-card animate-entry p-6">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent/10 text-accent mb-4">
             <Waves className="h-5 w-5" />
           </div>
@@ -109,7 +118,7 @@ export default async function HomePage() {
         </div>
 
         {/* Pillar 2 */}
-        <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-xs transition-all hover:border-accent/40 hover:shadow-tactile">
+        <div className="stationery-card animate-entry p-6">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent/10 text-accent mb-4">
             <Clock className="h-5 w-5" />
           </div>
@@ -122,7 +131,7 @@ export default async function HomePage() {
         </div>
 
         {/* Pillar 3 */}
-        <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-xs transition-all hover:border-accent/40 hover:shadow-tactile">
+        <div className="stationery-card animate-entry p-6">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent/10 text-accent mb-4">
             <ShieldCheck className="h-5 w-5" />
           </div>
@@ -136,7 +145,7 @@ export default async function HomePage() {
       </section>
 
       {/* 4-Step Slow Journey ("오늘의 편지함") */}
-      <section className="rounded-3xl border border-border/80 bg-surface p-8 sm:p-10 shadow-soft">
+      <section className="stationery-paper animate-entry p-8 sm:p-10">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-5">
           <div>
             <h2 className="text-xl font-bold tracking-tight text-foreground">
@@ -146,8 +155,8 @@ export default async function HomePage() {
               {t("home.stepsSubtitle")}
             </p>
           </div>
-          <span className="rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground">
-            Slow Loop
+          <span className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+            Slow Loop · {claimingSettings.leaseDurationMinutes}m Lease
           </span>
         </div>
 
@@ -155,7 +164,7 @@ export default async function HomePage() {
           {steps.map((item, index) => (
             <div
               key={item.titleKey}
-              className="relative rounded-2xl border border-border/70 bg-background/50 p-5 transition-all hover:border-accent/40 hover:bg-background shadow-2xs"
+              className="stationery-card relative bg-background/55 p-5 hover:bg-surface"
             >
               <div className="flex items-center justify-between mb-3">
                 <span className="grid h-7 w-7 place-items-center rounded-xl bg-accent text-xs font-bold text-accent-foreground">
@@ -177,7 +186,7 @@ export default async function HomePage() {
       </section>
 
       {/* Gentle Crisis Care Banner */}
-      <section className="rounded-2xl border border-border/70 bg-muted/30 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <section className="stationery-card animate-entry bg-muted/30 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
             <ShieldAlert className="h-5 w-5" />

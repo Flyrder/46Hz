@@ -121,22 +121,82 @@ html.theme-dark body {
 .stationery-paper {
   position: relative;
   background-color: hsl(var(--surface));
+  background-image: linear-gradient(180deg, hsl(var(--surface-paper) / 0.65) 0%, hsl(var(--surface)) 100%);
   border: 1px solid hsl(var(--border));
-  border-radius: 1rem;
-  box-shadow: var(--shadow-paper);
+  border-radius: 1.125rem;
+  box-shadow: var(--shadow-paper), inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+}
+
+html.theme-dark .stationery-paper {
+  box-shadow: var(--shadow-paper), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
 }
 
 .stationery-card {
   background-color: hsl(var(--surface));
   border: 1px solid hsl(var(--border) / 0.85);
-  border-radius: 0.875rem;
-  box-shadow: var(--shadow-soft);
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-soft), inset 0 1px 0 0 rgba(255, 255, 255, 0.45);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+}
+
+html.theme-dark .stationery-card {
+  box-shadow: var(--shadow-soft), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
 }
 
 .stationery-card:hover {
-  border-color: hsl(var(--accent) / 0.4);
+  border-color: hsl(var(--accent) / 0.42);
   box-shadow: var(--shadow-tactile);
+}
+
+/* Modern Web Guidance: animate-element-entry-exit (@starting-style + separate transition-behavior: allow-discrete) */
+.animate-entry {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), display 0.28s;
+  transition-behavior: allow-discrete;
+}
+
+@starting-style {
+  .animate-entry {
+    opacity: 0;
+    transform: translateY(6px) scale(0.992);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-entry {
+    transition: opacity 0.15s ease;
+    transform: none;
+  }
+
+  @starting-style {
+    .animate-entry {
+      opacity: 0;
+      transform: none;
+    }
+  }
+}
+
+/* Modern Web Guidance: required-field-feedback (:user-invalid + :user-valid + aria-invalid bridge) */
+.field-error-msg {
+  display: none;
+}
+
+.validated-field:user-invalid,
+.validated-field.user-invalid-fallback,
+.validated-field[aria-invalid="true"] {
+  border-color: hsl(var(--danger));
+  background-color: hsl(var(--danger) / 0.04);
+}
+
+.validated-field:required:user-valid {
+  border-color: hsl(var(--accent) / 0.55);
+}
+
+.validated-field:user-invalid + .field-error-msg,
+.validated-field.user-invalid-fallback + .field-error-msg,
+.validated-field[aria-invalid="true"] + .field-error-msg {
+  display: block;
 }
 
 /* Schumann Frequency Pulse Glow */

@@ -1,9 +1,9 @@
-# 46Hz UI/UX Design System & Emotional Aesthetics Manual
+# 46Hz UI/UX Design System, System Configuration Studio & Standalone Optimization Manual
 
-> **Product**: 46Hz Letterbox MVP (v0.1.0)  
+> **Product**: 46Hz Letterbox (v0.2.0)  
 > **Aesthetic Archetype**: Quiet, Warm Stationery & Human-Centered Calm Technology  
 > **Core Frequency**: ~46Hz (Earth's 7th Schumann Harmonic)  
-> **Last Updated**: 2026-10-12  
+> **Last Updated**: 2026-10-16  
 
 ---
 
@@ -45,11 +45,11 @@ The color palette combines natural stone, warm paper stationery, calming botanic
 ### 2.2 Elevation & Tactile Shadows
 - `--shadow-soft`: `0 16px 50px -35px rgba(54, 44, 34, 0.35)` — general soft elevation for cards.
 - `--shadow-tactile`: `0 8px 30px -10px rgba(54, 44, 34, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04)` — hover elevation state.
-- `--shadow-paper`: `0 1px 3px rgba(0, 0, 0, 0.04), 0 14px 40px -12px rgba(54, 44, 34, 0.15)` — letter container stationery shadow.
+- `--shadow-paper`: `0 1px 3px rgba(0, 0, 0, 0.04), 0 14px 40px -12px rgba(54, 44, 34, 0.15)` — letter container stationery shadow with top-edge inset highlight (`inset 0 1px 0 0 rgba(255, 255, 255, 0.5)`).
 
 ---
 
-## 3. Typography & Micro-interactions
+## 3. Typography, Modern CSS Entry Transitions & Form Validation
 
 ### 3.1 Typography
 - Font Family: System sans stack with Korean typographic optimization (`ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif`).
@@ -61,16 +61,25 @@ The color palette combines natural stone, warm paper stationery, calming botanic
 - **Resonance Pulse (`schumann-pulse`)**: The active Schumann harmonic node features a gentle breathing glow animation (2.4s cubic-bezier rhythm).
 - **Tactile Card Lift**: Letter cards lift slightly on hover (`hover:-translate-y-0.5 hover:shadow-tactile hover:border-accent/40`) with cubic-bezier transitions.
 
+### 3.3 Modern CSS Entry Transitions (`@starting-style`) & Progressive Form Feedback (`:user-invalid`)
+- **Zero-JS Entry Animations (`.animate-entry`)**:
+  - Uses `@starting-style` in [`app/globals.css`](file:///c:/Users/voide/eko/app/globals.css) to smoothly fade and lift cards/banners into view on initial render (`opacity: 0; transform: translateY(6px) scale(0.992)` $\rightarrow$ `opacity: 1; transform: translateY(0) scale(1)`).
+  - Uses a **separate** `transition-behavior: allow-discrete` declaration (never inside the `transition` shorthand) so older browsers gracefully preserve opacity/transform transitions.
+  - Respects `@media (prefers-reduced-motion: reduce)` by disabling spatial transforms (`transform: none`) and shortening opacity fade to `0.15s`.
+- **Non-Punitive Form Validation (`:user-invalid` + `aria-invalid` Bridge)**:
+  - Uses `.validated-field:user-invalid` and `.validated-field:required:user-valid` instead of `:invalid` so required inputs never glow red prematurely on page load before the user interacts with them.
+  - Synchronizes `aria-invalid="true"` and `.user-invalid-fallback` via JavaScript `onBlur`, `onInput`, and `onSubmit` handlers in [`components/admin-settings-form.tsx`](file:///c:/Users/voide/eko/components/admin-settings-form.tsx) so screen readers (NVDA, VoiceOver, TalkBack) announce errors accurately via `aria-describedby`.
+
 ---
 
 ## 4. Component Architecture Guide
 
 ### 4.1 Navigation Shell (`components/app-shell.tsx`)
 - Frosted glass sticky header (`backdrop-blur-md bg-background/85 border-b border-border/70`).
-- Brand badge featuring frequency wave insignia (`Waves`) and subtitle pill.
+- Dynamic brand badge reading live `brandSettings.name`, `brandSettings.tagline`, and `brandSettings.schumannResonance.baseHz` (`7.83Hz`).
 - Integrated language dropdown and 3-way sliding pill theme toggle (`PreferenceForm`).
 - Permanent accessible skip link (`#main-content`) for keyboard and screen reader accessibility.
-- Calming footer with Schumann resonance explanation, zero-PII assurance, and crisis helplines shortcut.
+- Calming footer with Schumann resonance explanation, quick shortcut to `/admin/settings`, zero-PII assurance, and crisis helplines shortcut.
 
 ### 4.2 Letter Writing Workbench (`components/letter-editor.tsx`)
 - Lined stationery paper container (`stationery-paper`).
@@ -82,7 +91,7 @@ The color palette combines natural stone, warm paper stationery, calming botanic
 - Earth's Schumann harmonic frequency markers (`7.8Hz`, `14.3Hz`, `20.8Hz`, `27.3Hz`, `33.8Hz`, `39.0Hz`, `45.9Hz` up to 15th harmonic).
 - Visual status: Completed harmonics filled in calming sage, active node pulsing gently, pending nodes outlined.
 - Accessible ARIA progressbar with live region readout (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`).
-- Author-only expandable consent button to expand capacity to 15 replies.
+- Author-only expandable consent button to expand capacity to `brandSettings.schumannResonance.expandedMaxReplies` replies.
 
 ### 4.4 AI Reply Coach Workbench (`components/reply-composer.tsx`)
 - Supportive drafting textarea with live character counter (min 20 characters).
@@ -125,7 +134,7 @@ The color palette combines natural stone, warm paper stationery, calming botanic
    - 최상단 HTML 태그에 `<html lang="ko-KR">` 선언 (언어 변경 시 `en-US`, `zh-CN`으로 동적 전환).
 2. **예측 가능한 입력 서식 (Predictable Inputs)**:
    - 모든 입력 폼에 `<label htmlFor="...">` 명시적 연결.
-   - 유효성 검사 실패 시 `aria-invalid="true"`, `role="alert"`, `aria-describedby`를 통해 스크린리더에 에러 즉시 음성 출력.
+   - 유효성 검사 실패 시 `:user-invalid`, `aria-invalid="true"`, `role="alert"`, `aria-describedby`를 통해 스크린리더에 에러 즉시 음성 출력.
 
 ### 5.4 견고성 (Robustness)
 1. **WAI-ARIA 1.2 시맨틱 랜드마크**:
@@ -133,3 +142,42 @@ The color palette combines natural stone, warm paper stationery, calming botanic
 2. **스크린리더 실시간 라이브 리전 (Live Regions)**:
    - 실시간 글자수 카운터 및 공명 노드 변경에 `aria-live="polite"` 적용.
    - 스크린리더(TalkBack, VoiceOver, 센스리더, NVDA, Windows Narrator) 전방위 음성 낭독 지원.
+
+---
+
+## 6. Web Admin System Configuration Studio (`/admin/settings`) & Live `settings.ts` Sync
+
+Administrators (`ADMIN` role) can configure all core system parameters from the browser at **`/admin/settings`** ([`app/admin/settings/page.tsx`](file:///c:/Users/voide/eko/app/admin/settings/page.tsx)) without manually editing TypeScript files or restarting the server:
+
+### 6.1 Configurable Domains
+1. **Brand & Identity (`brandSettings`)**:
+   - `name`, `tagline`, `description` (automatically updates `brandSettings.title`).
+2. **Schumann Resonance & Slow Letterbox (`brandSettings.schumannResonance`)**:
+   - `defaultMaxReplies` (default `7`), `expandedMaxReplies` (default `15`), `leaseDurationMinutes` (default `15` min).
+3. **Default Preferences & Session (`i18nSettings`, `themeSettings`, `sessionSettings`)**:
+   - `defaultLocale` (`ko_KR` | `en_US` | `zh_CN`), `defaultTheme` (`system` | `light` | `dark`), `sessionCookieMaxAgeDays` (default `30` days).
+4. **Security & Data Minimization (`securitySettings`, `complianceSettings`)**:
+   - Rate limit `maxRequestsPerWindow` & `windowMs`, `metadataRetentionDays`, `requireWarrantForDisclosure`, `allowAnonymousExport`, `allowImmediateSelfDestruct`.
+5. **Empathetic AI Middleware (`aiSettings`)**:
+   - `defaultProvider` (`mock` | `openai` | `deepseek` | `local`), `openAiModel`, `deepSeekModel`, `localModel`.
+
+### 6.2 Dual-Layer Persistence Architecture ([`lib/settings-store.ts`](file:///c:/Users/voide/eko/lib/settings-store.ts))
+- **In-Memory Mutation (`applyRuntimeSettingsUpdate`)**: Immediately updates exported objects in [`settings.ts`](file:///c:/Users/voide/eko/settings.ts) so all Server Components and Server Actions reflect the new parameters on the very next request.
+- **Disk Synchronization**:
+  - Writes `.settings.override.json` for container/standalone runtime hydration (`ensureSettingsLoadedFromDisk()`).
+  - Directly updates the literal values inside root [`settings.ts`](file:///c:/Users/voide/eko/settings.ts) so the repository source file stays 100% synchronized with the web admin UI.
+  - Records an audit entry (`UPDATE_SYSTEM_SETTINGS` or `RESET_SYSTEM_SETTINGS`) in `ModerationActionLog`.
+
+---
+
+## 7. Standalone Build & `node_modules` Purge Architecture
+
+To keep production deployments and local workspaces lean while running Prisma 7 (`@prisma/client`) and Prisma 8 RC (`@prisma/orm` + `@prisma/sql-postgres`) side-by-side:
+
+1. **`outputFileTracingExcludes` in [`next.config.mjs`](file:///c:/Users/voide/eko/next.config.mjs)**:
+   - Excludes CLI/dev-only packages (`prisma`, `@prisma/composer*`, `@prisma/studio-core`, `workerd`, `@alchemy.run`, `typescript`, `vitest`, `tsx`) and stale Prisma 6 native query engines (`query-engine-*`) from `.next/standalone/node_modules`.
+2. **Automated Purge Script ([`scripts/purge_standalone.ts`](file:///c:/Users/voide/eko/scripts/purge_standalone.ts) / `npm run purge:modules`)**:
+   - Strips **~2.23 GB** of non-runtime bloat from `node_modules` and `.next/standalone/node_modules` (including `@prisma/composer` nested `alchemy` cloud SDKs, `workerd`, `@prisma/studio-core`, `.cache`, and legacy native query-engine binaries), reducing `.next/standalone/node_modules` to **~23.3 MB**.
+3. **Minimal Docker Runner Stage ([`Dockerfile`](file:///c:/Users/voide/eko/Dockerfile))**:
+   - Copies only the traced `.next/standalone` bundle plus the exact Prisma 7 sync modules (`@prisma/client`, `@prisma/adapter-pg`, `@prisma/client-runtime-utils`, `@prisma/driver-adapter-utils`) instead of the entire `@prisma` namespace.
+
