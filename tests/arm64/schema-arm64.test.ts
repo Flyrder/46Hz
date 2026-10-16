@@ -68,8 +68,17 @@ describe("Arm64 Architecture Support", () => {
 
     const prisma8Config = path.join(process.cwd(), "prisma8.config.ts");
     expect(fs.existsSync(prisma8Config)).toBe(true);
+    const prisma8Content = fs.readFileSync(prisma8Config, "utf-8");
+    expect(prisma8Content).toContain('from "prisma/config"');
+    expect(prisma8Content).toContain('from "@prisma/orm-postgres/config"');
+
+    const pkgPath = path.join(process.cwd(), "package.json");
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+    expect(pkg.devDependencies["prisma"]).toBe("8.0.0-rc.23");
+    expect(pkg.devDependencies["@prisma/orm-postgres"]).toBe("8.0.0-rc.18");
 
     const contractPath = path.join(process.cwd(), "prisma", "contract.prisma");
     expect(fs.existsSync(contractPath)).toBe(true);
   });
 });
+
