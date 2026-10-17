@@ -68,9 +68,18 @@ export const complianceSettings = {
 } as const;
 
 export const aiSettings = {
+  enabled: ${cfg.enableAi},
+  enableRiskSafety: ${cfg.enableAiRiskSafety},
+  enableAnonymization: ${cfg.enableAiAnonymization},
+  enableReplyCoach: ${cfg.enableAiReplyCoach},
+  enableWritingSparks: ${cfg.enableAiWritingSparks},
+  enableResonanceMatch: ${cfg.enableAiResonanceMatch},
   defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)} as const,
   timeoutMs: ${cfg.aiTimeoutMs},
-  mockDelayMs: ${cfg.aiMockDelayMs}
+  mockDelayMs: ${cfg.aiMockDelayMs},
+  temperature: ${cfg.aiTemperature},
+  maxTokens: ${cfg.aiMaxTokens},
+  model: ${JSON.stringify(cfg.aiModel)}
 } as const;
 
 export const supportResourcesSettings = {
@@ -852,6 +861,105 @@ export function AdminSettingsForm({
               </div>
             </div>
 
+            {/* Master AI Toggle */}
+            <div className="mt-5 flex items-center justify-between rounded-xl border border-border/80 bg-background/60 p-4">
+              <div>
+                <span className="text-xs font-bold text-foreground block">
+                  {t("admin.settingsAiEnabledLabel")}
+                </span>
+                <span className="text-[11px] text-muted-foreground leading-relaxed block mt-0.5">
+                  {t("admin.settingsAiEnabledDesc")}
+                </span>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="enableAi"
+                  id="enableAi"
+                  disabled={!canEdit}
+                  checked={draft.enableAi}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, enableAi: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+              </label>
+            </div>
+
+            {/* AI Function Capability Toggles */}
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
+                <span>{t("admin.settingsAiRiskSafetyLabel")}</span>
+                <input
+                  type="checkbox"
+                  name="enableAiRiskSafety"
+                  disabled={!canEdit || !draft.enableAi}
+                  checked={draft.enableAiRiskSafety}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, enableAiRiskSafety: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
+                <span>{t("admin.settingsAiAnonymizationLabel")}</span>
+                <input
+                  type="checkbox"
+                  name="enableAiAnonymization"
+                  disabled={!canEdit || !draft.enableAi}
+                  checked={draft.enableAiAnonymization}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, enableAiAnonymization: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
+                <span>{t("admin.settingsAiReplyCoachLabel")}</span>
+                <input
+                  type="checkbox"
+                  name="enableAiReplyCoach"
+                  disabled={!canEdit || !draft.enableAi}
+                  checked={draft.enableAiReplyCoach}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, enableAiReplyCoach: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
+                <span>{t("admin.settingsAiWritingSparksLabel")}</span>
+                <input
+                  type="checkbox"
+                  name="enableAiWritingSparks"
+                  disabled={!canEdit || !draft.enableAi}
+                  checked={draft.enableAiWritingSparks}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, enableAiWritingSparks: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+              </label>
+
+              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30 sm:col-span-2">
+                <span>{t("admin.settingsAiResonanceMatchLabel")}</span>
+                <input
+                  type="checkbox"
+                  name="enableAiResonanceMatch"
+                  disabled={!canEdit || !draft.enableAi}
+                  checked={draft.enableAiResonanceMatch}
+                  onChange={(e) =>
+                    setDraft((prev) => ({ ...prev, enableAiResonanceMatch: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+                />
+              </label>
+            </div>
+
+            {/* AI Function Detail Parameters */}
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
               <div>
                 <label
@@ -877,6 +985,81 @@ export function AdminSettingsForm({
                   <option value="openai">{t("admin.settingsAiProviderOpenai")}</option>
                   <option value="deepseek">{t("admin.settingsAiProviderDeepseek")}</option>
                 </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="aiModel"
+                  className="block text-xs font-semibold text-foreground"
+                >
+                  {t("admin.settingsAiModelLabel")}
+                </label>
+                <input
+                  id="aiModel"
+                  name="aiModel"
+                  type="text"
+                  disabled={!canEdit}
+                  value={draft.aiModel}
+                  onChange={(e) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      aiModel: e.target.value
+                    }))
+                  }
+                  className={inputClassName}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="aiTemperature"
+                  className="block text-xs font-semibold text-foreground"
+                >
+                  {t("admin.settingsAiTemperatureLabel")}
+                </label>
+                <input
+                  id="aiTemperature"
+                  name="aiTemperature"
+                  type="number"
+                  min={0}
+                  max={2}
+                  step={0.1}
+                  disabled={!canEdit}
+                  value={draft.aiTemperature}
+                  onChange={(e) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      aiTemperature: Number(e.target.value) || 0.7
+                    }))
+                  }
+                  className={inputClassName}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="aiMaxTokens"
+                  className="block text-xs font-semibold text-foreground"
+                >
+                  {t("admin.settingsAiMaxTokensLabel")}
+                </label>
+                <input
+                  id="aiMaxTokens"
+                  name="aiMaxTokens"
+                  type="number"
+                  min={50}
+                  max={8000}
+                  step={50}
+                  disabled={!canEdit}
+                  value={draft.aiMaxTokens}
+                  onChange={(e) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      aiMaxTokens: Number(e.target.value) || 1500
+                    }))
+                  }
+                  className={inputClassName}
+                />
               </div>
 
               <div>

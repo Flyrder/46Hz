@@ -29,11 +29,19 @@ export default async function LetterDetailPage({
   const letter = await prisma.letter.findFirst({
     where: {
       id,
-      authorId: user.id
+      OR: [
+        { authorId: user.id },
+        { replies: { some: { responderId: user.id } } }
+      ]
     },
     include: {
       replies: {
-        where: { status: "APPROVED" },
+        where: {
+          OR: [
+            { status: "APPROVED" },
+            { responderId: user.id }
+          ]
+        },
         include: {
           feedback: {
             where: { fromUserId: user.id }
@@ -152,74 +160,99 @@ export default async function LetterDetailPage({
           ) : null}
 
           {!maskContent
-            ? letter.replies.map((reply) => (
-                <article
-                  key={reply.id}
-                  className="rounded-2xl border border-border/85 bg-surface p-6 shadow-soft transition-all"
-                >
-                  <div className="flex items-center justify-between border-b border-border/60 pb-3 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground/85">
-                      {t("letter.peerReplyTitle")}
-                    </span>
-                    <time dateTime={new Date(reply.createdAt).toISOString()}>{formatDate(reply.createdAt)}</time>
-                  </div>
-
-                  <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
-                    {reply.coachedText}
-                  </p>
-
-                  {/* Feedback Section */}
-                  {reply.feedback.length > 0 ? (
-                    <div className="mt-5 flex items-center gap-2 rounded-xl bg-accent/10 px-4 py-2.5 text-xs font-medium text-accent">
-                      <CheckCircle2 className="h-4 w-4 shrink-0" />
-                      <span>{t("feedback.saved")}</span>
+            ? letter.replies.map((reply) => {
+                const isMyReply = reply.responderId === user.id;
+                return (
+                  <article
+                    key={reply.id}
+                    className={`rounded-2xl border p-6 shadow-soft transition-all ${
+                      isMyReply
+                        ? "border-accent/40 bg-accent/[0.02] ring-1 ring-accent/15"
+                        : "border-border/85 bg-surface"
+                    }`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between border-b border-border/60 pb-3 text-xs text-muted-foreground gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground/85">
+                          {t("letter.peerReplyTitle")}
+                        </span>
+                        {isMyReply ? (
+                          <span className="inline-flex items-center rounded-full bg-accent/15 border border-accent/30 px-2.5 py-0.5 text-[11px] font-bold text-accent">
+                            {t("letter.myReplyBadge")}
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-muted/80 border border-border/70 px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                            {t("letter.otherReplyBadge")}
+                          </span>
+                        )}
+                      </div>
+                      <time dateTime={new Date(reply.createdAt).toISOString()}>{formatDate(reply.createdAt)}</time>
                     </div>
-                  ) : (
-                    <form action={submitFeedbackAction} className="mt-5 space-y-3.5 border-t border-border/60 pt-4">
-                      <input type="hidden" name="replyId" value={reply.id} />
-                      <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        {t("letter.replyFeedbackTitle")}
-                      </div>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
-                          <input className="accent-accent h-4.5 w-4.5 rounded" name="feltUnderstood" type="checkbox" />
-                          <span>{t("feedback.feltUnderstood")}</span>
-                        </label>
-                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
-                          <input className="accent-accent h-4.5 w-4.5 rounded" name="helpful" type="checkbox" />
-                          <span>{t("feedback.helpful")}</span>
-                        </label>
-                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
-                          <input className="accent-accent h-4.5 w-4.5 rounded" name="tooJudgmental" type="checkbox" />
-                          <span>{t("feedback.judgmental")}</span>
-                        </label>
-                        <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
-                          <input className="accent-accent h-4.5 w-4.5 rounded" name="tooMuchAdvice" type="checkbox" />
-                          <span>{t("feedback.tooMuchAdvice")}</span>
-                        </label>
-                      </div>
 
-                      <div className="pt-2">
-                        <label className="block text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1" htmlFor={`report-${reply.id}`}>
-                          <Flag className="h-3 w-3" />
-                          <span>{t("common.report")}</span>
-                        </label>
-                        <textarea
-                          id={`report-${reply.id}`}
-                          name="reportReason"
-                          rows={2}
-                          className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-base sm:text-xs leading-relaxed outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/20"
-                          placeholder={t("common.optionalReason")}
-                        />
-                      </div>
+                    <p className="mt-4 font-letter whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
+                      {reply.coachedText}
+                    </p>
 
-                      <div className="flex justify-end pt-1">
-                        <SubmitButton variant="secondary">{t("feedback.save")}</SubmitButton>
+                    {/* Feedback Section */}
+                    {letter.authorId === user.id ? (
+                      reply.feedback.length > 0 ? (
+                        <div className="mt-5 flex items-center gap-2 rounded-xl bg-accent/10 px-4 py-2.5 text-xs font-medium text-accent">
+                          <CheckCircle2 className="h-4 w-4 shrink-0" />
+                          <span>{t("feedback.saved")}</span>
+                        </div>
+                      ) : (
+                        <form action={submitFeedbackAction} className="mt-5 space-y-3.5 border-t border-border/60 pt-4">
+                          <input type="hidden" name="replyId" value={reply.id} />
+                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            {t("letter.replyFeedbackTitle")}
+                          </div>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                              <input className="accent-accent h-4.5 w-4.5 rounded" name="feltUnderstood" type="checkbox" />
+                              <span>{t("feedback.feltUnderstood")}</span>
+                            </label>
+                            <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                              <input className="accent-accent h-4.5 w-4.5 rounded" name="helpful" type="checkbox" />
+                              <span>{t("feedback.helpful")}</span>
+                            </label>
+                            <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                              <input className="accent-accent h-4.5 w-4.5 rounded" name="tooJudgmental" type="checkbox" />
+                              <span>{t("feedback.judgmental")}</span>
+                            </label>
+                            <label className="flex items-center min-h-[44px] gap-2.5 rounded-xl border border-border/70 p-3 text-xs text-foreground cursor-pointer hover:bg-muted/30 active:scale-98 transition-all">
+                              <input className="accent-accent h-4.5 w-4.5 rounded" name="tooMuchAdvice" type="checkbox" />
+                              <span>{t("feedback.tooMuchAdvice")}</span>
+                            </label>
+                          </div>
+
+                          <div className="pt-2">
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1" htmlFor={`report-${reply.id}`}>
+                              <Flag className="h-3 w-3" />
+                              <span>{t("common.report")}</span>
+                            </label>
+                            <textarea
+                              id={`report-${reply.id}`}
+                              name="reportReason"
+                              rows={2}
+                              className="w-full rounded-xl border border-border/70 bg-background/50 p-3 text-base sm:text-xs leading-relaxed outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/20"
+                              placeholder={t("common.optionalReason")}
+                            />
+                          </div>
+
+                          <div className="flex justify-end pt-1">
+                            <SubmitButton variant="secondary">{t("feedback.save")}</SubmitButton>
+                          </div>
+                        </form>
+                      )
+                    ) : reply.feedback.length > 0 ? (
+                      <div className="mt-4 flex items-center gap-2 rounded-xl bg-accent/10 px-3.5 py-2 text-xs font-medium text-accent">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                        <span>{t("feedback.saved")}</span>
                       </div>
-                    </form>
-                  )}
-                </article>
-              ))
+                    ) : null}
+                  </article>
+                );
+              })
             : null}
         </div>
       </div>

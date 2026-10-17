@@ -95,9 +95,18 @@ export const complianceSettings = {
 } as const;
 
 export const aiSettings = {
+  enabled: ${cfg.enableAi},
+  enableRiskSafety: ${cfg.enableAiRiskSafety},
+  enableAnonymization: ${cfg.enableAiAnonymization},
+  enableReplyCoach: ${cfg.enableAiReplyCoach},
+  enableWritingSparks: ${cfg.enableAiWritingSparks},
+  enableResonanceMatch: ${cfg.enableAiResonanceMatch},
   defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)} as const,
   timeoutMs: ${cfg.aiTimeoutMs},
-  mockDelayMs: ${cfg.aiMockDelayMs}
+  mockDelayMs: ${cfg.aiMockDelayMs},
+  temperature: ${cfg.aiTemperature},
+  maxTokens: ${cfg.aiMaxTokens},
+  model: ${JSON.stringify(cfg.aiModel)}
 } as const;
 
 export const supportResourcesSettings = {
@@ -163,7 +172,7 @@ function syncRootSettingsTsLiterals(cfg: EditableSystemSettings): boolean {
 
     source = source.replace(
       /(export const aiSettings[\s\S]*?=\s*\{)([\s\S]*?)(\n\};)/,
-      `$1\n  defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)},\n  timeoutMs: ${cfg.aiTimeoutMs},\n  mockDelayMs: ${cfg.aiMockDelayMs}$3`
+      `$1\n  enabled: ${cfg.enableAi},\n  enableRiskSafety: ${cfg.enableAiRiskSafety},\n  enableAnonymization: ${cfg.enableAiAnonymization},\n  enableReplyCoach: ${cfg.enableAiReplyCoach},\n  enableWritingSparks: ${cfg.enableAiWritingSparks},\n  enableResonanceMatch: ${cfg.enableAiResonanceMatch},\n  defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)},\n  timeoutMs: ${cfg.aiTimeoutMs},\n  mockDelayMs: ${cfg.aiMockDelayMs},\n  temperature: ${cfg.aiTemperature},\n  maxTokens: ${cfg.aiMaxTokens},\n  model: ${JSON.stringify(cfg.aiModel)}$3`
     );
 
     source = source.replace(

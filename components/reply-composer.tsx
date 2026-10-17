@@ -83,7 +83,7 @@ export function ReplyComposer({
           onChange={(e) => setCharCount([...e.target.value.trim()].length)}
           aria-invalid={state.ok === false && !!state.error}
           aria-describedby={state.ok === false && state.error ? "reply-error" : undefined}
-          className="mt-3.5 w-full resize-y rounded-xl border border-border bg-background/60 p-4 text-base leading-relaxed outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
+          className="mt-3.5 font-letter w-full resize-y rounded-xl border border-border bg-background/60 p-4 text-base leading-relaxed outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
           placeholder={labels.placeholder}
         />
 
@@ -285,7 +285,7 @@ function CoachedReplyWorkbench({
         required
         value={currentText}
         onChange={(e) => setCurrentText(e.target.value)}
-        className="mt-3 w-full resize-y rounded-xl border border-border bg-background p-4 text-base leading-relaxed outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/25 break-words"
+        className="mt-3 font-letter w-full resize-y rounded-xl border border-border bg-background p-4 text-base leading-relaxed outline-none transition-all focus:border-accent focus:ring-2 focus:ring-accent/25 break-words"
       />
 
       <div className="mt-5 flex flex-wrap items-center gap-3">

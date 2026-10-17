@@ -8,7 +8,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-7.x%20Strict-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![Tailwind CSS 4](https://img.shields.io/badge/TailwindCSS-v4-38bdf8.svg?logo=tailwindcss)](https://tailwindcss.com/)
 [![Prisma ORM 7](https://img.shields.io/badge/Prisma-7.10%20pg--adapter-2D3748.svg?logo=prisma)](https://www.prisma.io/)
-[![Vitest](https://img.shields.io/badge/Vitest-125%20Passed-6E9F18.svg?logo=vitest)](https://vitest.dev/)
+[![Vitest](https://img.shields.io/badge/Vitest-142%20Passed-6E9F18.svg?logo=vitest)](https://vitest.dev/)
 [![Multi-Arch](https://img.shields.io/badge/Arch-Arm64%20%7C%20AMD64-orange.svg?logo=docker)](https://www.docker.com/)
 [![KWCAG 2.2](https://img.shields.io/badge/A11y-KWCAG%202.2%20%2F%20KS%20X%209256-emerald.svg)](#8-배리어-프리-웹-접근성-kwcag-22--ks-x-92562024)
 [![Zero PII](https://img.shields.io/badge/Privacy-Zero%20PII%20GDPR-teal.svg)](#보안-강화-및-데이터-최소화-규정-준수)
@@ -187,7 +187,7 @@ settings.compliance.maxRecentIps;       // 세션당 최대 5개 IP 이력 제�
 │   └── seed.ts                   # 한국/중국 공식 핫라인 및 초기 시드 데이터
 ├── scripts/                      # 시스템 무결성 검증 및 유지보수 도구
 │   └── verify_backend.ts         # 7단계 엔드투엔드 백엔드 무결성 자동 검증 스크립트
-├── tests/                        # Vitest 자동화 테스트 스위트 (20개 파일, 129개 테스트)
+├── tests/                        # Vitest 자동화 테스트 스위트 (22개 파일, 142개 테스트)
 ├── docker-compose.yml            # 멀티 아키텍처 PostgreSQL 컨테이너 정의
 ├── Dockerfile                    # 경량화 멀티 스테이지 프로덕션 컨테이너 빌드
 ├── settings.ts                   # 중앙 집중식 시스템 설정
@@ -345,7 +345,7 @@ npm run dev
 코드베이스의 완벽성을 보장하기 위해 다음 검증 파이프라인을 실행합니다:
 
 ```bash
-# 1. 19개 자동화 테스트 스위트 (125개 테스트) 전체 실행
+# 1. 22개 자동화 테스트 스위트 (142개 테스트) 전체 실행
 npm run test:run
 
 # 2. TypeScript 엄격 타입 검사 (에러 0건)

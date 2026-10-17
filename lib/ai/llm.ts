@@ -14,6 +14,7 @@ import type {
   WritingSparksResult
 } from "@/lib/ai/middleware";
 import { MockAiMiddleware } from "@/lib/ai/mock";
+import { aiSettings } from "@/settings";
 
 export interface LlmConfig {
   provider: "openai" | "deepseek" | "gemini" | "anthropic" | "ollama" | "custom";
@@ -21,6 +22,8 @@ export interface LlmConfig {
   baseURL?: string;
   model?: string;
   timeoutMs?: number;
+  temperature?: number;
+  maxTokens?: number;
 }
 
 export class LlmAiMiddleware implements AiMiddleware {
@@ -76,8 +79,10 @@ export class LlmAiMiddleware implements AiMiddleware {
       provider,
       apiKey: customConfig?.apiKey ?? apiKey,
       baseURL: (customConfig?.baseURL ?? process.env.AI_BASE_URL ?? defaultBaseURL).replace(/\/+$/, ""),
-      model: customConfig?.model ?? process.env.AI_MODEL ?? defaultModel,
-      timeoutMs: customConfig?.timeoutMs ?? 10000
+      model: customConfig?.model ?? process.env.AI_MODEL ?? aiSettings.model ?? defaultModel,
+      timeoutMs: customConfig?.timeoutMs ?? aiSettings.timeoutMs ?? 10000,
+      temperature: customConfig?.temperature ?? aiSettings.temperature ?? 0.7,
+      maxTokens: customConfig?.maxTokens ?? aiSettings.maxTokens ?? 1500
     };
   }
 
@@ -138,7 +143,8 @@ export class LlmAiMiddleware implements AiMiddleware {
 
       const requestBody: Record<string, any> = {
         model: this.config.model,
-        temperature: 0.2,
+        temperature: this.config.temperature ?? 0.7,
+        max_tokens: this.config.maxTokens ?? 1500,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -177,7 +183,7 @@ export class LlmAiMiddleware implements AiMiddleware {
   }
 
   async processLetter(input: ProcessLetterInput): Promise<ProcessedLetterResult> {
-    if (!this.isConfigured) {
+    if (!aiSettings.enabled || !this.isConfigured) {
       return this.fallback.processLetter(input);
     }
 
@@ -245,7 +251,7 @@ Risk level rules:
   }
 
   async coachReply(input: CoachReplyInput): Promise<CoachedReplyResult> {
-    if (!this.isConfigured) {
+    if (!aiSettings.enabled || !aiSettings.enableReplyCoach || !this.isConfigured) {
       return this.fallback.coachReply(input);
     }
 
@@ -311,7 +317,7 @@ Output a valid JSON object strictly matching this schema:
   }
 
   async classifyRisk(input: RiskClassificationInput): Promise<RiskClassificationResult> {
-    if (!this.isConfigured) {
+    if (!aiSettings.enabled || !aiSettings.enableRiskSafety || !this.isConfigured) {
       return this.fallback.classifyRisk(input);
     }
 
@@ -345,7 +351,7 @@ Output a valid JSON object strictly matching:
   }
 
   async anonymize(input: AnonymizationInput): Promise<AnonymizationResult> {
-    if (!this.isConfigured) {
+    if (!aiSettings.enabled || !aiSettings.enableAnonymization || !this.isConfigured) {
       return this.fallback.anonymize(input);
     }
 
@@ -374,7 +380,7 @@ Output JSON:
   }
 
   async generateWritingSparks(input: WritingSparksInput): Promise<WritingSparksResult> {
-    if (!this.isConfigured) {
+    if (!aiSettings.enabled || !aiSettings.enableWritingSparks || !this.isConfigured) {
       return this.fallback.generateWritingSparks(input);
     }
 
@@ -419,7 +425,7 @@ Output a valid JSON object strictly matching this schema:
   }
 
   async matchResonantLetters(input: ResonanceMatchInput): Promise<ResonanceMatchResult> {
-    if (!this.isConfigured) {
+    if (!aiSettings.enabled || !aiSettings.enableResonanceMatch || !this.isConfigured) {
       return this.fallback.matchResonantLetters(input);
     }
 

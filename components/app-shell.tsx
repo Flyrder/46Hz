@@ -149,6 +149,13 @@ export function AppShell({
             <span className="text-[11px] text-muted-foreground/70">
               {t("shell.footerComplianceBadge")}
             </span>
+            <span className="text-border" aria-hidden="true">·</span>
+            <Link
+              href="/licenses"
+              className="text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+            >
+              {t("shell.licenseLink")}
+            </Link>
           </div>
         </div>
       </footer>

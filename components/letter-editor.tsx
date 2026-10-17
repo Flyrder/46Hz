@@ -117,7 +117,7 @@ export function LetterEditor({
           minLength={minLength}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          className="mt-4 w-full resize-y rounded-xl border border-border/70 bg-background/50 p-4 sm:p-5 text-base leading-relaxed text-foreground outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
+          className="mt-4 font-letter w-full resize-y rounded-xl border border-border/70 bg-background/50 p-4 sm:p-5 text-base leading-relaxed text-foreground outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
           placeholder={labels.placeholder}
         />
 

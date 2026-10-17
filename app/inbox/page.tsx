@@ -1,4 +1,5 @@
-import { Inbox, Send, PenLine, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { Inbox, Send, PenLine, CheckCircle2, ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { LetterCard } from "@/components/letter-card";
 import { StatusBadge } from "@/components/status-badge";
@@ -124,9 +125,10 @@ export default async function InboxPage({
             />
           ) : (
             ownReplies.map((reply) => (
-              <div
+              <Link
                 key={reply.id}
-                className="rounded-2xl border border-border/85 bg-surface p-5 shadow-xs transition-all hover:border-accent/30 hover:shadow-tactile"
+                href={`/letters/${reply.letterId}`}
+                className="group block rounded-2xl border border-border/85 bg-surface p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-tactile active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
                 <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2.5">
                   <StatusBadge tone={reply.status === "APPROVED" ? "good" : "neutral"}>
@@ -139,10 +141,14 @@ export default async function InboxPage({
                     type: t(`replyType.${reply.letter.desiredReplyType}`).toLowerCase()
                   })}
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-foreground/80 font-normal line-clamp-2 break-words">
+                <p className="mt-2 font-letter text-xs leading-relaxed text-foreground/80 font-normal line-clamp-2 break-words">
                   {reply.coachedText}
                 </p>
-              </div>
+                <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-semibold text-accent opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
+                  <span>{t("inbox.viewFullLetterAndReplies")}</span>
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                </div>
+              </Link>
             ))
           )}
         </div>
