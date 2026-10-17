@@ -10,10 +10,14 @@ import {
   Save,
   RotateCcw,
   FileCode2,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Key,
+  Sparkles
 } from "lucide-react";
 import { ExitIsoIcon } from "@/components/exit-sign-emblem";
-import type { EditableSystemSettings } from "@/settings";
+import { DEFAULT_AI_SYSTEM_PROMPT, type EditableSystemSettings } from "@/settings";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useI18n } from "@/lib/i18n";
 
@@ -79,7 +83,10 @@ export const aiSettings = {
   mockDelayMs: ${cfg.aiMockDelayMs},
   temperature: ${cfg.aiTemperature},
   maxTokens: ${cfg.aiMaxTokens},
-  model: ${JSON.stringify(cfg.aiModel)}
+  model: ${JSON.stringify(cfg.aiModel)},
+  apiKey: ${JSON.stringify(cfg.aiApiKey)},
+  baseUrl: ${JSON.stringify(cfg.aiBaseUrl)},
+  systemPrompt: ${JSON.stringify(cfg.aiSystemPrompt)}
 } as const;
 
 export const supportResourcesSettings = {
@@ -100,6 +107,7 @@ export function AdminSettingsForm({
 }) {
   const { t } = useI18n();
   const [draft, setDraft] = useState<EditableSystemSettings>(initialSettings);
+  const [showApiKey, setShowApiKey] = useState<boolean>(false);
 
   const livePreview = useMemo(() => generateLiveSettingsPreview(draft), [draft]);
 
@@ -959,165 +967,359 @@ export function AdminSettingsForm({
               </label>
             </div>
 
-            {/* AI Function Detail Parameters */}
-            <div className="mt-5 grid gap-4 sm:grid-cols-3">
-              <div>
-                <label
-                  htmlFor="aiDefaultProvider"
-                  className="block text-xs font-semibold text-foreground"
-                >
-                  {t("admin.settingsAiProviderLabel")}
-                </label>
-                <select
-                  id="aiDefaultProvider"
-                  name="aiDefaultProvider"
-                  disabled={!canEdit}
-                  value={draft.aiDefaultProvider}
-                  onChange={(e) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      aiDefaultProvider: e.target.value as EditableSystemSettings["aiDefaultProvider"]
-                    }))
-                  }
-                  className={inputClassName}
-                >
-                  <option value="mock">{t("admin.settingsAiProviderMock")}</option>
-                  <option value="openai">{t("admin.settingsAiProviderOpenai")}</option>
-                  <option value="deepseek">{t("admin.settingsAiProviderDeepseek")}</option>
-                </select>
+            {/* AI Provider & Endpoint Details */}
+            <div className="mt-5 rounded-2xl border border-border/80 bg-background/50 p-5 space-y-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="aiDefaultProvider"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiProviderLabel")}
+                  </label>
+                  <select
+                    id="aiDefaultProvider"
+                    name="aiDefaultProvider"
+                    disabled={!canEdit}
+                    value={draft.aiDefaultProvider}
+                    onChange={(e) => {
+                      const newProv = e.target.value as EditableSystemSettings["aiDefaultProvider"];
+                      let suggestedModel = draft.aiModel;
+                      let suggestedBaseUrl = draft.aiBaseUrl;
+                      if (newProv === "openai") {
+                        if (!draft.aiModel || draft.aiModel.includes("deepseek") || draft.aiModel.includes("gemini") || draft.aiModel.includes("mock")) {
+                          suggestedModel = "gpt-4o-mini";
+                        }
+                      } else if (newProv === "deepseek") {
+                        if (!draft.aiModel || draft.aiModel.includes("gpt") || draft.aiModel.includes("gemini") || draft.aiModel.includes("mock")) {
+                          suggestedModel = "deepseek-chat";
+                        }
+                      } else if (newProv === "gemini") {
+                        if (!draft.aiModel || draft.aiModel.includes("gpt") || draft.aiModel.includes("deepseek") || draft.aiModel.includes("mock")) {
+                          suggestedModel = "gemini-1.5-flash";
+                        }
+                      }
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiDefaultProvider: newProv,
+                        aiModel: suggestedModel,
+                        aiBaseUrl: suggestedBaseUrl
+                      }));
+                    }}
+                    className={inputClassName}
+                  >
+                    <option value="mock">{t("admin.settingsAiProviderMock")}</option>
+                    <option value="openai">{t("admin.settingsAiProviderOpenai")}</option>
+                    <option value="deepseek">{t("admin.settingsAiProviderDeepseek")}</option>
+                    <option value="gemini">{t("admin.settingsAiProviderGemini")}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="aiModel"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiModelLabel")}
+                  </label>
+                  <input
+                    id="aiModel"
+                    name="aiModel"
+                    type="text"
+                    disabled={!canEdit}
+                    value={draft.aiModel}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiModel: e.target.value
+                      }))
+                    }
+                    className={inputClassName}
+                  />
+                  {/* Model Presets Quick Select */}
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] font-medium text-muted-foreground mr-1">
+                      {t("admin.settingsAiModelPresets")}:
+                    </span>
+                    {(draft.aiDefaultProvider === "openai"
+                      ? ["gpt-4o-mini", "gpt-4o"]
+                      : draft.aiDefaultProvider === "deepseek"
+                      ? ["deepseek-chat", "deepseek-reasoner"]
+                      : draft.aiDefaultProvider === "gemini"
+                      ? ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"]
+                      : ["mock-v1"]
+                    ).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setDraft((prev) => ({ ...prev, aiModel: m }))}
+                        disabled={!canEdit}
+                        className={`rounded-lg border px-2 py-0.5 text-[11px] font-mono transition-colors ${
+                          draft.aiModel === m
+                            ? "border-accent bg-accent/15 text-accent font-bold"
+                            : "border-border/60 bg-surface text-muted-foreground hover:bg-muted"
+                        }`}
+                      >
+                        {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label
-                  htmlFor="aiModel"
-                  className="block text-xs font-semibold text-foreground"
-                >
-                  {t("admin.settingsAiModelLabel")}
-                </label>
-                <input
-                  id="aiModel"
-                  name="aiModel"
-                  type="text"
-                  disabled={!canEdit}
-                  value={draft.aiModel}
-                  onChange={(e) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      aiModel: e.target.value
-                    }))
-                  }
-                  className={inputClassName}
-                />
+              {/* Provider API Key & Base URL */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label
+                      htmlFor="aiApiKey"
+                      className="block text-xs font-semibold text-foreground flex items-center gap-1"
+                    >
+                      <Key className="h-3 w-3 text-accent" />
+                      <span>{t("admin.settingsAiApiKeyLabel")}</span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowApiKey((v) => !v)}
+                      className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+                      aria-label={showApiKey ? t("admin.settingsAiHideKey") : t("admin.settingsAiShowKey")}
+                    >
+                      {showApiKey ? (
+                        <>
+                          <EyeOff className="h-3 w-3" />
+                          <span>{t("admin.settingsAiHideKey")}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-3 w-3" />
+                          <span>{t("admin.settingsAiShowKey")}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <input
+                    id="aiApiKey"
+                    name="aiApiKey"
+                    type={showApiKey ? "text" : "password"}
+                    disabled={!canEdit}
+                    placeholder={
+                      draft.aiDefaultProvider === "openai"
+                        ? "sk-proj-..."
+                        : draft.aiDefaultProvider === "deepseek"
+                        ? "sk-..."
+                        : draft.aiDefaultProvider === "gemini"
+                        ? "AIzaSy..."
+                        : "Optional"
+                    }
+                    value={draft.aiApiKey}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiApiKey: e.target.value
+                      }))
+                    }
+                    className={inputClassName}
+                  />
+                  <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+                    {t("admin.settingsAiApiKeyDesc")}
+                  </p>
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="aiBaseUrl"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiBaseUrlLabel")}
+                  </label>
+                  <input
+                    id="aiBaseUrl"
+                    name="aiBaseUrl"
+                    type="text"
+                    disabled={!canEdit}
+                    placeholder={
+                      draft.aiDefaultProvider === "openai"
+                        ? "https://api.openai.com/v1"
+                        : draft.aiDefaultProvider === "deepseek"
+                        ? "https://api.deepseek.com"
+                        : draft.aiDefaultProvider === "gemini"
+                        ? "https://generativelanguage.googleapis.com/v1beta/openai"
+                        : "https://..."
+                    }
+                    value={draft.aiBaseUrl}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiBaseUrl: e.target.value
+                      }))
+                    }
+                    className={inputClassName}
+                  />
+                  <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+                    {t("admin.settingsAiBaseUrlDesc")}
+                  </p>
+                </div>
               </div>
 
+              {/* System Initial Prompt Editor */}
               <div>
-                <label
-                  htmlFor="aiTemperature"
-                  className="block text-xs font-semibold text-foreground"
-                >
-                  {t("admin.settingsAiTemperatureLabel")}
-                </label>
-                <input
-                  id="aiTemperature"
-                  name="aiTemperature"
-                  type="number"
-                  min={0}
-                  max={2}
-                  step={0.1}
+                <div className="flex items-center justify-between mb-1">
+                  <label
+                    htmlFor="aiSystemPrompt"
+                    className="block text-xs font-semibold text-foreground flex items-center gap-1.5"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-accent" />
+                    <span>{t("admin.settingsAiSystemPromptLabel")}</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-mono text-muted-foreground">
+                      {draft.aiSystemPrompt.length}자
+                    </span>
+                    <button
+                      type="button"
+                      disabled={!canEdit}
+                      onClick={() =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          aiSystemPrompt: DEFAULT_AI_SYSTEM_PROMPT
+                        }))
+                      }
+                      className="text-[11px] font-semibold text-accent hover:underline"
+                    >
+                      {t("admin.settingsAiResetPrompt")}
+                    </button>
+                  </div>
+                </div>
+                <textarea
+                  id="aiSystemPrompt"
+                  name="aiSystemPrompt"
+                  rows={4}
                   disabled={!canEdit}
-                  value={draft.aiTemperature}
+                  value={draft.aiSystemPrompt}
                   onChange={(e) =>
                     setDraft((prev) => ({
                       ...prev,
-                      aiTemperature: Number(e.target.value) || 0.7
+                      aiSystemPrompt: e.target.value
                     }))
                   }
-                  className={inputClassName}
+                  className={`${inputClassName} text-xs font-mono leading-relaxed`}
                 />
+                <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
+                  {t("admin.settingsAiSystemPromptDesc")}
+                </p>
               </div>
 
-              <div>
-                <label
-                  htmlFor="aiMaxTokens"
-                  className="block text-xs font-semibold text-foreground"
-                >
-                  {t("admin.settingsAiMaxTokensLabel")}
-                </label>
-                <input
-                  id="aiMaxTokens"
-                  name="aiMaxTokens"
-                  type="number"
-                  min={50}
-                  max={8000}
-                  step={50}
-                  disabled={!canEdit}
-                  value={draft.aiMaxTokens}
-                  onChange={(e) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      aiMaxTokens: Number(e.target.value) || 1500
-                    }))
-                  }
-                  className={inputClassName}
-                />
-              </div>
+              {/* Execution & Model Hyperparameters */}
+              <div className="grid gap-4 sm:grid-cols-4 border-t border-border/50 pt-4">
+                <div>
+                  <label
+                    htmlFor="aiTemperature"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiTemperatureLabel")}
+                  </label>
+                  <input
+                    id="aiTemperature"
+                    name="aiTemperature"
+                    type="number"
+                    min={0}
+                    max={2}
+                    step={0.1}
+                    disabled={!canEdit}
+                    value={draft.aiTemperature}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiTemperature: Number(e.target.value) || 0.7
+                      }))
+                    }
+                    className={inputClassName}
+                  />
+                </div>
 
-              <div>
-                <label
-                  htmlFor="aiTimeoutMs"
-                  className="block text-xs font-semibold text-foreground"
-                >
-                  {t("admin.settingsAiTimeoutLabel")} <span className="text-danger">*</span>
-                </label>
-                <input
-                  id="aiTimeoutMs"
-                  name="aiTimeoutMs"
-                  type="number"
-                  required
-                  min={1000}
-                  max={60000}
-                  step={500}
-                  disabled={!canEdit}
-                  value={draft.aiTimeoutMs}
-                  onChange={(e) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      aiTimeoutMs: Number(e.target.value) || 10000
-                    }))
-                  }
-                  onBlur={handleBlur}
-                  onInput={handleInput}
-                  className={inputClassName}
-                />
-              </div>
+                <div>
+                  <label
+                    htmlFor="aiMaxTokens"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiMaxTokensLabel")}
+                  </label>
+                  <input
+                    id="aiMaxTokens"
+                    name="aiMaxTokens"
+                    type="number"
+                    min={50}
+                    max={8000}
+                    step={50}
+                    disabled={!canEdit}
+                    value={draft.aiMaxTokens}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiMaxTokens: Number(e.target.value) || 1500
+                      }))
+                    }
+                    className={inputClassName}
+                  />
+                </div>
 
-              <div>
-                <label
-                  htmlFor="aiMockDelayMs"
-                  className="block text-xs font-semibold text-foreground"
-                >
-                  {t("admin.settingsAiMockDelayLabel")} <span className="text-danger">*</span>
-                </label>
-                <input
-                  id="aiMockDelayMs"
-                  name="aiMockDelayMs"
-                  type="number"
-                  required
-                  min={0}
-                  max={5000}
-                  step={50}
-                  disabled={!canEdit}
-                  value={draft.aiMockDelayMs}
-                  onChange={(e) =>
-                    setDraft((prev) => ({
-                      ...prev,
-                      aiMockDelayMs: Number(e.target.value) || 150
-                    }))
-                  }
-                  onBlur={handleBlur}
-                  onInput={handleInput}
-                  className={inputClassName}
-                />
+                <div>
+                  <label
+                    htmlFor="aiTimeoutMs"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiTimeoutLabel")} <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id="aiTimeoutMs"
+                    name="aiTimeoutMs"
+                    type="number"
+                    required
+                    min={1000}
+                    max={60000}
+                    step={500}
+                    disabled={!canEdit}
+                    value={draft.aiTimeoutMs}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiTimeoutMs: Number(e.target.value) || 10000
+                      }))
+                    }
+                    onBlur={handleBlur}
+                    onInput={handleInput}
+                    className={inputClassName}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="aiMockDelayMs"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiMockDelayLabel")} <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    id="aiMockDelayMs"
+                    name="aiMockDelayMs"
+                    type="number"
+                    required
+                    min={0}
+                    max={5000}
+                    step={50}
+                    disabled={!canEdit}
+                    value={draft.aiMockDelayMs}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiMockDelayMs: Number(e.target.value) || 150
+                      }))
+                    }
+                    onBlur={handleBlur}
+                    onInput={handleInput}
+                    className={inputClassName}
+                  />
+                </div>
               </div>
             </div>
           </section>

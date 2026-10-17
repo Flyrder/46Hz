@@ -21,6 +21,7 @@ export interface LlmConfig {
   apiKey?: string;
   baseURL?: string;
   model?: string;
+  systemPrompt?: string;
   timeoutMs?: number;
   temperature?: number;
   maxTokens?: number;
@@ -47,39 +48,42 @@ export class LlmAiMiddleware implements AiMiddleware {
 
     let defaultBaseURL = "https://api.openai.com/v1";
     let defaultModel = "gpt-4o-mini";
-    let apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
+    let apiKey = customConfig?.apiKey ?? (aiSettings.apiKey?.trim() || undefined);
 
     if (provider === "deepseek") {
       defaultBaseURL = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com/v1";
       defaultModel = process.env.DEEPSEEK_MODEL || "deepseek-chat";
-      apiKey = process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY;
+      apiKey = apiKey || process.env.DEEPSEEK_API_KEY || process.env.AI_API_KEY;
     } else if (provider === "gemini") {
       defaultBaseURL = process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com/v1beta/openai";
       defaultModel = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-      apiKey = process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
+      apiKey = apiKey || process.env.GEMINI_API_KEY || process.env.AI_API_KEY;
     } else if (provider === "anthropic") {
       defaultBaseURL = process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com/v1";
       defaultModel = process.env.ANTHROPIC_MODEL || "claude-3-5-haiku-20241022";
-      apiKey = process.env.ANTHROPIC_API_KEY || process.env.AI_API_KEY;
+      apiKey = apiKey || process.env.ANTHROPIC_API_KEY || process.env.AI_API_KEY;
     } else if (provider === "ollama") {
       defaultBaseURL = process.env.OLLAMA_BASE_URL || "http://localhost:11434/v1";
       defaultModel = process.env.OLLAMA_MODEL || "llama3.2";
-      apiKey = process.env.OLLAMA_API_KEY || "ollama";
+      apiKey = apiKey || process.env.OLLAMA_API_KEY || "ollama";
     } else if (provider === "openai") {
       defaultBaseURL = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
       defaultModel = process.env.OPENAI_MODEL || "gpt-4o-mini";
-      apiKey = process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
+      apiKey = apiKey || process.env.OPENAI_API_KEY || process.env.AI_API_KEY;
     } else {
       defaultBaseURL = process.env.AI_BASE_URL || "https://api.openai.com/v1";
       defaultModel = process.env.AI_MODEL || "gpt-4o-mini";
-      apiKey = process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
+      apiKey = apiKey || process.env.AI_API_KEY || process.env.OPENAI_API_KEY;
     }
+
+    const customBaseURL = customConfig?.baseURL ?? (aiSettings.baseUrl?.trim() || undefined);
 
     this.config = {
       provider,
-      apiKey: customConfig?.apiKey ?? apiKey,
-      baseURL: (customConfig?.baseURL ?? process.env.AI_BASE_URL ?? defaultBaseURL).replace(/\/+$/, ""),
-      model: customConfig?.model ?? process.env.AI_MODEL ?? aiSettings.model ?? defaultModel,
+      apiKey,
+      baseURL: (customBaseURL ?? process.env.AI_BASE_URL ?? defaultBaseURL).replace(/\/+$/, ""),
+      model: customConfig?.model ?? (aiSettings.model?.trim() || undefined) ?? process.env.AI_MODEL ?? defaultModel,
+      systemPrompt: customConfig?.systemPrompt ?? (aiSettings.systemPrompt?.trim() || undefined),
       timeoutMs: customConfig?.timeoutMs ?? aiSettings.timeoutMs ?? 10000,
       temperature: customConfig?.temperature ?? aiSettings.temperature ?? 0.7,
       maxTokens: customConfig?.maxTokens ?? aiSettings.maxTokens ?? 1500
@@ -95,6 +99,14 @@ export class LlmAiMiddleware implements AiMiddleware {
     return this.config;
   }
 
+  private buildSystemPrompt(taskInstruction: string): string {
+    const base = this.config.systemPrompt?.trim();
+    if (base) {
+      return `${base}\n\n[Task Guidelines]\n${taskInstruction}`;
+    }
+    return taskInstruction;
+  }
+
   private async callChatCompletion(systemPrompt: string, userPrompt: string): Promise<string> {
     if (!this.isConfigured) {
       throw new Error(`LLM provider ${this.config.provider} API key not configured.`);
@@ -102,6 +114,7 @@ export class LlmAiMiddleware implements AiMiddleware {
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.config.timeoutMs);
+    const effectiveSystemPrompt = this.buildSystemPrompt(systemPrompt);
 
     try {
       if (this.config.provider === "anthropic") {
@@ -115,7 +128,7 @@ export class LlmAiMiddleware implements AiMiddleware {
           body: JSON.stringify({
             model: this.config.model,
             max_tokens: 2048,
-            system: systemPrompt,
+            system: effectiveSystemPrompt,
             messages: [{ role: "user", content: userPrompt }]
           }),
           signal: controller.signal
@@ -146,7 +159,7 @@ export class LlmAiMiddleware implements AiMiddleware {
         temperature: this.config.temperature ?? 0.7,
         max_tokens: this.config.maxTokens ?? 1500,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: effectiveSystemPrompt },
           { role: "user", content: userPrompt }
         ]
       };

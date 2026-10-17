@@ -106,7 +106,10 @@ export const aiSettings = {
   mockDelayMs: ${cfg.aiMockDelayMs},
   temperature: ${cfg.aiTemperature},
   maxTokens: ${cfg.aiMaxTokens},
-  model: ${JSON.stringify(cfg.aiModel)}
+  model: ${JSON.stringify(cfg.aiModel)},
+  apiKey: ${JSON.stringify(cfg.aiApiKey)},
+  baseUrl: ${JSON.stringify(cfg.aiBaseUrl)},
+  systemPrompt: ${JSON.stringify(cfg.aiSystemPrompt)}
 } as const;
 
 export const supportResourcesSettings = {
@@ -172,7 +175,7 @@ function syncRootSettingsTsLiterals(cfg: EditableSystemSettings): boolean {
 
     source = source.replace(
       /(export const aiSettings[\s\S]*?=\s*\{)([\s\S]*?)(\n\};)/,
-      `$1\n  enabled: ${cfg.enableAi},\n  enableRiskSafety: ${cfg.enableAiRiskSafety},\n  enableAnonymization: ${cfg.enableAiAnonymization},\n  enableReplyCoach: ${cfg.enableAiReplyCoach},\n  enableWritingSparks: ${cfg.enableAiWritingSparks},\n  enableResonanceMatch: ${cfg.enableAiResonanceMatch},\n  defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)},\n  timeoutMs: ${cfg.aiTimeoutMs},\n  mockDelayMs: ${cfg.aiMockDelayMs},\n  temperature: ${cfg.aiTemperature},\n  maxTokens: ${cfg.aiMaxTokens},\n  model: ${JSON.stringify(cfg.aiModel)}$3`
+      `$1\n  enabled: ${cfg.enableAi},\n  enableRiskSafety: ${cfg.enableAiRiskSafety},\n  enableAnonymization: ${cfg.enableAiAnonymization},\n  enableReplyCoach: ${cfg.enableAiReplyCoach},\n  enableWritingSparks: ${cfg.enableAiWritingSparks},\n  enableResonanceMatch: ${cfg.enableAiResonanceMatch},\n  defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)},\n  timeoutMs: ${cfg.aiTimeoutMs},\n  mockDelayMs: ${cfg.aiMockDelayMs},\n  temperature: ${cfg.aiTemperature},\n  maxTokens: ${cfg.aiMaxTokens},\n  model: ${JSON.stringify(cfg.aiModel)},\n  apiKey: ${JSON.stringify(cfg.aiApiKey)},\n  baseUrl: ${JSON.stringify(cfg.aiBaseUrl)},\n  systemPrompt: ${JSON.stringify(cfg.aiSystemPrompt)}$3`
     );
 
     source = source.replace(

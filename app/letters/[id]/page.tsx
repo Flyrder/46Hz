@@ -15,6 +15,7 @@ import { formatDate } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { DeleteLetterButton } from "@/components/delete-letter-button";
 import { LetterInteractiveReader } from "@/components/letter-interactive-reader";
+import { DesiredReplyTypeEditor } from "@/components/desired-reply-type-editor";
 
 export const dynamic = "force-dynamic";
 
@@ -70,11 +71,13 @@ export default async function LetterDetailPage({
           className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground mb-3 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          <span>{t("letter.backToInbox")}</span>
+          <span>{letter.authorId === user.id ? t("letter.backToInbox") : t("letter.backToInboxSentReplies")}</span>
         </Link>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">{t("letter.title")}</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            {letter.authorId === user.id ? t("letter.title") : t("letter.othersTitle")}
+          </h1>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
@@ -93,7 +96,12 @@ export default async function LetterDetailPage({
           <StatusBadge tone={letter.riskLevel === "NORMAL" ? "good" : "warning"}>
             {t(`status.${letter.riskLevel}`)}
           </StatusBadge>
-          <StatusBadge tone="neutral">{t(`replyType.${letter.desiredReplyType}`)}</StatusBadge>
+          <DesiredReplyTypeEditor
+            letterId={letter.id}
+            currentType={letter.desiredReplyType}
+            isAuthor={letter.authorId === user.id}
+            t={t}
+          />
           {letter.emotionTags.map((tag) => (
             <span key={tag} className="text-xs font-medium text-muted-foreground/80">
               #{formatTag(tag, t)}

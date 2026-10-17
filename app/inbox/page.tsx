@@ -131,9 +131,12 @@ export default async function InboxPage({
                 className="group block rounded-2xl border border-border/85 bg-surface p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:shadow-tactile active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               >
                 <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-2.5">
-                  <StatusBadge tone={reply.status === "APPROVED" ? "good" : "neutral"}>
-                    {t(`status.${reply.status}`)}
-                  </StatusBadge>
+                  <div className="flex items-center gap-1.5">
+                    <StatusBadge tone="neutral">{t("inbox.othersLetter")}</StatusBadge>
+                    <StatusBadge tone={reply.status === "APPROVED" ? "good" : "neutral"}>
+                      {t(`status.${reply.status}`)}
+                    </StatusBadge>
+                  </div>
                   <span className="text-xs text-muted-foreground">{formatDate(reply.createdAt)}</span>
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
@@ -145,7 +148,7 @@ export default async function InboxPage({
                   {reply.coachedText}
                 </p>
                 <div className="mt-3 flex items-center justify-end gap-1 text-[11px] font-semibold text-accent opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
-                  <span>{t("inbox.viewFullLetterAndReplies")}</span>
+                  <span>{t("inbox.viewOthersLetterAndReplies")}</span>
                   <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </div>
               </Link>

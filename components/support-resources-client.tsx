@@ -39,7 +39,6 @@ export function SupportResourcesClient({
   const t = customT || (propLocale ? createTranslator(propLocale) : contextT);
 
   const [selectedRegion, setSelectedRegion] = useState<string>("ALL");
-  const [selectedLang, setSelectedLang] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [breathingOpen, setBreathingOpen] = useState<boolean>(false);
 
@@ -71,11 +70,6 @@ export function SupportResourcesClient({
         if (!isChinaResource) return false;
       }
 
-      // Language filter
-      if (selectedLang !== "ALL") {
-        if (!res.language.toLowerCase().startsWith(selectedLang.toLowerCase())) return false;
-      }
-
       // Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -88,7 +82,7 @@ export function SupportResourcesClient({
 
       return true;
     });
-  }, [resources, selectedRegion, selectedLang, searchQuery, enableChinaSupportInfo]);
+  }, [resources, selectedRegion, searchQuery, enableChinaSupportInfo]);
 
   const exitSteps = [
     {
@@ -342,56 +336,6 @@ export function SupportResourcesClient({
               </button>
             </>
           ) : null}
-
-          <span className={`text-xs font-semibold text-muted-foreground shrink-0 mr-1 ${enableChinaSupportInfo ? "ml-3" : ""}`}>
-            {t("resources.filterLangLabel")}
-          </span>
-          <button
-            type="button"
-            onClick={() => setSelectedLang("ALL")}
-            className={`min-h-[44px] shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-              selectedLang === "ALL"
-                ? "bg-accent text-accent-foreground shadow-soft"
-                : "border border-border bg-surface text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <span className="text-box-trim">{t("resources.filterLangAll")}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedLang("ko")}
-            className={`min-h-[44px] shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-              selectedLang === "ko"
-                ? "bg-accent text-accent-foreground shadow-soft"
-                : "border border-border bg-surface text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <span className="text-box-trim">{t("common.langKo")}</span>
-          </button>
-          {enableChinaSupportInfo ? (
-            <button
-              type="button"
-              onClick={() => setSelectedLang("zh")}
-              className={`min-h-[44px] shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-                selectedLang === "zh"
-                  ? "bg-accent text-accent-foreground shadow-soft"
-                  : "border border-border bg-surface text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              <span className="text-box-trim">{t("common.langZh")}</span>
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => setSelectedLang("en")}
-            className={`min-h-[44px] shrink-0 rounded-full px-4 py-2 text-xs font-semibold transition-all ${
-              selectedLang === "en"
-                ? "bg-accent text-accent-foreground shadow-soft"
-                : "border border-border bg-surface text-muted-foreground hover:bg-muted"
-            }`}
-          >
-            <span className="text-box-trim">{t("common.langEn")}</span>
-          </button>
         </div>
 
         {/* Resources Cards Stream */}
@@ -406,7 +350,6 @@ export function SupportResourcesClient({
                   <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground">{resource.title}</h3>
                   <div className="flex items-center gap-1.5">
                     <StatusBadge tone="neutral">{resource.region}</StatusBadge>
-                    <StatusBadge tone="neutral">{resource.language.toUpperCase()}</StatusBadge>
                   </div>
                 </div>
 
@@ -451,7 +394,6 @@ export function SupportResourcesClient({
                 type="button"
                 onClick={() => {
                   setSelectedRegion("ALL");
-                  setSelectedLang("ALL");
                   setSearchQuery("");
                 }}
                 className="mt-3 inline-flex min-h-[44px] items-center rounded-xl border border-border bg-surface px-4 py-2 text-xs font-semibold hover:bg-muted"
