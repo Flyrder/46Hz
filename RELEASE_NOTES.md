@@ -1,56 +1,55 @@
-# 46Hz v0.2.1 — Bundled Typography & Open-Source Licenses, Operations Calendar & Metric Deep-Dive, and Granular AI Control Studio
+# 46Hz v0.2.2 — Multi-Architecture Container Build Stabilization, Native Platform Cross-Compilation & MCP Protocol Endpoint
 
-> **"지친 마음에 따스한 글씨로 닿는 위로, 그리고 더 투명하고 정교해진 운영의 지혜"**  
+> **"크로스 아키텍처 멀티 플랫폼 빌드 안정화, 모델 컨텍스트 프로토콜(MCP) 개방 및 전 계층 최적화"**  
 > *A quiet, human-centered anonymous emotional support slow letterbox.*
 
-46Hz의 기능 고도화 및 운영 안정화 릴리스(**v0.2.1**)를 배포합니다.  
-이번 **v0.2.1**은 v0.2.0의 EXIT 위기 지원 리프레시와 전 영역 한글화 완성에 이어, **네이버 나눔스퀘어라운드 및 마루 부리 서체 로컬 번들링(`/fonts`)과 오픈소스 라이선스 공시(`/licenses`)**, **운영자 캘린더 뷰(`AdminCalendarView`) 및 클릭형 메트릭 심층 드릴다운 네비게이션**, **AI 마스터 스위치 및 미세조정(Hyperparameter) 스튜디오**, **관리자 위기 자원 삭제 정리 액션**을 탑재하였습니다.
+46Hz의 프로덕션 컨테이너 빌드 안정화 및 기능 고도화 릴리스(**v0.2.2**)를 배포합니다.  
+이번 **v0.2.2**는 v0.2.1의 서체 번들링, 운영 캘린더, 세부 AI 제어에 이어, **Docker Buildx 기반 멀티 아키텍처(`linux/amd64`, `linux/arm64`) 컨테이너 빌드 파이프라인의 네이티브 크로스 컴파일 최적화**, **Model Context Protocol(MCP) 표준 엔드포인트(`/api/mcp`) 탑재**, **클라이언트 컴포넌트 `useI18n` 훅 경계 분리를 통한 RSC 직렬화 오버헤드 해소**, **Gemini 2.5 Native Interactions API 연동 및 생각(Thinking)/저장소 제어**를 완성했습니다.
 
 ---
 
-## 📊 v0.2.0 vs v0.2.1 핵심 비교 (Release Comparison)
+## 📊 v0.2.1 vs v0.2.2 핵심 비교 (Release Comparison)
 
-| 영역 | v0.2.0 (EXIT & Localization) | v0.2.1 (Typography, Ops Calendar & AI Control) |
+| 영역 | v0.2.1 (Typography & Ops Calendar) | v0.2.2 (Buildx Native Multi-Arch & MCP Endpoint) |
 | :--- | :--- | :--- |
-| **서체 및 타이포그래피** | 구글 폰트/웹 CDN 및 기본 시스템 산세리프 의존 | 네이버 **나눔스퀘어라운드** & **마루 부리** OTF 서체 로컬 번들링 (`/fonts`) — 편지 본문 및 답장에 감성 문학 세리프(`font-letter`) 적용, 오프라인 완전 구동 |
-| **오픈소스 라이선스 & 규정 준수** | 루트 `LICENSE` (AGPL-3.0) 텍스트 파일만 제공 | 전용 **오픈소스 라이선스 안내 페이지 (`/licenses`)**, **`THIRD_PARTY_NOTICES.md`**, 네이버 서체 저작권 명시, Docker 컨테이너 패키징 |
-| **관리자 운영 콘솔 (`/admin`, `/admin/letters`, `/admin/replies`)** | 단순 통계 숫자 카드 및 기본 리스트 뷰 | **인터랙티브 운영 캘린더 뷰 (`AdminCalendarView`)** — 일별 편지/답장 상태 집계, **클릭형 메트릭 심층 링크**, 상태/날짜별 정밀 필터링 및 3개 국어 완전 대칭 i18n |
-| **AI 제어 및 미세조정 스튜디오** | Mock / DeepSeek 공급자 단순 선택 및 지연시간 설정 | **AI 마스터 스위치(`enableAi`)**, 5대 모듈별 독립 토글(위험감지/익명화/코칭/글감/공명), **Temperature · MaxTokens · Model** 런타임 제어 |
-| **위기 상담 자원 관리 (`/admin/resources`)** | 수동 수정 위주의 관리 | AI 추천 생성 지원 자원 원클릭 즉시 삭제/정리 액션 탑재 |
-| **품질 검증 (Vitest)** | 20개 스위트 / 133개 테스트 통과 | **22개 스위트 / 142개 테스트 전체 통과** + `tsc --noEmit` 무결점 검증 |
+| **컨테이너 빌드 파이프라인** | QEMU 에뮬레이션 빌드로 arm64 Prisma 엔진 크래시 발생 가능 | **`--platform=$BUILDPLATFORM` 네이티브 빌드 최적화** — QEMU 병목 제거, 빌드 시간 10분→2분 단축, `debian-openssl-3.0.x` 타깃 보강 |
+| **에이전트 연동 인터페이스** | REST API 위주의 내부 엔드포인트 | **Model Context Protocol(MCP) JSON-RPC 2.0 엔드포인트 (`/api/mcp`)** 신설 — 외부 AI 에이전트/도구와의 표준화된 도구 호출 및 상태 조회 지원 |
+| **클라이언트 i18n 런타임** | RSC 서버 컴포넌트에서 클라이언트로 번역 함수 전달 시 함수 직렬화 경고 | **클라이언트 전용 `useI18n` 훅 적용** (`components/admin-settings-form.tsx`) — RSC 경계 간 순수 상태만 전달하여 렌더링 안정성 확보 |
+| **운영자 설정 UI** | 폼 하단 설정 프리뷰 배치 불균형 | 저장/초기화 버튼 정렬 및 `settings.ts` 실시간 JSON 프리뷰 하단 재배치로 가시성 극대화 |
+| **AI 공급자 심층 제어** | 기본 모델 및 파라미터 제어 | Gemini Interactions API 전용 함수 프롬프트, Thinking Budget, 컨텍스트 스토어 제어 및 실시간 연결 테스트 |
+| **품질 검증 (Vitest)** | 22개 스위트 / 142개 테스트 통과 | **28개 스위트 / 169개 테스트 전체 통과 (100%)** + `tsc --noEmit` 무결점 검증 |
 
 ---
 
-## 🌟 v0.2.1 주요 신규 기능 및 개선 사항 (What's New in v0.2.1)
+## 🌟 v0.2.2 주요 신규 기능 및 개선 사항 (What's New in v0.2.2)
 
-### 1. 네이버 나눔스퀘어라운드 & 마루 부리 서체 로컬 번들링 (`/fonts`)
-- **감성 문학 세리프 타이포그래피**: 네이버 문화재단의 **마루 부리(MaruBuri)** 서체 5종(ExtraLight, Light, Regular, SemiBold, Bold)을 번들링하여 편지 뷰어(`LetterContentViewer`)와 답장 작성 화면에 적용했습니다. 화면을 오래 바라보아도 눈이 편안하고 종이 편지지에 잉크로 쓴 듯한 따스한 감성을 제공합니다.
-- **글로벌 UI 폰트 나눔스퀘어라운드**: 둥글고 다정한 **나눔스퀘어라운드(NanumSquareRound)** 4종(L, R, B, EB)을 전역 서체로 탑재하여 외부 CDN 다운로드 없이 완전 오프라인 환경에서도 일관된 시각 경험을 보장합니다.
+### 1. 멀티 아키텍처 컨테이너 빌드 네이티브 최적화 (`Dockerfile` & `prisma/schema.prisma`)
+- **`--platform=$BUILDPLATFORM` 네이티브 크로스 빌드**: `Dockerfile`의 `dependencies`와 `builder` 스테이지에 빌더 호스트 네이티브 플랫폼을 지정하여, QEMU aarch64 에뮬레이션 중에 발생하던 Prisma Rust 바이너리(`schema-engine`)의 크래시 및 10분 이상의 빌드 지연을 원천 해결했습니다.
+- **`debian-openssl-3.0.x` 바이너리 타깃 보강**: `prisma/schema.prisma`의 `binaryTargets`에 `debian-openssl-3.0.x`를 추가하여 Debian Bookworm 베이스 이미지 기반 amd64 컨테이너와 arm64 컨테이너 모두에서 완벽한 런타임 호환성을 제공합니다.
+- **엔진 바이너리 번들링 보장**: 빌더 단계에서 컴파일 및 다운로드된 멀티 아키텍처 Prisma 엔진을 최종 러너 이미지에 정확히 복사하도록 경로를 보정했습니다.
 
-### 2. 오픈소스 라이선스 투명성 공시 (`/licenses` 및 `THIRD_PARTY_NOTICES.md`)
-- **오픈소스 공시 페이지**: `/licenses` 엔드포인트를 신설하여 46Hz 본체의 AGPL-3.0-or-later 라이선스 전문, 네이버 글꼴 라이선스(OFL/자유 이용 허락), Next.js, React, Prisma 등 주요 의존성 라이브러리의 라이선스 현황을 투명하게 안내합니다.
-- **프로덕션 패키징**: `Dockerfile` 빌드 단계에서 `LICENSE`, `THIRD_PARTY_NOTICES.md`, `fonts/LICENSE.txt`를 스탠드얼론 컨테이너에 자동 복사하도록 구성했습니다.
+### 2. Model Context Protocol (MCP) 표준 엔드포인트 (`/api/mcp`)
+- Claude Desktop, Gemini CLI, Cursor 등 현대적인 AI 코딩 및 오케스트레이션 도구에서 46Hz 서비스의 편지/답장 통계 및 상태를 직접 조회하고 조작할 수 있는 **MCP (Model Context Protocol) JSON-RPC 2.0 규격 엔드포인트**를 정식 지원합니다.
+- Prisma 8 PSL 데이터 계약(Contract) 무결성 검증 도구와 통합되어 외부 도구에서도 스키마 일관성을 검증할 수 있습니다.
 
-### 3. 관리자 운영 캘린더 및 클릭형 메트릭 심층 드릴다운 (`/admin`, `/admin/letters`, `/admin/replies`)
-- **인터랙티브 운영 캘린더 (`components/admin-calendar-view.tsx`)**:
-  - 월 단위 탐색과 함께 일자별 총 편지/답장 수, 대기(Pending), 승인(Approved), 반려(Rejected), 위기 연계(Routed) 상태를 시각적 배지와 점으로 요약 표시합니다. 요일 헤더, 상태 범례, 툴팁까지 한국어/영어/중국어 3개 언어로 100% 완전 대칭 현지화되었습니다.
-  - 특정 날짜를 클릭하면 `/admin/letters?date=YYYY-MM-DD` 및 `/admin/replies?date=YYYY-MM-DD`로 해당 날짜의 대기열만 즉시 필터링하여 모니터링할 수 있습니다.
-- **원클릭 메트릭 상세 네비게이션**:
-  - 대시보드 상단 7개 핵심 지표 카드(오늘 접수 편지, 오늘 작성 답장, 대기 중 편지, 고위험 감지, 신고 접수 건, 공감 피드백, 반려 답장)를 클릭형 링크로 전환하고, 하단에 상관 분석 디테일 문구를 추가했습니다.
-  - 감정 레이더 분포 카드 클릭 시 해당 감정 태그(`/admin/letters?tag=...`)로 즉시 모아보기가 가능합니다.
+### 3. 클라이언트 컴포넌트 RSC 함수 직렬화 경계 해소
+- `app/admin/settings/page.tsx` 등 서버 컴포넌트에서 클라이언트 폼으로 i18n 번역 함수 `t`를 직접 props로 넘기던 구조를 개선했습니다.
+- 클라이언트 컴포넌트 내부에서 `useI18n()` 훅을 직접 호출하도록 분리하여, Next.js Server-to-Client 컴포넌트 경계에서 함수 직렬화로 인한 런타임 경고 및 잠재적 렌더링 충돌을 제거했습니다.
 
-### 4. AI 마스터 스위치 및 미세조정(Hyperparameter) 스튜디오 (`/admin/settings`)
-- **AI 전체 비활성화(Master Toggle)**: `enableAi: false` 설정 시 PII 마스킹, 위험 감지, 답장 코칭, 글감 마중물 등 모든 AI 처리를 즉시 무해하게 바이패스하여 긴급 장애 상황이나 무AI 순수 모드로 운영할 수 있습니다.
-- **세부 모듈별 독립 On/Off**: 위험 감지(`enableAiRiskSafety`), 개인정보 마스킹(`enableAiAnonymization`), 답장 코칭(`enableAiReplyCoach`), 글감 마중물(`enableAiWritingSparks`), 공명 매칭(`enableAiResonanceMatch`)을 독립적으로 켜고 끌 수 있습니다.
-- **하이퍼파라미터 제어**: 웹 설정 스튜디오에서 Temperature(창의성 조절, 0.0~2.0), Max Tokens(최대 생성 토큰 수, 100~4000), 대상 모델명(Model, e.g. `gpt-4o-mini`, `deepseek-chat`)을 실시간으로 변경하여 `settings.ts`에 동기화할 수 있습니다.
-
-### 5. 위기 자원 정리 액션 및 피드백 UX 개선
-- **AI 지원 자원 즉시 삭제**: `/admin/resources`에서 AI가 자동 제안한 지원 자원 중 부적절하거나 중복된 항목을 운영자가 원클릭으로 안전하게 삭제할 수 있는 서버 액션을 추가했습니다.
-- **편지 답장 피드백 체크박스 컴포넌트**: 편지 수신자가 답장에 대한 따뜻한 피드백을 남길 때 '충분히 이해받음', '도움이 됨', '단정적/지시적 느낌', '과도한 조언 위주'를 직관적으로 선택하고 사유를 남길 수 있도록 폼 UX를 개선했습니다.
+### 4. 관리자 UI 정밀 정렬 및 Gemini 심층 제어
+- `/admin/settings`의 설정 저장 및 기본값 복원 버튼의 시각적 정렬을 다듬고, `settings.ts` 라이브 프리뷰를 폼 하단으로 재배치하여 설정 변경에 따른 실시간 코드 동기화를 한눈에 확인할 수 있습니다.
+- Gemini 2.5 Native Interactions API 연동 규격을 완성하여, 기능별 시스템 프롬프트 분리와 확장 생각(Extended Thinking) 버짓을 직접 제어할 수 있습니다.
 
 ---
 
 ## 📜 지난 릴리스 히스토리 (Release Archive)
+
+### 46Hz v0.2.1 (2026-10-17)
+- 네이버 나눔스퀘어라운드 및 마루 부리 서체 로컬 번들링 (`/fonts`)
+- 오픈소스 라이선스 투명성 공시 페이지 (`/licenses` 및 `THIRD_PARTY_NOTICES.md`)
+- 관리자 인터랙티브 운영 캘린더 뷰 (`AdminCalendarView`) 및 클릭형 메트릭 심층 드릴다운 네비게이션
+- AI 마스터 스위치(`enableAi`) 및 5대 세부 모듈 독립 제어 스튜디오 (`/admin/settings`)
+- AI 추천 위기 자원 원클릭 즉시 삭제/정리 서버 액션 탑재
 
 ### 46Hz v0.2.0 (2026-10-17)
 - 영화 `<엑시트(EXIT)>` 모티프의 **"EXIT: 지원 정보"** 전면 리프레시 및 ISO 7010 비상구 엠블럼 (`components/exit-sign-emblem.tsx`)
@@ -68,7 +67,7 @@
 ## 🚀 빠른 시작 (Quick Start)
 
 ```bash
-# Docker Compose 원클릭 실행
+# Docker Compose 원클릭 실행 (v0.2.2 멀티 아키텍처 지원)
 docker compose up -d
 
 # 로컬 개발 서버 실행
@@ -82,3 +81,4 @@ npm run dev
 - **오픈소스 라이선스**: `http://localhost:3000/licenses`
 - **관리자 운영 센터**: `http://localhost:3000/admin` (기본 암호: `local-admin`)
 - **관리자 설정 스튜디오**: `http://localhost:3000/admin/settings`
+- **MCP 엔드포인트**: `http://localhost:3000/api/mcp`

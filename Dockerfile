@@ -6,12 +6,12 @@ WORKDIR /app
 # Install OpenSSL for Prisma multi-arch binary engines
 RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
-FROM base AS dependencies
+FROM --platform=$BUILDPLATFORM base AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM base AS builder
+FROM --platform=$BUILDPLATFORM base AS builder
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
@@ -42,13 +42,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma7.config.ts ./prisma7.confi
 COPY --from=builder --chown=nextjs:nodejs /app/prisma8.config.ts ./prisma8.config.ts
 
 # Copy only required Prisma 7 CLI & engine modules for startup schema sync (excluding ~1.9GB @prisma/composer & studio-core)
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/prisma7 ./node_modules/@prisma/prisma7
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/engines-version ./node_modules/@prisma/engines-version
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/config ./node_modules/@prisma/config
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/debug ./node_modules/@prisma/debug
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/fetch-engine ./node_modules/@prisma/fetch-engine
-COPY --from=dependencies --chown=nextjs:nodejs /app/node_modules/@prisma/get-platform ./node_modules/@prisma/get-platform
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/prisma7 ./node_modules/@prisma/prisma7
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/engines ./node_modules/@prisma/engines
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/engines-version ./node_modules/@prisma/engines-version
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/config ./node_modules/@prisma/config
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/debug ./node_modules/@prisma/debug
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/fetch-engine ./node_modules/@prisma/fetch-engine
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/get-platform ./node_modules/@prisma/get-platform
 
 # Copy and set permissions for entrypoint script
 COPY --from=builder /app/scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
