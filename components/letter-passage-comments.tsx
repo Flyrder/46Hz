@@ -138,7 +138,7 @@ export function LetterPassageComments({
               value={selectedQuote}
               onChange={(e) => setSelectedQuote(e.target.value)}
               placeholder={t("comment.quotePlaceholder")}
-              className="w-full rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+              className="font-letter w-full rounded-lg border border-border/70 bg-background/60 px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-accent focus:ring-1 focus:ring-accent"
             />
           </div>
 
@@ -156,7 +156,7 @@ export function LetterPassageComments({
               rows={3}
               required
               placeholder={t("comment.placeholder")}
-              className="w-full resize-y rounded-xl border border-border/70 bg-background p-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="font-letter w-full resize-y rounded-xl border border-border/70 bg-background p-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </div>
 
@@ -208,7 +208,7 @@ export function LetterPassageComments({
             >
               {/* Quoted Excerpt if available */}
               {item.selectedText && (
-                <div className="mb-2.5 rounded-lg border-l-2 border-accent bg-accent/5 px-3 py-1.5 text-xs italic text-foreground/80 flex items-start gap-1.5">
+                <div className="font-letter mb-2.5 rounded-lg border-l-2 border-accent bg-accent/5 px-3 py-1.5 text-xs italic text-foreground/80 flex items-start gap-1.5">
                   <Quote className="h-3 w-3 shrink-0 text-accent mt-0.5" aria-hidden="true" />
                   <span className="line-clamp-3 break-words">&ldquo;{item.selectedText}&rdquo;</span>
                 </div>
@@ -217,7 +217,7 @@ export function LetterPassageComments({
               {/* Comment Content */}
               <div className="flex items-start gap-2">
                 <CornerDownRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60 mt-1" aria-hidden="true" />
-                <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words flex-1">
+                <p className="font-letter text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words flex-1">
                   {item.content}
                 </p>
               </div>

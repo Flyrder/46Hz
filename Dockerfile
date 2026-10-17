@@ -31,6 +31,9 @@ RUN groupadd -g 1001 nodejs && useradd -u 1001 -g nodejs nextjs
 
 # Copy static assets and standalone build output
 COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/LICENSE ./LICENSE
+COPY --from=builder --chown=nextjs:nodejs /app/THIRD_PARTY_NOTICES.md ./THIRD_PARTY_NOTICES.md
+COPY --from=builder --chown=nextjs:nodejs /app/fonts/LICENSE.txt ./fonts/LICENSE.txt
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma

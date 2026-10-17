@@ -74,14 +74,6 @@ async function main() {
         active: true
       },
       {
-        title: "국립정신건강센터 마음건강 포털",
-        description: "전국 광역·기초 정신건강복지센터 위치 안내 및 정신건강 지원 정보 포털",
-        region: "KR",
-        language: "ko",
-        url: "https://www.mentalhealth.go.kr",
-        active: true
-      },
-      {
         title: "全国心理危机干预热线 (400-161-9995)",
         description: "全国免费心理危机干预及自杀预防生命热线，提供24小时专业心理疏导与危机干预。",
         region: "CN",

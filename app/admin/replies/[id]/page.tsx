@@ -68,7 +68,7 @@ export default async function AdminReplyDetailPage({
               <Sparkles className="h-4 w-4 text-accent" />
               {t("admin.coachedReplySection")}
             </h2>
-            <div className="mt-2.5 rounded-xl border border-border/80 bg-background/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+            <div className="mt-2.5 font-letter rounded-xl border border-border/80 bg-background/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
               {reply.coachedText}
             </div>
           </div>
@@ -78,7 +78,7 @@ export default async function AdminReplyDetailPage({
               <FileText className="h-4 w-4 text-muted-foreground" />
               {t("admin.rawReplySection")}
             </h2>
-            <div className="mt-2.5 rounded-xl border border-border/60 bg-muted/40 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap font-mono">
+            <div className="mt-2.5 font-letter rounded-xl border border-border/60 bg-muted/40 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
               {reply.rawText}
             </div>
           </div>
@@ -88,7 +88,7 @@ export default async function AdminReplyDetailPage({
               <Mail className="h-4 w-4 text-accent" />
               {t("admin.letterContextSection")}
             </h2>
-            <div className="mt-2.5 rounded-xl border border-border/60 bg-muted/20 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
+            <div className="mt-2.5 font-letter rounded-xl border border-border/60 bg-muted/20 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
               {reply.letter.processedText}
             </div>
           </div>

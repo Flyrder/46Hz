@@ -89,7 +89,7 @@ export default async function AdminLetterDetailPage({
               <Sparkles className="h-4 w-4 text-accent" />
               {t("admin.processedTextSection")}
             </h2>
-            <div className="mt-2.5 rounded-xl border border-border/80 bg-background/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
+            <div className="mt-2.5 font-letter rounded-xl border border-border/80 bg-background/50 p-4 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
               {letter.processedText}
             </div>
           </div>
@@ -99,7 +99,7 @@ export default async function AdminLetterDetailPage({
               <FileText className="h-4 w-4 text-muted-foreground" />
               {t("admin.rawTextSection")}
             </h2>
-            <div className="mt-2.5 rounded-xl border border-border/60 bg-muted/40 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap font-mono">
+            <div className="mt-2.5 font-letter rounded-xl border border-border/60 bg-muted/40 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
               {letter.rawText}
             </div>
           </div>

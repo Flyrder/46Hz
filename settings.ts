@@ -39,9 +39,18 @@ export interface EditableSystemSettings {
   maxRecentIps: number;
   legalBasis: string;
   dataMinimizationNotice: string;
+  enableAi: boolean;
+  enableAiRiskSafety: boolean;
+  enableAiAnonymization: boolean;
+  enableAiReplyCoach: boolean;
+  enableAiWritingSparks: boolean;
+  enableAiResonanceMatch: boolean;
   aiDefaultProvider: SupportedAiProvider;
   aiTimeoutMs: number;
   aiMockDelayMs: number;
+  aiTemperature: number;
+  aiMaxTokens: number;
+  aiModel: string;
   enableChinaSupportInfo: boolean;
 }
 
@@ -49,7 +58,7 @@ export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
   brandName: "46Hz",
   brandTitle: "46Hz Letterbox",
   brandTagline: "A quiet anonymous emotional support letterbox.",
-  brandVersion: "0.2.0",
+  brandVersion: "0.2.1",
   defaultLocale: "ko_KR",
   defaultTheme: "system",
   cookieMaxAgeDays: 180,
@@ -68,9 +77,18 @@ export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
   legalBasis: "Law Enforcement Incident & Compliance Request (Data Minimization Principle)",
   dataMinimizationNotice:
     "46Hz strictly collects zero PII (no legal names, no email, no phone, no biometrics). Retention policy is strictly capped at rolling 14 days.",
+  enableAi: true,
+  enableAiRiskSafety: true,
+  enableAiAnonymization: true,
+  enableAiReplyCoach: true,
+  enableAiWritingSparks: true,
+  enableAiResonanceMatch: true,
   aiDefaultProvider: "mock",
   aiTimeoutMs: 10_000,
   aiMockDelayMs: 150,
+  aiTemperature: 0.7,
+  aiMaxTokens: 1500,
+  aiModel: "gpt-4o-mini",
   enableChinaSupportInfo: false
 };
 
@@ -83,7 +101,7 @@ export const brandSettings: {
   name: "46Hz",
   title: "46Hz Letterbox",
   tagline: "A quiet anonymous emotional support letterbox.",
-  version: "0.2.0"
+  version: "0.2.1"
 };
 
 export const i18nSettings: {
@@ -221,13 +239,31 @@ export const complianceSettings: {
 };
 
 export const aiSettings: {
+  enabled: boolean;
+  enableRiskSafety: boolean;
+  enableAnonymization: boolean;
+  enableReplyCoach: boolean;
+  enableWritingSparks: boolean;
+  enableResonanceMatch: boolean;
   defaultProvider: SupportedAiProvider;
   timeoutMs: number;
   mockDelayMs: number;
+  temperature: number;
+  maxTokens: number;
+  model: string;
 } = {
+  enabled: true,
+  enableRiskSafety: true,
+  enableAnonymization: true,
+  enableReplyCoach: true,
+  enableWritingSparks: true,
+  enableResonanceMatch: true,
   defaultProvider: "mock",
   timeoutMs: 10_000,
-  mockDelayMs: 150
+  mockDelayMs: 150,
+  temperature: 0.7,
+  maxTokens: 1500,
+  model: "gpt-4o-mini"
 };
 
 export const supportResourcesSettings: {
@@ -274,9 +310,18 @@ export function getEditableSystemSettings(): EditableSystemSettings {
     maxRecentIps: complianceSettings.maxRecentIps,
     legalBasis: complianceSettings.legalBasis,
     dataMinimizationNotice: complianceSettings.dataMinimizationNotice,
+    enableAi: aiSettings.enabled,
+    enableAiRiskSafety: aiSettings.enableRiskSafety,
+    enableAiAnonymization: aiSettings.enableAnonymization,
+    enableAiReplyCoach: aiSettings.enableReplyCoach,
+    enableAiWritingSparks: aiSettings.enableWritingSparks,
+    enableAiResonanceMatch: aiSettings.enableResonanceMatch,
     aiDefaultProvider: aiSettings.defaultProvider,
     aiTimeoutMs: aiSettings.timeoutMs,
     aiMockDelayMs: aiSettings.mockDelayMs,
+    aiTemperature: aiSettings.temperature,
+    aiMaxTokens: aiSettings.maxTokens,
+    aiModel: aiSettings.model,
     enableChinaSupportInfo: supportResourcesSettings.enableChinaSupportInfo
   };
 }
@@ -320,9 +365,18 @@ export function applyRuntimeSettingsUpdate(
   complianceSettings.legalBasis = next.legalBasis;
   complianceSettings.dataMinimizationNotice = next.dataMinimizationNotice;
 
+  aiSettings.enabled = next.enableAi;
+  aiSettings.enableRiskSafety = next.enableAiRiskSafety;
+  aiSettings.enableAnonymization = next.enableAiAnonymization;
+  aiSettings.enableReplyCoach = next.enableAiReplyCoach;
+  aiSettings.enableWritingSparks = next.enableAiWritingSparks;
+  aiSettings.enableResonanceMatch = next.enableAiResonanceMatch;
   aiSettings.defaultProvider = next.aiDefaultProvider;
   aiSettings.timeoutMs = next.aiTimeoutMs;
   aiSettings.mockDelayMs = next.aiMockDelayMs;
+  aiSettings.temperature = next.aiTemperature;
+  aiSettings.maxTokens = next.aiMaxTokens;
+  aiSettings.model = next.aiModel;
 
   supportResourcesSettings.enableChinaSupportInfo = next.enableChinaSupportInfo;
 

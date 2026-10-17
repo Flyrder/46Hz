@@ -1,4 +1,4 @@
-import { saveSupportResourceAction } from "@/app/actions/admin";
+import { saveSupportResourceAction, deleteSupportResourceAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
-import { HeartHandshake, PlusCircle, Shield, Phone, Globe } from "lucide-react";
+import { HeartHandshake, PlusCircle, Shield, Phone, Globe, Trash2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -226,7 +226,7 @@ export default async function AdminResourcesPage() {
               />
             </div>
 
-            <div className="mt-3 flex items-center justify-between pt-1">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 pt-1">
               <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
                 <input
                   name="active"
@@ -237,7 +237,19 @@ export default async function AdminResourcesPage() {
                 <span>{t("admin.keepActiveLabel")}</span>
               </label>
 
-              <SubmitButton variant="secondary">{t("admin.saveResourceChangesButton")}</SubmitButton>
+              <div className="flex items-center gap-2">
+                <button
+                  type="submit"
+                  formAction={deleteSupportResourceAction}
+                  formNoValidate
+                  className="inline-flex min-h-[38px] items-center gap-1.5 rounded-xl border border-danger/40 bg-danger/10 px-3.5 py-1.5 text-xs font-semibold text-danger hover:bg-danger/20 transition-all active:scale-98"
+                  title={t("admin.deleteResourceButton")}
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  <span>{t("admin.deleteResourceButton")}</span>
+                </button>
+                <SubmitButton variant="secondary">{t("admin.saveResourceChangesButton")}</SubmitButton>
+              </div>
             </div>
           </form>
         ))}

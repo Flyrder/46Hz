@@ -1,6 +1,6 @@
 # 46Hz UI/UX Design System, System Configuration Studio & Standalone Optimization Manual
 
-> **Product**: 46Hz Letterbox (v0.2.0)  
+> **Product**: 46Hz Letterbox (v0.2.1)  
 > **Aesthetic Archetype**: Quiet, Warm Stationery & Human-Centered Calm Technology  
 > **Core Frequency**: ~46Hz (Earth's 7th Schumann Harmonic)  
 > **Last Updated**: 2026-10-16  

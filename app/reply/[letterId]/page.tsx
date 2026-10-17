@@ -169,7 +169,7 @@ export default async function ReplyLetterPage({
           )}
         </div>
 
-        <div className="mt-5 whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
+        <div className="mt-5 font-letter whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
           {letter.processedText}
         </div>
       </article>

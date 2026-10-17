@@ -23,6 +23,7 @@ type AdminNavLink = {
   labelKey: TranslationKey;
   fallbackLabel: string;
   adminOnly: boolean;
+  disabled?: boolean;
   icon: typeof BarChart3;
 };
 
@@ -33,7 +34,7 @@ const links: AdminNavLink[] = [
   { href: "/admin/reports", labelKey: "admin.navReports", fallbackLabel: "Reports", adminOnly: false, icon: AlertTriangle },
   { href: "/admin/users", labelKey: "admin.navUsers", fallbackLabel: "Users", adminOnly: true, icon: Users },
   { href: "/admin/resources", labelKey: "admin.navResources", fallbackLabel: "Resources", adminOnly: true, icon: HeartHandshake },
-  { href: "/admin/compliance", labelKey: "admin.navCompliance", fallbackLabel: "Compliance", adminOnly: false, icon: ShieldCheck },
+  { href: "/admin/compliance", labelKey: "admin.navCompliance", fallbackLabel: "Compliance", adminOnly: false, disabled: true, icon: ShieldCheck },
   { href: "/admin/moderation-log", labelKey: "admin.navLog", fallbackLabel: "Log", adminOnly: false, icon: History },
   { href: "/admin/settings", labelKey: "admin.navSettings", fallbackLabel: "Settings", adminOnly: true, icon: Sliders }
 ];
@@ -51,7 +52,24 @@ export function AdminNav({
 
   return (
     <nav aria-label={t("admin.staffNavAria")} className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-      {links.map(({ href, labelKey, fallbackLabel, adminOnly, icon: Icon }) => {
+      {links.map(({ href, labelKey, fallbackLabel, adminOnly, disabled, icon: Icon }) => {
+        if (disabled) {
+          return (
+            <span
+              key={href}
+              aria-disabled="true"
+              className="inline-flex min-h-[44px] items-center gap-2 whitespace-nowrap rounded-xl border border-border/50 bg-muted/40 px-3.5 py-2 text-xs font-semibold text-muted-foreground/50 opacity-60 cursor-not-allowed select-none"
+              title={t ? t("admin.complianceDisabledBadge") : "Disabled"}
+            >
+              <Icon className="h-3.5 w-3.5 text-muted-foreground/40" aria-hidden="true" />
+              <span className="line-through">{t ? t(labelKey) : fallbackLabel}</span>
+              <span className="rounded bg-muted px-1.5 py-0.5 text-[9px] font-bold text-muted-foreground/70">
+                {t ? t("admin.complianceDisabledBadge") : "Disabled"}
+              </span>
+            </span>
+          );
+        }
+
         const isActive =
           href === "/admin"
             ? pathname === "/admin"

@@ -287,4 +287,19 @@ describe("i18n preferences", () => {
     expect(translate("en_US", "resonance.schumannNote")).toContain("damping");
     expect(translate("zh_CN", "resonance.schumannNote")).toContain("衰减");
   });
+
+  it("localizes license info link, NAVER font copyright notices, AGPLv3 summary, and open-source library descriptions across all locales", () => {
+    expect(translate("ko_KR", "shell.licenseLink")).toBe("라이선스 정보");
+    expect(translate("en_US", "shell.licenseLink")).toBe("License Info");
+    expect(translate("zh_CN", "shell.licenseLink")).toBe("许可证信息");
+
+    expect(translate("ko_KR", "license.fontSectionTitle")).toBe("네이버 글꼴 저작권 안내");
+    expect(translate("ko_KR", "license.fontNoticeP1")).toContain("네이버와 네이버 문화재단");
+    expect(translate("en_US", "license.fontNoticeP1")).toContain("NAVER Cultural Foundation");
+    expect(translate("zh_CN", "license.fontNoticeP1")).toContain("NAVER 文化财团");
+
+    expect(translate("ko_KR", "license.agplSectionTitle")).toContain("GNU AGPLv3");
+    expect(translate("en_US", "license.agplSectionTitle")).toContain("GNU AGPLv3");
+    expect(translate("zh_CN", "license.agplSectionTitle")).toContain("GNU AGPLv3");
+  });
 });

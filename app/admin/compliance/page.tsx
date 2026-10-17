@@ -73,6 +73,26 @@ export default async function AdminCompliancePage({
 
       <AdminNav role={role} />
 
+      {/* Grey-out Disabled Notice Banner */}
+      <div
+        role="status"
+        className="mb-6 rounded-2xl border border-border/80 bg-muted/40 p-5 shadow-soft flex items-start gap-3.5"
+      >
+        <ShieldAlert className="h-6 w-6 text-muted-foreground shrink-0 mt-0.5" />
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-bold text-foreground">
+              {t("admin.complianceDisabledTitle")}
+            </h2>
+            <StatusBadge tone="neutral">{t("admin.complianceDisabledBadge")}</StatusBadge>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+            {t("admin.complianceDisabledDesc")}
+          </p>
+        </div>
+      </div>
+
+      <div className="opacity-50 grayscale pointer-events-none select-none space-y-6" aria-disabled="true">
       {/* Data Minimization Principle Charter */}
       <div className="rounded-2xl border border-border/80 bg-surface p-6 shadow-soft">
         <div className="flex items-center gap-2 text-base font-bold text-foreground">
@@ -298,6 +318,7 @@ export default async function AdminCompliancePage({
             ) : null}
           </div>
         </div>
+      </div>
       </div>
     </section>
   );

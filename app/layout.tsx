@@ -1,10 +1,34 @@
 import type { Metadata, Viewport } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AppShell } from "@/components/app-shell";
 import { createTranslator, I18nProvider } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 import { ensureSettingsLoadedFromDisk } from "@/lib/settings-store";
 import { brandSettings } from "@/settings";
+
+const nanumSquareRound = localFont({
+  src: [
+    { path: "../fonts/NanumSquareRoundOTFL.otf", weight: "300", style: "normal" },
+    { path: "../fonts/NanumSquareRoundOTFR.otf", weight: "400", style: "normal" },
+    { path: "../fonts/NanumSquareRoundOTFB.otf", weight: "700", style: "normal" },
+    { path: "../fonts/NanumSquareRoundOTFEB.otf", weight: "800", style: "normal" }
+  ],
+  variable: "--font-ui",
+  display: "swap"
+});
+
+const maruBuri = localFont({
+  src: [
+    { path: "../fonts/MaruBuri-ExtraLight.otf", weight: "200", style: "normal" },
+    { path: "../fonts/MaruBuri-Light.otf", weight: "300", style: "normal" },
+    { path: "../fonts/MaruBuri-Regular.otf", weight: "400", style: "normal" },
+    { path: "../fonts/MaruBuri-SemiBold.otf", weight: "600", style: "normal" },
+    { path: "../fonts/MaruBuri-Bold.otf", weight: "700", style: "normal" }
+  ],
+  variable: "--font-letter",
+  display: "swap"
+});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -60,7 +84,11 @@ export default async function RootLayout({
   const t = createTranslator(locale);
 
   return (
-    <html lang={locale.replace("_", "-")} className={`theme-${theme}`} suppressHydrationWarning>
+    <html
+      lang={locale.replace("_", "-")}
+      className={`theme-${theme} ${nanumSquareRound.variable} ${maruBuri.variable}`}
+      suppressHydrationWarning
+    >
       <body>
         <I18nProvider locale={locale}>
           <AppShell locale={locale} theme={theme} t={t}>

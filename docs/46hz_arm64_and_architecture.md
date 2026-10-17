@@ -1,7 +1,7 @@
 # 46Hz 架构演进与 Arm64 多架构适配实践手册
 
-> 沉淀日期: 2026-10-11 (Updated 2026-10-12)  
-> 适用版本: 46Hz Letterbox MVP (v0.1.0)  
+> 沉淀日期: 2026-10-11 (Updated 2026-10-17)  
+> 适用版本: 46Hz Letterbox (v0.2.1)  
 > 关联手册: [46Hz UI/UX Design System Manual](./46hz_ui_design_system.md)
 
 ---

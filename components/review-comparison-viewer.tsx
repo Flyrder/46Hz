@@ -143,7 +143,7 @@ export function ReviewComparisonViewer({
           required
           value={currentText}
           onChange={(e) => setCurrentText(e.target.value)}
-          className="mt-4 w-full resize-y rounded-xl border border-border/70 bg-background/50 p-4 sm:p-5 text-base leading-relaxed text-foreground outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
+          className="mt-4 font-letter w-full resize-y rounded-xl border border-border/70 bg-background/50 p-4 sm:p-5 text-base leading-relaxed text-foreground outline-none transition-all focus:border-accent focus:bg-background focus:ring-2 focus:ring-accent/25 break-words"
           placeholder={t("write.placeholder")}
         />
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
@@ -193,7 +193,7 @@ export function ReviewComparisonViewer({
           </div>
         </div>
 
-        <div className="mt-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:p-5 text-base leading-relaxed text-foreground whitespace-pre-wrap break-words min-h-[240px]">
+        <div className="mt-4 font-letter rounded-xl border border-border/60 bg-muted/20 p-4 sm:p-5 text-base leading-relaxed text-foreground whitespace-pre-wrap break-words min-h-[240px]">
           {rawText}
         </div>
 
@@ -225,7 +225,7 @@ export function ReviewComparisonViewer({
                 {copiedRaw ? t("common.copied") : t("common.copy")}
               </button>
             </div>
-            <div className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+            <div className="font-letter text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
               {rawText}
             </div>
           </div>
@@ -245,7 +245,7 @@ export function ReviewComparisonViewer({
                 {t("review.directlyEditable")}
               </button>
             </div>
-            <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+            <div className="font-letter text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
               {currentText}
             </div>
           </div>

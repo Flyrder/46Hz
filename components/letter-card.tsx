@@ -78,7 +78,7 @@ export function LetterCard({
       </div>
 
       {/* Preview Text */}
-      <p className="mt-3.5 text-sm leading-relaxed text-foreground/90 font-normal line-clamp-3 break-words">
+      <p className="mt-3.5 font-letter text-sm leading-relaxed text-foreground/90 font-normal line-clamp-3 break-words">
         {preview}
       </p>
 

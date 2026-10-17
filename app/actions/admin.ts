@@ -246,6 +246,32 @@ export async function saveSupportResourceAction(formData: FormData): Promise<voi
   revalidatePath("/support-resources");
 }
 
+export async function deleteSupportResourceAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+  const id = formValue(formData, "id");
+  if (!id) {
+    throw new Error("Resource ID is required for deletion.");
+  }
+
+  await prisma.$transaction([
+    prisma.supportResource.delete({
+      where: { id }
+    }),
+    prisma.moderationEvent.create({
+      data: {
+        targetType: "SUPPORT_RESOURCE",
+        targetId: id,
+        action: "RESOURCE_DELETED",
+        previousStatus: "ACTIVE",
+        newStatus: "DELETED"
+      }
+    })
+  ]);
+
+  revalidatePath("/admin/resources");
+  revalidatePath("/support-resources");
+}
+
 export async function saveSystemSettingsAction(formData: FormData): Promise<void> {
   await requireAdmin();
 
@@ -271,9 +297,18 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
     maxRecentIps: formValue(formData, "maxRecentIps"),
     legalBasis: formValue(formData, "legalBasis"),
     dataMinimizationNotice: formValue(formData, "dataMinimizationNotice"),
+    enableAi: formData.get("enableAi") === "on" || formData.get("enableAi") === "true",
+    enableAiRiskSafety: formData.get("enableAiRiskSafety") === "on" || formData.get("enableAiRiskSafety") === "true",
+    enableAiAnonymization: formData.get("enableAiAnonymization") === "on" || formData.get("enableAiAnonymization") === "true",
+    enableAiReplyCoach: formData.get("enableAiReplyCoach") === "on" || formData.get("enableAiReplyCoach") === "true",
+    enableAiWritingSparks: formData.get("enableAiWritingSparks") === "on" || formData.get("enableAiWritingSparks") === "true",
+    enableAiResonanceMatch: formData.get("enableAiResonanceMatch") === "on" || formData.get("enableAiResonanceMatch") === "true",
     aiDefaultProvider: formValue(formData, "aiDefaultProvider"),
     aiTimeoutMs: formValue(formData, "aiTimeoutMs"),
     aiMockDelayMs: formValue(formData, "aiMockDelayMs"),
+    aiTemperature: formValue(formData, "aiTemperature"),
+    aiMaxTokens: formValue(formData, "aiMaxTokens"),
+    aiModel: formValue(formData, "aiModel"),
     enableChinaSupportInfo: formData.get("enableChinaSupportInfo") === "on" || formData.get("enableChinaSupportInfo") === "true"
   });
 

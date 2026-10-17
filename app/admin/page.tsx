@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { adminLoginAction, adminLogoutAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
@@ -15,7 +16,8 @@ import {
   ShieldAlert,
   AlertTriangle,
   HeartHandshake,
-  ShieldX
+  ShieldX,
+  ArrowUpRight
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -128,14 +130,65 @@ export default async function AdminPage({
     value: string | number;
     icon: typeof Mail;
     tone: "neutral" | "good" | "warning" | "danger";
+    href: string;
+    detail: string;
   }> = [
-    { label: t("admin.metricsLettersToday"), value: lettersToday, icon: Mail, tone: "neutral" },
-    { label: t("admin.metricsRepliesToday"), value: repliesToday, icon: MessageSquare, tone: "neutral" },
-    { label: t("admin.metricsPendingModeration"), value: pendingLetters + pendingReplies, icon: Clock, tone: pendingLetters + pendingReplies > 0 ? "warning" : "good" },
-    { label: t("admin.metricsHighRisk"), value: highRisk, icon: ShieldAlert, tone: highRisk > 0 ? "danger" : "good" },
-    { label: t("admin.metricsReports"), value: reports, icon: AlertTriangle, tone: reports > 0 ? "warning" : "good" },
-    { label: t("admin.metricsUnderstoodRate"), value: feedbackCount ? `${Math.round((understoodCount / feedbackCount) * 100)}%` : "N/A", icon: HeartHandshake, tone: "good" },
-    { label: t("admin.metricsRejectedRate"), value: replyCount ? `${Math.round((rejectedReplyCount / replyCount) * 100)}%` : "N/A", icon: ShieldX, tone: "neutral" }
+    {
+      label: t("admin.metricsLettersToday"),
+      value: lettersToday,
+      icon: Mail,
+      tone: "neutral",
+      href: "/admin/letters?filter=today",
+      detail: t("admin.metricsLettersTodayDetail")
+    },
+    {
+      label: t("admin.metricsRepliesToday"),
+      value: repliesToday,
+      icon: MessageSquare,
+      tone: "neutral",
+      href: "/admin/replies?filter=today",
+      detail: t("admin.metricsRepliesTodayDetail")
+    },
+    {
+      label: t("admin.metricsPendingModeration"),
+      value: pendingLetters + pendingReplies,
+      icon: Clock,
+      tone: pendingLetters + pendingReplies > 0 ? "warning" : "good",
+      href: "/admin/letters?status=PENDING",
+      detail: t("admin.metricsPendingDetail", { letters: String(pendingLetters), replies: String(pendingReplies) })
+    },
+    {
+      label: t("admin.metricsHighRisk"),
+      value: highRisk,
+      icon: ShieldAlert,
+      tone: highRisk > 0 ? "danger" : "good",
+      href: "/admin/letters?risk=HIGH",
+      detail: t("admin.metricsHighRiskDetail")
+    },
+    {
+      label: t("admin.metricsReports"),
+      value: reports,
+      icon: AlertTriangle,
+      tone: reports > 0 ? "warning" : "good",
+      href: "/admin/reports",
+      detail: t("admin.metricsReportsDetail")
+    },
+    {
+      label: t("admin.metricsUnderstoodRate"),
+      value: feedbackCount ? `${Math.round((understoodCount / feedbackCount) * 100)}%` : "N/A",
+      icon: HeartHandshake,
+      tone: "good",
+      href: "/admin/reports",
+      detail: t("admin.metricsUnderstoodDetail", { positive: String(understoodCount), total: String(feedbackCount) })
+    },
+    {
+      label: t("admin.metricsRejectedRate"),
+      value: replyCount ? `${Math.round((rejectedReplyCount / replyCount) * 100)}%` : "N/A",
+      icon: ShieldX,
+      tone: "neutral",
+      href: "/admin/replies?status=REJECTED",
+      detail: t("admin.metricsRejectedDetail", { rejected: String(rejectedReplyCount), total: String(replyCount) })
+    }
   ];
 
   return (
@@ -160,19 +213,31 @@ export default async function AdminPage({
 
       <AdminNav role={role} />
 
-      {/* Metrics Cards Grid */}
+      {/* Metrics Cards Grid - Clickable with correlated details */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {metrics.map(({ label, value, icon: Icon, tone }) => (
-          <div key={label} className="flex flex-col justify-between rounded-2xl border border-border/80 bg-surface p-4.5 shadow-soft transition-all hover:border-accent/40">
-            <div className="flex items-center justify-between gap-2 text-xs font-semibold text-muted-foreground">
-              <span>{label}</span>
-              <Icon className="h-4 w-4 opacity-70" aria-hidden="true" />
+        {metrics.map(({ label, value, icon: Icon, tone, href, detail }) => (
+          <Link
+            key={label}
+            href={href}
+            className="group flex flex-col justify-between rounded-2xl border border-border/80 bg-surface p-4.5 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/60 hover:shadow-tactile active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          >
+            <div>
+              <div className="flex items-center justify-between gap-2 text-xs font-semibold text-muted-foreground group-hover:text-accent transition-colors">
+                <span>{label}</span>
+                <span className="flex items-center gap-1">
+                  <Icon className="h-4 w-4 opacity-75 group-hover:opacity-100" aria-hidden="true" />
+                  <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                </span>
+              </div>
+              <div className="mt-3 flex items-baseline justify-between gap-2">
+                <span className="text-2xl font-bold tracking-tight text-foreground">{value}</span>
+                <StatusBadge tone={tone}>{String(value)}</StatusBadge>
+              </div>
             </div>
-            <div className="mt-3 flex items-baseline justify-between gap-2">
-              <span className="text-2xl font-bold tracking-tight text-foreground">{value}</span>
-              <StatusBadge tone={tone}>{String(value)}</StatusBadge>
-            </div>
-          </div>
+            <p className="mt-3 border-t border-border/50 pt-2.5 text-[11px] font-medium text-muted-foreground group-hover:text-accent transition-colors">
+              {detail}
+            </p>
+          </Link>
         ))}
       </div>
 
@@ -199,9 +264,17 @@ export default async function AdminPage({
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {emotionStats.map((item) => (
-            <div key={item.key} className="rounded-xl border border-border/70 bg-background/60 p-3.5 shadow-soft">
+            <Link
+              key={item.key}
+              href={`/admin/letters?tag=${item.key}`}
+              className="group rounded-xl border border-border/70 bg-background/60 p-3.5 shadow-soft transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/60 hover:bg-surface hover:shadow-tactile active:scale-[0.99]"
+              title={t("admin.viewTagLettersTitle", { tag: item.label })}
+            >
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-foreground">{item.label}</span>
+                <span className="font-semibold text-foreground group-hover:text-accent transition-colors flex items-center gap-1">
+                  {item.label}
+                  <ArrowUpRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </span>
                 <span className="font-mono text-muted-foreground">
                   {t("admin.radarCountFormat", { count: String(item.count), percent: String(item.percent) })}
                 </span>
@@ -212,19 +285,23 @@ export default async function AdminPage({
                   style={{ width: `${Math.min(100, item.percent)}%` }}
                 />
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
 
       {/* Pending Queues Status Badges */}
       <div className="mt-6 flex flex-wrap gap-2.5">
-        <StatusBadge tone={pendingLetters > 0 ? "warning" : "good"}>
-          {t("admin.pendingLettersBadge", { count: String(pendingLetters) })}
-        </StatusBadge>
-        <StatusBadge tone={pendingReplies > 0 ? "warning" : "good"}>
-          {t("admin.pendingRepliesBadge", { count: String(pendingReplies) })}
-        </StatusBadge>
+        <Link href="/admin/letters?status=PENDING" className="inline-block transition-transform hover:scale-105 active:scale-95">
+          <StatusBadge tone={pendingLetters > 0 ? "warning" : "good"}>
+            {t("admin.pendingLettersBadge", { count: String(pendingLetters) })} →
+          </StatusBadge>
+        </Link>
+        <Link href="/admin/replies?status=PENDING" className="inline-block transition-transform hover:scale-105 active:scale-95">
+          <StatusBadge tone={pendingReplies > 0 ? "warning" : "good"}>
+            {t("admin.pendingRepliesBadge", { count: String(pendingReplies) })} →
+          </StatusBadge>
+        </Link>
       </div>
     </section>
   );

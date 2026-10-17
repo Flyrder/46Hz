@@ -1,6 +1,7 @@
 import type { AiMiddleware } from "@/lib/ai/middleware";
 import { MockAiMiddleware } from "@/lib/ai/mock";
 import { LlmAiMiddleware, type LlmConfig } from "@/lib/ai/llm";
+import { aiSettings } from "@/settings";
 
 export type AiProviderName =
   | "mock"
@@ -12,7 +13,7 @@ export type AiProviderName =
   | "custom";
 
 export function getAiProviderName(): AiProviderName {
-  const provider = (process.env.AI_PROVIDER ?? "mock").toLowerCase().trim();
+  const provider = (process.env.AI_PROVIDER || aiSettings.defaultProvider || "mock").toLowerCase().trim();
   if (
     provider === "openai" ||
     provider === "deepseek" ||
@@ -39,11 +40,17 @@ export function getAiMiddleware(override?: Partial<LlmConfig>): AiMiddleware {
   ) {
     return new LlmAiMiddleware({
       provider,
+      model: aiSettings.model,
+      timeoutMs: aiSettings.timeoutMs,
+      temperature: aiSettings.temperature,
+      maxTokens: aiSettings.maxTokens,
       ...override
     });
   }
 
-  return new MockAiMiddleware();
+  return new MockAiMiddleware({
+    delayMs: aiSettings.mockDelayMs
+  });
 }
 
 export * from "@/lib/ai/middleware";

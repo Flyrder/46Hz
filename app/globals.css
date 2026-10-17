@@ -13,21 +13,22 @@
   --color-warning: hsl(var(--warning));
   --color-danger: hsl(var(--danger));
 
-  --shadow-soft: 0 16px 50px -35px rgba(54, 44, 34, 0.35);
-  --shadow-tactile: 0 8px 30px -10px rgba(54, 44, 34, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
-  --shadow-paper: 0 1px 3px rgba(0, 0, 0, 0.04), 0 14px 40px -12px rgba(54, 44, 34, 0.15);
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --shadow-soft: 0 10px 36px -18px rgba(34, 30, 24, 0.22), 0 2px 8px -2px rgba(34, 30, 24, 0.08);
+  --shadow-tactile: 0 12px 34px -10px rgba(34, 30, 24, 0.18), 0 3px 8px -1px rgba(0, 0, 0, 0.08);
+  --shadow-paper: 0 2px 6px rgba(0, 0, 0, 0.04), 0 16px 40px -12px rgba(34, 30, 24, 0.2);
+  --font-sans: var(--font-ui), "NanumSquareRound", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+  --font-serif: var(--font-letter), "MaruBuri", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 :root {
   --background: 38 26% 96%;
-  --foreground: 218 22% 17%;
+  --foreground: 220 30% 10%;
   --surface: 0 0% 100%;
   --surface-paper: 38 30% 98%;
-  --muted: 216 18% 92%;
-  --muted-foreground: 218 12% 43%;
-  --border: 216 16% 85%;
-  --accent: 168 38% 34%;
+  --muted: 216 20% 90%;
+  --muted-foreground: 218 20% 32%;
+  --border: 216 22% 76%;
+  --accent: 168 46% 28%;
   --accent-foreground: 0 0% 100%;
   --warning: 38 88% 46%;
   --danger: 356 65% 48%;
@@ -35,13 +36,13 @@
 
 html.theme-light {
   --background: 38 26% 96%;
-  --foreground: 218 22% 17%;
+  --foreground: 220 30% 10%;
   --surface: 0 0% 100%;
   --surface-paper: 38 30% 98%;
-  --muted: 216 18% 92%;
-  --muted-foreground: 218 12% 43%;
-  --border: 216 16% 85%;
-  --accent: 168 38% 34%;
+  --muted: 216 20% 90%;
+  --muted-foreground: 218 20% 32%;
+  --border: 216 22% 76%;
+  --accent: 168 46% 28%;
   --accent-foreground: 0 0% 100%;
   --warning: 38 88% 46%;
   --danger: 356 65% 48%;
@@ -90,10 +91,12 @@ html {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+/* Modern Web Guidance: visually-stable-font-fallbacks (font-size-adjust: from-font) */
 body {
   min-height: 100%;
   margin: 0;
   font-family: var(--font-sans);
+  font-size-adjust: from-font;
   overflow-wrap: break-word;
   word-break: break-word;
   color: hsl(var(--foreground));
@@ -101,6 +104,12 @@ body {
     radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0) 360px),
     hsl(var(--background));
   transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+/* MaruBuri Stationery Typography for Letters & Replies */
+.font-letter {
+  font-family: var(--font-serif);
+  font-size-adjust: from-font;
 }
 
 html.theme-dark body {

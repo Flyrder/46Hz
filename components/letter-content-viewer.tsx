@@ -70,7 +70,7 @@ export function LetterContentViewer({
   if (maskContent) {
     return (
       <article className="stationery-paper p-6 sm:p-8">
-        <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
+        <div className="font-letter whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
           {t("letter.masked")}
         </div>
       </article>
@@ -85,7 +85,7 @@ export function LetterContentViewer({
         onMouseUp={handleTextSelection}
         onTouchEnd={handleTextSelection}
       >
-        <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
+        <div className="font-letter whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
           {renderTextWithHighlights(processedText, highlightedQuotes)}
         </div>
 
@@ -93,7 +93,7 @@ export function LetterContentViewer({
           <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-accent/40 bg-accent/10 p-3 text-xs animate-in fade-in">
             <div className="flex items-center gap-1.5 text-foreground font-medium truncate max-w-md">
               <Quote className="h-3.5 w-3.5 text-accent shrink-0" aria-hidden="true" />
-              <span className="truncate">&ldquo;{selectionSnippet}&rdquo;</span>
+              <span className="font-letter truncate">&ldquo;{selectionSnippet}&rdquo;</span>
             </div>
             <button
               type="button"
@@ -204,7 +204,7 @@ export function LetterContentViewer({
 
       {/* Content Rendering based on mode */}
       {viewMode === "processed" && (
-        <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
+        <div className="font-letter whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
           {renderTextWithHighlights(processedText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
         </div>
       )}
@@ -215,7 +215,7 @@ export function LetterContentViewer({
             <FileText className="h-3 w-3" aria-hidden="true" />
             <span>{t("letter.rawDraftBadge")}</span>
           </div>
-          <div className="whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
+          <div className="font-letter whitespace-pre-wrap text-base leading-relaxed text-foreground/90 font-normal break-words">
             {renderTextWithHighlights(rawText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
           </div>
         </div>
@@ -232,7 +232,7 @@ export function LetterContentViewer({
               </span>
               <span className="text-xs text-muted-foreground">{t("common.characterCount", { count: String(rawText.length) })}</span>
             </div>
-            <div className="text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+            <div className="font-letter text-sm leading-relaxed text-foreground/80 whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
               {renderTextWithHighlights(rawText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
             </div>
           </div>
@@ -246,7 +246,7 @@ export function LetterContentViewer({
               </span>
               <span className="text-xs text-muted-foreground">{t("common.characterCount", { count: String(processedText.length) })}</span>
             </div>
-            <div className="text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
+            <div className="font-letter text-sm leading-relaxed text-foreground whitespace-pre-wrap break-words max-h-96 overflow-y-auto">
               {renderTextWithHighlights(processedText, highlightedQuotes, t("comment.highlightedQuoteTitle"))}
             </div>
           </div>

@@ -129,9 +129,18 @@ export const systemSettingsSchema = z
     maxRecentIps: z.coerce.number().int().min(1).max(20),
     legalBasis: z.string().trim().min(5).max(300),
     dataMinimizationNotice: z.string().trim().min(10).max(500),
+    enableAi: z.boolean().default(true),
+    enableAiRiskSafety: z.boolean().default(true),
+    enableAiAnonymization: z.boolean().default(true),
+    enableAiReplyCoach: z.boolean().default(true),
+    enableAiWritingSparks: z.boolean().default(true),
+    enableAiResonanceMatch: z.boolean().default(true),
     aiDefaultProvider: z.enum(["mock", "openai", "deepseek"]),
     aiTimeoutMs: z.coerce.number().int().min(1000).max(60000),
     aiMockDelayMs: z.coerce.number().int().min(0).max(5000),
+    aiTemperature: z.coerce.number().min(0).max(2).default(0.7),
+    aiMaxTokens: z.coerce.number().int().min(50).max(8000).default(1500),
+    aiModel: z.string().trim().min(1).max(80).default("gpt-4o-mini"),
     enableChinaSupportInfo: z.boolean().default(false)
   })
   .refine((data) => data.expandedMaxReplies >= data.defaultMaxReplies, {

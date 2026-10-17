@@ -14,6 +14,7 @@ import type {
   WritingSparksResult
 } from "@/lib/ai/middleware";
 import type { ReplyType } from "@/lib/domain";
+import { aiSettings } from "@/settings";
 
 const emotionDictionary: Array<[string, string[]]> = [
   ["lonely", ["lonely", "alone", "isolated", "외로움", "외로워", "혼자", "고립", "孤独", "孤单"]],
@@ -41,15 +42,38 @@ const desiredReplyHints: Array<[ReplyType, string[]]> = [
 ];
 
 export class MockAiMiddleware implements AiMiddleware {
+  private delayMs: number;
+
+  constructor(options?: { delayMs?: number }) {
+    this.delayMs = options?.delayMs ?? aiSettings.mockDelayMs ?? 40;
+  }
+
   async processLetter(input: ProcessLetterInput): Promise<ProcessedLetterResult> {
-    const anonymization = await this.anonymize({
-      text: input.text,
-      language: input.language
-    });
-    const risk = await this.classifyRisk({
-      text: input.text,
-      language: input.language
-    });
+    if (!aiSettings.enabled) {
+      return {
+        processedText: normalizeLetter(input.text),
+        emotionTags: [],
+        situationTags: [],
+        desiredReplyType: input.preferredReplyType,
+        anonymization: { text: input.text, flaggedTerms: [] },
+        risk: { level: "NORMAL", reasons: [], peerSafe: true }
+      };
+    }
+
+    const anonymization = aiSettings.enableAnonymization
+      ? await this.anonymize({
+          text: input.text,
+          language: input.language
+        })
+      : { text: input.text, flaggedTerms: [] };
+
+    const risk = aiSettings.enableRiskSafety
+      ? await this.classifyRisk({
+          text: input.text,
+          language: input.language
+        })
+      : { level: "NORMAL" as const, reasons: [], peerSafe: true };
+
     const desiredReplyType = inferDesiredReplyType(
       anonymization.text,
       input.preferredReplyType
@@ -66,6 +90,16 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async coachReply(input: CoachReplyInput): Promise<CoachedReplyResult> {
+    if (!aiSettings.enabled || !aiSettings.enableReplyCoach) {
+      return {
+        coachedText: input.replyText,
+        flags: [],
+        suggestions: [],
+        reframings: [],
+        metrics: { empathy: 85, gentleness: 85, nonJudgmental: 85 }
+      };
+    }
+
     const lang = normalizeAiLang(input.language);
     const lower = input.replyText.toLowerCase();
     const flags: string[] = [];
@@ -179,6 +213,14 @@ export class MockAiMiddleware implements AiMiddleware {
   async classifyRisk(
     input: RiskClassificationInput
   ): Promise<RiskClassificationResult> {
+    if (!aiSettings.enabled || !aiSettings.enableRiskSafety) {
+      return {
+        level: "NORMAL",
+        reasons: [],
+        peerSafe: true
+      };
+    }
+
     const lang = normalizeAiLang(input.language);
     const text = input.text.toLowerCase();
 
@@ -246,6 +288,13 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async anonymize(input: AnonymizationInput): Promise<AnonymizationResult> {
+    if (!aiSettings.enabled || !aiSettings.enableAnonymization) {
+      return {
+        text: input.text,
+        flaggedTerms: []
+      };
+    }
+
     const lang = normalizeAiLang(input.language);
     const flaggedTerms: string[] = [];
     let text = input.text;
@@ -324,6 +373,13 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async generateWritingSparks(input: WritingSparksInput): Promise<WritingSparksResult> {
+    if (!aiSettings.enabled || !aiSettings.enableWritingSparks) {
+      return {
+        sparks: [],
+        suggestedEmotionTags: []
+      };
+    }
+
     const lang = normalizeAiLang(input.language);
     const mood = (input.mood ?? "").toLowerCase();
 
@@ -452,6 +508,13 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async matchResonantLetters(input: ResonanceMatchInput): Promise<ResonanceMatchResult> {
+    if (!aiSettings.enabled || !aiSettings.enableResonanceMatch) {
+      return {
+        recommendedLetterIds: input.availableLetters.map((l) => l.id),
+        matchReasons: {}
+      };
+    }
+
     const lang = normalizeAiLang(input.language);
     const recommended: string[] = [];
     const reasons: Record<string, string> = {};
