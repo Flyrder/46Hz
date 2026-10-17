@@ -93,7 +93,7 @@ export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
   brandName: "46Hz",
   brandTitle: "46Hz Letterbox",
   brandTagline: "A quiet anonymous emotional support letterbox.",
-  brandVersion: "0.2.1",
+  brandVersion: "0.2.2",
   defaultLocale: "ko_KR",
   defaultTheme: "system",
   cookieMaxAgeDays: 180,
@@ -146,7 +146,7 @@ export const brandSettings: {
   name: "46Hz",
   title: "46Hz Letterbox",
   tagline: "A quiet anonymous emotional support letterbox.",
-  version: "0.2.1"
+  version: "0.2.2"
 };
 
 export const i18nSettings: {

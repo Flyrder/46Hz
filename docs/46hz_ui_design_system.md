@@ -1,10 +1,10 @@
 # 46Hz UI/UX 디자인 시스템, 시스템 환경설정 스튜디오 및 독립 실행(Standalone) 최적화 매뉴얼
 **46Hz UI/UX Design System, System Configuration Studio & Standalone Optimization Manual**
 
-> **제품명**: 46Hz 편지함 (46Hz Letterbox v0.2.1)  
+> **제품명**: 46Hz 편지함 (46Hz Letterbox v0.2.2)  
 > **미학적 원형 (Aesthetic Archetype)**: 고요하고 따뜻한 종이 편지지 & 인간 중심의 캄 테크 (Calm Technology)  
 > **핵심 주파수 (Core Frequency)**: 약 46Hz (지구 7차 슈만 공명 고조파)  
-> **최종 업데이트**: 2026-10-16  
+> **최종 업데이트**: 2026-10-18  
 
 ---
 

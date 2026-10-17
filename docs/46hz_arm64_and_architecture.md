@@ -1,8 +1,8 @@
 # 46Hz 아키텍처 진화 및 Arm64 멀티 아키텍처 최적화 실무 매뉴얼
 **46Hz Architecture Evolution & Arm64 Multi-Arch Adaptation Guide**
 
-> 작성 일자: 2026-10-11 (최종 업데이트: 2026-10-17)  
-> 적용 버전: 46Hz Letterbox (v0.2.1)  
+> 작성 일자: 2026-10-11 (최종 업데이트: 2026-10-18)  
+> 적용 버전: 46Hz Letterbox (v0.2.2)  
 > 연관 문서: [46Hz UI/UX 디자인 시스템 매뉴얼](./46hz_ui_design_system.md)
 
 ---

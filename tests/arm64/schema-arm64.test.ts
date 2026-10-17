@@ -7,6 +7,7 @@ describe("Arm64 Architecture Support", () => {
     const schemaPath = path.join(process.cwd(), "prisma", "schema.prisma");
     const content = fs.readFileSync(schemaPath, "utf-8");
 
+    expect(content).toContain("debian-openssl-3.0.x");
     expect(content).toContain("linux-arm64-openssl-3.0.x");
     expect(content).toContain("linux-arm64-openssl-1.1.x");
     expect(content).toContain("linux-musl-arm64-openssl-3.0.x");

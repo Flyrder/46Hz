@@ -25,8 +25,8 @@ describe("Unified Settings (settings.ts)", () => {
   it("provides brand metadata", () => {
     expect(brandSettings.name).toBe("46Hz");
     expect(brandSettings.title).toContain("46Hz");
-    expect(brandSettings.version).toBe("0.2.1");
-    expect(FACTORY_DEFAULT_SETTINGS.brandVersion).toBe("0.2.1");
+    expect(brandSettings.version).toBe("0.2.2");
+    expect(FACTORY_DEFAULT_SETTINGS.brandVersion).toBe("0.2.2");
     expect(settings.brand).toEqual(brandSettings);
   });
 
@@ -111,7 +111,7 @@ describe("Unified Settings (settings.ts)", () => {
     expect(invalid.success).toBe(false);
   });
 
-  it("synchronizes v0.2.1 release version across package.json, settings, and docker-compose", async () => {
+  it("synchronizes v0.2.2 release version across package.json, settings, and docker-compose", async () => {
     const fs = await import("node:fs");
     const path = await import("node:path");
 
@@ -119,9 +119,9 @@ describe("Unified Settings (settings.ts)", () => {
     const pkgLock = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package-lock.json"), "utf8"));
     const composeContent = fs.readFileSync(path.join(process.cwd(), "docker-compose.yml"), "utf8");
 
-    expect(brandSettings.version).toBe("0.2.1");
-    expect(pkg.version).toBe("0.2.1");
-    expect(pkgLock.version).toBe("0.2.1");
-    expect(composeContent).toContain("ghcr.io/flyrder/46hz:v0.2.1");
+    expect(brandSettings.version).toBe("0.2.2");
+    expect(pkg.version).toBe("0.2.2");
+    expect(pkgLock.version).toBe("0.2.2");
+    expect(composeContent).toContain("ghcr.io/flyrder/46hz:v0.2.2");
   });
 });
