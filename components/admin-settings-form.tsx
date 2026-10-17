@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useTransition } from "react";
 import {
   Waves,
   Globe,
@@ -18,7 +18,8 @@ import {
   Activity,
   AlertCircle,
   ChevronDown,
-  Sliders
+  Sliders,
+  Loader2
 } from "lucide-react";
 import { ExitIsoIcon } from "@/components/exit-sign-emblem";
 import {
@@ -33,6 +34,7 @@ import {
 } from "@/settings";
 import type { AiConnectionTestResult } from "@/lib/ai";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { buttonVariants } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 
 function generateLiveSettingsPreview(cfg: EditableSystemSettings): string {
@@ -131,6 +133,13 @@ export function AdminSettingsForm({
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [testingAi, setTestingAi] = useState<boolean>(false);
   const [aiTestResult, setAiTestResult] = useState<AiConnectionTestResult | null>(null);
+  const [isResetting, startResetTransition] = useTransition();
+
+  const handleReset = () => {
+    startResetTransition(async () => {
+      await resetAction();
+    });
+  };
 
   const livePreview = useMemo(() => generateLiveSettingsPreview(draft), [draft]);
 
@@ -221,15 +230,13 @@ export function AdminSettingsForm({
     "mt-1.5 w-full rounded-xl border border-border bg-background/80 px-3.5 py-2.5 text-sm text-foreground transition-colors focus:border-accent focus:bg-surface focus:outline-none focus:ring-2 focus:ring-accent/25 disabled:cursor-not-allowed disabled:opacity-60 validated-field";
 
   return (
-    <div className="grid gap-6 lg:grid-cols-12">
-      {/* Main Form Column */}
-      <div className="space-y-6 lg:col-span-7">
-        <form
-          action={saveAction}
-          onSubmit={handleFormSubmit}
-          noValidate
-          className="space-y-6"
-        >
+    <div className="space-y-6">
+      <form
+        action={saveAction}
+        onSubmit={handleFormSubmit}
+        noValidate
+        className="space-y-6"
+      >
           {/* Section 1: Brand & Identity */}
           <section className="stationery-card p-6 animate-entry">
             <div className="flex items-start gap-3 border-b border-border/60 pb-4">
@@ -1733,50 +1740,56 @@ export function AdminSettingsForm({
                 <Save className="h-4 w-4" aria-hidden="true" />
                 <span>{t("admin.settingsSaveButton")}</span>
               </SubmitButton>
+
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={isResetting}
+                className={buttonVariants("secondary")}
+                aria-busy={isResetting}
+              >
+                {isResetting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <span className="sr-only">{t("common.processingSrOnly")}</span>
+                  </>
+                ) : (
+                  <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                <span>{t("admin.settingsResetButton")}</span>
+              </button>
             </div>
           ) : null}
         </form>
 
-        {canEdit ? (
-          <form action={resetAction} className="flex justify-end">
-            <SubmitButton variant="secondary">
-              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>{t("admin.settingsResetButton")}</span>
-            </SubmitButton>
-          </form>
-        ) : null}
-      </div>
-
-      {/* Live settings.ts Code Preview Column */}
-      <aside className="lg:col-span-5">
-        <div className="sticky top-20 stationery-card overflow-hidden p-5">
-          <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
-            <div className="flex items-center gap-2">
-              <FileCode2 className="h-4.5 w-4.5 text-accent" aria-hidden="true" />
-              <h3 className="text-sm font-bold text-foreground">
-                {t("admin.settingsCodePreviewTitle")}
-              </h3>
-            </div>
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-0.5 text-[10px] font-bold text-accent">
-              <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
-              <span>settings.ts</span>
-            </span>
+      {/* Live settings.ts Code Preview Section */}
+      <section className="stationery-card overflow-hidden p-5 sm:p-6 animate-entry">
+        <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
+          <div className="flex items-center gap-2">
+            <FileCode2 className="h-4.5 w-4.5 text-accent" aria-hidden="true" />
+            <h3 className="text-sm font-bold text-foreground">
+              {t("admin.settingsCodePreviewTitle")}
+            </h3>
           </div>
-
-          <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
-            {t("admin.settingsCodePreviewDesc")}
-          </p>
-
-          <pre className="mt-4 max-h-[540px] overflow-auto rounded-xl border border-border/80 bg-background/90 p-4 font-mono text-[11px] leading-relaxed text-foreground">
-            <code>{livePreview}</code>
-          </pre>
-
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-border/60 bg-muted/40 p-3 text-[11px] text-muted-foreground">
-            <Database className="h-4 w-4 shrink-0 text-accent mt-0.5" aria-hidden="true" />
-            <span>{t("admin.settingsSyncNote")}</span>
-          </div>
+          <span className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-0.5 text-[10px] font-bold text-accent">
+            <CheckCircle2 className="h-3 w-3" aria-hidden="true" />
+            <span>settings.ts</span>
+          </span>
         </div>
-      </aside>
+
+        <p className="mt-2.5 text-xs leading-relaxed text-muted-foreground">
+          {t("admin.settingsCodePreviewDesc")}
+        </p>
+
+        <pre className="mt-4 max-h-[540px] overflow-auto rounded-xl border border-border/80 bg-background/90 p-4 font-mono text-[11px] leading-relaxed text-foreground">
+          <code>{livePreview}</code>
+        </pre>
+
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-border/60 bg-muted/40 p-3 text-[11px] text-muted-foreground">
+          <Database className="h-4 w-4 shrink-0 text-accent mt-0.5" aria-hidden="true" />
+          <span>{t("admin.settingsSyncNote")}</span>
+        </div>
+      </section>
     </div>
   );
 }
