@@ -1,158 +1,159 @@
-# 46Hz 架构演进与 Arm64 多架构适配实践手册
+# 46Hz 아키텍처 진화 및 Arm64 멀티 아키텍처 최적화 실무 매뉴얼
+**46Hz Architecture Evolution & Arm64 Multi-Arch Adaptation Guide**
 
-> 沉淀日期: 2026-10-11 (Updated 2026-10-17)  
-> 适用版本: 46Hz Letterbox (v0.2.1)  
-> 关联手册: [46Hz UI/UX Design System Manual](./46hz_ui_design_system.md)
-
----
-
-## 1. 品牌重塑：从 EKO 到 46Hz (Brand Rebranding)
-
-### 1.1 品牌内涵与情绪哲学
-- **命名意象**：46Hz 是介于听觉与震颤感知边缘的低频赫兹。在情绪声学中，极低频率的温和共振具有抚平焦虑、锚定心绪的作用；它象征着信件所传递的温暖——无需高声喧哗，而是如 46Hz 的低频脉动一般，在喧嚣的互联网深处为每一个受伤或孤独的心灵提供深沉而坚定的回响。
-- **产品核心循环**：
-  $$\text{匿名写信} \longrightarrow \text{AI 澄清脱敏} \longrightarrow \text{审核网关} \longrightarrow \text{同伴认领回信} \longrightarrow \text{AI 润色} \longrightarrow \text{二次审核} \longrightarrow \text{投递反馈}$$
-
-### 1.2 全链路标识与持久化迁移清单
-1. **前端与应用壳层**：
-   - 全局 Header Logo 从 `E / EKO` 升级为 `46 / 46Hz`。
-   - 根布局元数据标题更新为 `46Hz Letterbox`。
-   - 服务健康探测端点 `/api/health` 标识为 `46hz-letterbox`。
-2. **多语言国际化 (i18n) 模块分离与韩语默认化**：
-   - **默认语言**：系统默认语言全局设定为韩语 (`ko_KR`)。
-   - **彻底解耦合设计（内容与引擎物理隔离）**：
-     - `locales/{ko_KR, en_US, zh_CN}.ts`: 纯粹的语言数据字典包，完全独立于业务代码库。
-     - `locales/index.ts`: 语言包聚合与类型安全绑定。
-     - `lib/i18n/types.ts`: 独立存放 `Locale`、`TranslationKey`、`Translations` 契约类型。
-     - `lib/i18n/config.ts`: 集中管理 `defaultLocale = "ko_KR"` 与语言选项。
-     - `lib/i18n/index.ts`: 纯粹的国际化调度与回退引擎，内部无任何语言文件。
-     - `lib/i18n.ts`: 统一对外平滑转发。
-   - 迁移占位提示统一升级为 `46HZ-XXXX-XXXX`。
-3. **Session 与 Cookie 隔离设计**：
-   - 匿名用户识别：`46hz_user_id`。
-   - 语言偏好：`46hz_locale`。
-   - 主题偏好：`46hz_theme`。
-   - 管理员身份：`46hz_admin_role`（存储 `ADMIN` 或 `MODERATOR`）。
-   - 设备间匿名迁移码：采用 Crockford Base32 变体（排除 `0, 1, I, O` 易混淆字符），前缀升级为 `46HZ-`（形如 `46HZ-XXXX-XXXX`）。
+> 작성 일자: 2026-10-11 (최종 업데이트: 2026-10-17)  
+> 적용 버전: 46Hz Letterbox (v0.2.1)  
+> 연관 문서: [46Hz UI/UX 디자인 시스템 매뉴얼](./46hz_ui_design_system.md)
 
 ---
 
-## 2. 并发回信冲突控制：物理信箱守护机制 (Human-Centered Letter Holding Protocol)
+## 1. 브랜드 리브랜딩: EKO에서 46Hz로 (Brand Rebranding)
 
-### 2.1 业务痛点与防 Shadowban 心理学设计
-在早期设计中，若直接使用“预占 (Claim)”、“锁定 (Locked)”、“15 分钟租约 (15-min Lease)”以及警告色（Amber/Warning）提示，用户极易误解为**账号被系统风控、隐式降权或 Shadowban**。
+### 1.1 브랜드 함의와 정서 철학
+- **네이밍 의미**: 46Hz는 청각적 인지와 미세한 진동 감각의 경계에 맞닿아 있는 극저주파수(ELF) 대역입니다. 감성 음향학에서 이러한 온화한 저주파 공명은 불안을 잠재우고 마음에 안정감을 부여하는 치유적 특성을 갖습니다. 이는 편지가 전달하는 온기를 상징합니다. 시끄럽게 소리치지 않고, 46Hz의 나지막한 맥동처럼 번잡한 인터넷의 심연 속에서 상처받거나 외로운 모든 영혼에게 깊고 흔들림 없는 화답을 건넵니다.
+- **제품 핵심 순환 루프**:
+  $$\text{익명 편지 작성} \longrightarrow \text{AI 정돈 및 탈민감화} \longrightarrow \text{검토 게이트웨이} \longrightarrow \text{동료 수신 및 답장} \longrightarrow \text{AI 코칭 및 윤문} \longrightarrow \text{2차 검토} \longrightarrow \text{배달 및 피드백}$$
 
-为了消除这种冰冷的算法规制感，46Hz 将底层并发控制完全转译为温情的**物理慢信箱隐喻**：
-- **对于其他来访同伴**：不再显示“已被锁定/预占”，而是温馨提示：“*另一位同伴正在用心写信中——为了让写信人获得专注、不被重复打扰的倾听，这封信已由 TA 暂时取下。TA 正在静心撰写，若 15 分钟内离开，信件会重新回到信箱。*”
-- **对于正在书写的同伴**：不再显示“拥有 15 分钟独占租约”，而是提示：“*静心书写中 · 为您守护 15 分钟专注时间*”，并提供醒目的“*放回信箱（留给其他同伴）*”主动让出通道。
-- **视觉去警告化**：抛弃刺眼的琥珀色警示框，全面采用温润的中性卡片背景 (`bg-surface`) 与静谧的羽毛笔/信件图标 (`PenLine`)。
+### 1.2 전 구간 식별자 및 영속성 마이그레이션 내역
+1. **프론트엔드 및 애플리케이션 셸**:
+   - 글로벌 Header Logo: `E / EKO`에서 `46 / 46Hz`로 승격.
+   - 루트 레이아웃 메타데이터 타이틀: `46Hz Letterbox`로 갱신.
+   - 서비스 헬스체크 엔드포인트 `/api/health` 응답 식별자: `46hz-letterbox` 반영.
+2. **다국어(i18n) 모듈 완전 분리 및 한국어 기본값 지정**:
+   - **기본 언어**: 시스템 기본 언어를 전역적으로 한국어(`ko_KR`)로 설정.
+   - **완전한 디커플링 설계 (콘텐츠와 엔진의 물리적 격리)**:
+     - `locales/{ko_KR, en_US, zh_CN}.ts`: 비즈니스 로직과 물리적으로 완전히 격리된 순수 언어 사전 패키지.
+     - `locales/index.ts`: 언어 패키지 집계 및 타입 세이프 바인딩.
+     - `lib/i18n/types.ts`: `Locale`, `TranslationKey`, `Translations` 타입 계약 전용 모듈.
+     - `lib/i18n/config.ts`: `defaultLocale = "ko_KR"` 및 지원 언어 목록 집중 관리.
+     - `lib/i18n/index.ts`: 언어 파일 없이 동작하는 순수 국제화 라우팅 및 폴백 엔진.
+     - `lib/i18n.ts`: 외부 모듈을 위한 단일화된 전방위 re-export 게이트웨이.
+   - 마이그레이션 자리표시자 형식: `46HZ-XXXX-XXXX`로 표준화.
+3. **세션 및 쿠키 격리 설계**:
+   - 익명 사용자 식별 쿠키: `46hz_user_id`.
+   - 언어 환경설정: `46hz_locale`.
+   - 테마 환경설정: `46hz_theme`.
+   - 관리자/모더레이터 권한: `46hz_admin_role` (`ADMIN` 또는 `MODERATOR` 저장).
+   - 기기 간 익명 이전 코드: Crockford Base32 변형(혼동하기 쉬운 `0, 1, I, O` 제외)을 채택하고 접두사를 `46HZ-` (`46HZ-XXXX-XXXX` 형태)로 표준화.
 
-### 2.2 底层守护协议 (Holding Protocol)
-我们在 `lib/reply/claiming.ts` 中基于已有的 `Match` 模型实现了一套轻量级、无外部 Redis 依赖的时间窗口守护机制：
+---
+
+## 2. 동시 답장 충돌 제어: 물리 편지함 점유 보호 프로토콜 (Human-Centered Letter Holding Protocol)
+
+### 2.1 비즈니스 페인포인트 및 섀도우밴(Shadowban) 방지 심리학 설계
+초기 시스템 설계에서 "선점(Claim)", "잠금(Locked)", "15분 임대(15-min Lease)"와 같은 기술 용어와 경고색(Amber/Warning) 뱃지를 직접 노출했을 때, 사용자들은 **자신의 계정이 시스템에 의해 감시당하거나, 은밀히 권한이 제한(Shadowban)된 것**으로 심각한 오해와 불안감을 겪었습니다.
+
+이러한 차가운 알고리즘 통제감을 불식시키기 위해, 46Hz는 동시성 제어 기술을 따뜻한 **물리적 느린 우체통 은유**로 완전히 재해석했습니다:
+- **다른 방문 동료의 화면**: "잠금/선점됨" 대신 따뜻한 배려 문구 노출: *"다른 동료가 편지를 소중히 읽고 있어요 — 작성자가 온전히 집중된 답장을 받을 수 있도록, 이 편지는 다른 동료가 잠시 품에 안고 정성껏 답장을 적고 있습니다. 15분 동안 조용히 지켜봐 주세요."*
+- **현재 답장을 작성 중인 동료의 화면**: "15분 독점 임대 보유 중" 대신 안내: *"마음을 담아 적는 중 · 온전한 집중을 위해 15분간 이 편지를 지켜드립니다."*와 함께, 언제든 부담 없이 양보할 수 있는 *"편지함에 다시 넣기 (다른 동료에게 양보)"* 버튼 제공.
+- **시각적 비경고화**: 자극적인 주황색/경고색 박스를 전면 철거하고, 따스한 중립 카드 배경(`bg-surface`)과 서정적인 깃펜 아이콘(`PenLine`)으로 전환.
+
+### 2.2 기저 점유 보호 프로토콜 (Holding Protocol)
+외부 Redis 의존성 없이 `lib/reply/claiming.ts` 내에서 기존 Prisma `Match` 모델을 기반으로 경량의 시간 윈도우 점유 보호 메커니즘을 구현했습니다:
 
 ```text
-[同伴进入 /reply 信件池]
+[동료가 /reply 편지 보관함 진입]
         │
         ▼
-[过滤正由他人守护中或已有回复的信件] ──> matches.none(status == OFFERED && createdAt >= now - 15m)
+[다른 동료가 보호 중이거나 이미 답장 완료된 편지 제외] ──> matches.none(status == OFFERED && createdAt >= now - 15m)
         │
         ▼
-[同伴点击打开 /reply/[letterId]]
+[동료가 /reply/[letterId] 클릭하여 열람]
         │
         ▼
-[执行 claimLetterForReply(letterId, userId)]
+[claimLetterForReply(letterId, userId) 실행]
         │
-        ├── 正在由他人守护 (15分钟内) ──> 温暖提示 "另一位同伴正在用心写信中"，引导浏览其他信件
+        ├── 타인이 15분 보호 시간 내 작성 중 ──> "다른 동료가 편지를 소중히 읽고 있어요" 안내 및 다른 편지 탐색 유도
         │
-        └── 未被守护 / 对方超时离开
+        └── 보호 중이 아니거나 15분 타임아웃 경과
                 │
                 ▼
-        [创建/刷新 Match: status=OFFERED, createdAt=now] ──> 享有 15 分钟安静书写保护
+        [Match 생성/갱신: status=OFFERED, createdAt=now] ──> 15분간 조용한 단독 작성 보호
                 │
                 ▼
-        [同伴提交回复 submitReplyAction]
+        [동료가 submitReplyAction 실행하여 답장 제출]
                 │
-                ├── 校验守护有效性与防重复提交
+                ├── 점유 유효성 검증 및 중복 제출 방지
                 │
                 ▼
-        [事务: 创建 Reply(PENDING), 更新 Match(RESPONDED), 记录 ModerationEvent]
+        [DB 트랜잭션: Reply(PENDING) 생성, Match(RESPONDED) 갱신, ModerationEvent 기록]
 ```
 
-### 2.3 状态机与边界条件
-- **守护窗口时长**：`CLAIM_LEASE_MINUTES = 15`（900 秒）。
-- **状态转移**：
-  - `OFFERED`（且 $T_{\text{now}} - T_{\text{create}} < 15\text{min}$）：守护撰写中。
-  - `OFFERED`（且 $T_{\text{now}} - T_{\text{create}} \ge 15\text{min}$）：已超时，信件自动回归公共信箱，对后续同伴开放，旧记录标记为 `EXPIRED`。
-  - `RESPONDED`：回复已提交，终态。
-  - `SKIPPED`：主动放回信箱（点击 UI 的“放回信箱”按钮触发 `releaseReplyClaimAction`），立即释放守护，无需等待 15 分钟自然过期。
-- **防止重复回信**：在 `coachReplyAction` 与 `submitReplyAction` 双重拦截同位用户对同一信件的重复提交，同时在 `/reply/[letterId]` 渲染专门的“已送出回信”感谢卡片。
-- **纯函数可测性**：抽离 `isClaimExpired`、`isMatchActiveClaim`、`calculateRemainingLeaseSeconds` 纯函数，确保毫秒级边界判断在 Vitest 单元测试中 100% 覆盖。
+### 2.3 상태 머신 및 경계 조건
+- **보호 윈도우 유효 시간**: `CLAIM_LEASE_MINUTES = 15` (정확히 900초).
+- **상태 전이 규칙**:
+  - `OFFERED` (동시에 $T_{\text{now}} - T_{\text{create}} < 15\text{분}$): 현재 보호 및 작성 중.
+  - `OFFERED` (동시에 $T_{\text{now}} - T_{\text{create}} \ge 15\text{분}$): 보호 시간 만료. 편지가 자동으로 공용 편지함으로 회귀하며 다음 동료에게 개방(기존 레코드는 `EXPIRED`로 처리).
+  - `RESPONDED`: 답장 제출 완료 (최종 상태).
+  - `SKIPPED`: 자발적 양보 (UI의 "편지함에 다시 넣기" 클릭 시 `releaseReplyClaimAction` 트리거). 15분을 기다릴 필요 없이 즉시 점유 해제.
+- **중복 답장 방지**: `coachReplyAction`과 `submitReplyAction` 양단에서 동일 사용자가 동일 편지에 중복 제출하는 것을 원천 차단하며, `/reply/[letterId]` 접근 시 "이미 따뜻한 답장을 보내셨습니다" 전용 감사 카드를 렌더링.
+- **순수 함수 기반 단위 테스트 보장**: `isClaimExpired`, `isMatchActiveClaim`, `calculateRemainingLeaseSeconds`를 순수 함수로 완전히 분리하여 Vitest에서 밀리초 단위 경계값 테스트 100% 달성.
 
 ---
 
-## 3. 生产级多提供商 LLM 可拔插架构 (Pluggable AI Architecture)
+## 3. 프로덕션급 다중 제공자 LLM 플러그형 아키텍처 (Pluggable AI Architecture)
 
-### 3.1 抽象层接口设计 (`lib/ai/middleware.ts`)
-46Hz 业务逻辑（Server Actions、API 路由）不直接绑定任何特定的 LLM SDK，而是依赖 `AiMiddleware` 纯接口：
-- `processLetter(input)`: 澄清并脱敏信件内容，输出结构化情感标签、情境标签与期望回复类型。
-- `coachReply(input)`: 检查同伴回复的语气倾向（避免评判、过度建议、反客为主），指导生成温和回复。
-- `classifyRisk(input)`: 4 级风险内容分类与危机分流判定。
-- `anonymize(input)`: PII 隐私信息（手机、邮箱、全名、地点）检测与脱敏。
+### 3.1 추상 계층 인터페이스 설계 (`lib/ai/middleware.ts`)
+46Hz의 비즈니스 로직(Server Actions, API 라우트)은 특정 LLM SDK에 직접 종속되지 않고 `AiMiddleware` 순수 인터페이스에만 의존합니다:
+- `processLetter(input)`: 편지 내용을 정돈 및 탈민감화하고, 구조화된 감정/상황 태그 및 희망 위로 유형을 도출.
+- `coachReply(input)`: 답장의 톤(비판단성, 온화함, 공감성)을 점검하고 부드러운 치유적 표현으로 다듬도록 코칭.
+- `classifyRisk(input)`: 4단계 위험도 분류 및 긴급 위기 상황 분기判定.
+- `anonymize(input)`: PII 개인정보(전화번호, 주민등록번호, 이메일, 계좌, 주소, 실명 등) 탐지 및 마스킹.
 
-### 3.2 多模型适配器 (`lib/ai/llm.ts`)
-通过统一的 OpenAI Chat Completions API 协议，封装 `LlmAiMiddleware`，实现多厂商一键拔插：
+### 3.2 다중 모델 어댑터 (`lib/ai/llm.ts`)
+OpenAI Chat Completions API 표준 규격을 채택하여 `LlmAiMiddleware`를 캡슐화하고 다중 벤더를 한 줄 설정으로 전환할 수 있도록 구현했습니다:
 
-| 提供商 | `AI_PROVIDER` | 默认 Base URL | 默认 Model | 认证 Header |
+| 제공자 | `AI_PROVIDER` | 기본 Base URL | 기본 모델 | 인증 방식 |
 | :--- | :--- | :--- | :--- | :--- |
 | **OpenAI** | `openai` | `https://api.openai.com/v1` | `gpt-4o-mini` | `Bearer ${OPENAI_API_KEY}` |
 | **DeepSeek** | `deepseek` | `https://api.deepseek.com/v1` | `deepseek-chat` | `Bearer ${DEEPSEEK_API_KEY}` |
-| **自定义兼容端点** | `custom` | `process.env.AI_BASE_URL` | `process.env.AI_MODEL` | `Bearer ${AI_API_KEY}` |
-| **Mock** | `mock` | N/A (本地规则与词典) | Deterministic | 无需鉴权 |
+| **사용자 호환 엔드포인트** | `custom` | `process.env.AI_BASE_URL` | `process.env.AI_MODEL` | `Bearer ${AI_API_KEY}` |
+| **Mock (오프라인)** | `mock` | N/A (로컬 규칙 엔진) | Deterministic | 인증 불필요 |
 
-### 3.3 零停机优雅降级与防御性容错 (Graceful Degradation & Resilience)
-外部大模型常面临网络抖动、提供商宕机、429 Rate Limit、输出非法格式等不可控因素：
-1. **推理思维链清洗**：针对 DeepSeek R1 / 推理模型输出的 `<think>...</think>` 思维链标签进行自动剥离，防止污染 JSON 解析。
-2. **枚举安全归一化**：自动将模型返回的大小写不一致（如 `"normal"`、`"comfort"`）清洗归一化为 Prisma 强类型枚举，杜绝数据库类型崩溃。
-3. **最外层 JSON 容错提取**：支持 Markdown 代码块包裹与前后自由文本混杂场景的健壮匹配。
-- **双保险策略**：`LlmAiMiddleware` 内部持有 `MockAiMiddleware` 实例。
-- **降级触发条件**：
-  1. 对应提供商未配置 API Key（`isConfigured === false`）。
-  2. 网络请求超时（默认 10 秒超时控制）。
-  3. HTTP 错误响应（5xx、429 等）或 JSON 解析彻底失败。
-- **结果保证**：在任何故障场景下，系统均在后端控制台记录告警日志并自动降级为规则处理，确保前端用户写信、审信、回信主流程绝不白屏或崩溃。
+### 3.3 무중단 우아한 폴백 및 방어적 장애 허용 (Graceful Degradation & Resilience)
+외부 대규모 언어 모델은 네트워크 지연, 서버 장애, 429 레이트 리밋, 비정형 포맷 반환 등의 통제 불가능한 요소를 수반합니다:
+1. **추론형 사고 사슬 태그 정제**: DeepSeek R1 등 추론 모델이 출력하는 `<think>...</think>` 태그를 자동으로 분리·제거하여 JSON 파싱 오염을 원천 차단.
+2. **열거형(Enum) 안전 정규화**: 모델이 대소문자가 혼합된 비표준 값(`"normal"`, `"comfort"` 등)을 반환하더라도 Prisma 강타입 Enum 규격으로 강제 교정하여 데이터베이스 제약 조건 충돌 방지.
+3. **최외곽 JSON 내성 추출**: 마크다운 코드 블록(```json) 감싸기 및 앞뒤 자연어 서술이 섞여 있는 경우에도 정규식을 통해 순수 JSON 블록만 견고하게 추출.
+- **이중 안전장치(Dual-Safety)**: `LlmAiMiddleware` 인스턴스 내부에 언제나 `MockAiMiddleware`를 상시 보유.
+- **폴백 트리거 조건**:
+  1. 해당 제공자의 API Key가 미설정된 경우 (`isConfigured === false`).
+  2. 네트워크 요청 타임아웃 발생 시 (기본 10초 타임아웃).
+  3. HTTP 5xx, 429 오류 응답 수신 또는 최종 JSON 파싱 실패 시.
+- **신뢰성 보장**: 어떠한 외부 장애 상황에서도 서버 로그에 상세 경고를 기록한 후 즉시 로컬 규칙 엔진으로 대체 작동하여, 사용자의 글쓰기·답장·검토 핵심 프로세스가 절대 중단되지 않습니다.
 
 ---
 
-## 4. 细粒度 RBAC 权限与分级审核机制 (Granular Admin & Moderator RBAC)
+## 4. 세분화된 RBAC 권한 및 단계별 검토 체계 (Granular Admin & Moderator RBAC)
 
-### 4.1 角色定义与权限矩阵
-为适应社区规模化后的分工需求，46Hz 将后台管理权限细化为两级角色：
+### 4.1 역할 정의 및 권한 매트릭스
+커뮤니티 성장에 따른 운영 분업을 지원하기 위해 관리자 권한을 2단계 역할로 분리했습니다:
 
-| 权限范围 | 系统管理员 (ADMIN) | 专职内容审核员 (MODERATOR) |
+| 권한 항목 | 최고 관리자 (ADMIN) | 온기 모더레이터 (MODERATOR) |
 | :--- | :---: | :---: |
-| **指标看板** (`/admin`) | ✅ 访问与统计 | ✅ 访问与统计 |
-| **信件审核与初审** (`/admin/letters`) | ✅ 审核通过/驳回 | ✅ 审核通过/驳回 |
-| **信件风险覆写** (`/admin/letters/[id]`) | ✅ 覆写风险级别 | ✅ 覆写风险级别 |
-| **回信审核与复审** (`/admin/replies`) | ✅ 审核通过/驳回 | ✅ 审核通过/驳回 |
-| **举报与反馈查看** (`/admin/reports`) | ✅ 查看全量举报 | ✅ 查看全量举报 |
-| **全量审计日志** (`/admin/moderation-log`) | ✅ 查看操作流水 | ✅ 查看操作流水 |
-| **用户封禁与惩戒** (`/admin/users`) | ✅ 可执行封禁 | ❌ 仅限管理员（UI展示权限提示） |
-| **危机支持资源配置** (`/admin/resources`) | ✅ 增删查改 | ❌ 仅限管理员（UI展示权限提示） |
+| **대시보드 지표 조회** (`/admin`) | ✅ 접근 및 통계 확인 | ✅ 접근 및 통계 확인 |
+| **편지 검토 및 승인/반려** (`/admin/letters`) | ✅ 승인 / 반려 / 라우팅 | ✅ 승인 / 반려 / 라우팅 |
+| **편지 위험도 수동 변경** (`/admin/letters/[id]`) | ✅ 위험 등급 재설정 | ✅ 위험 등급 재설정 |
+| **답장 검토 및 승인/반려** (`/admin/replies`) | ✅ 승인 / 반려 | ✅ 승인 / 반려 |
+| **신고 내역 모니터링** (`/admin/reports`) | ✅ 전체 신고 확인 | ✅ 전체 신고 확인 |
+| **운영 감사 로그** (`/admin/moderation-log`) | ✅ 전체 작업 이력 확인 | ✅ 전체 작업 이력 확인 |
+| **사용자 계정 제재** (`/admin/users`) | ✅ 제재/차단 실행 | ❌ 권한 없음 (안내 배너 표시) |
+| **위기 지원 리소스 관리** (`/admin/resources`) | ✅ 생성/수정/삭제 | ❌ 권한 없음 (안내 배너 표시) |
 
-### 4.2 认证与操作审计追踪
-- **独立口令分发**：
-  - `ADMIN_PASSCODE`（默认 `local-admin`）登录赋予 `ADMIN` 权限。
-  - `MODERATOR_PASSCODE`（默认 `local-moderator`）登录赋予 `MODERATOR` 权限。
-- **审计流水增强**：在所有审核操作写入 `ModerationEvent` 时，动作标识自动区分为 `ADMIN_MODERATED` 与 `MODERATOR_MODERATED`，确保操作责任链清晰可溯。
+### 4.2 인증 및 작업 감사 추적
+- **역할별 전용 접속 암호 분리**:
+  - `ADMIN_PASSCODE` (기본값 `local-admin`) 입력 시 `ADMIN` 최고 권한 부여.
+  - `MODERATOR_PASSCODE` (기본값 `local-moderator`) 입력 시 `MODERATOR` 검토 권한 부여.
+- **감사 로그 책임성 확립**: 모든 검토 작업이 `ModerationEvent`에 기록될 때, 수행자 역할이 `ADMIN_MODERATED` 또는 `MODERATOR_MODERATED`로 명확히 구분되어 운영 투명성을 보장합니다.
 
 ---
 
-## 5. Arm64 / AArch64 架构跨平台适配与踩坑实践 (Multi-Arch Arm64 Adaptation Guide)
+## 5. Arm64 / AArch64 아키텍처 크로스 플랫폼 최적화 실무 가이드 (Multi-Arch Arm64 Guide)
 
-在 Apple Silicon (M-series)、AWS Graviton (t4g/c7g)、Oracle Ampere 以及搭载 ARM64 Linux 的边缘节点或服务器上运行现代 Node.js/Prisma 应用时，最常遇到的兼容性壁垒在于底层 C/C++ 预编译二进制模块。
+Apple Silicon(M시리즈), AWS Graviton(t4g/c7g), Oracle Ampere 및 Arm64 Linux 기반의 서버나 에지 디바이스에서 최신 Node.js/Prisma 애플리케이션을 구동할 때 가장 빈번하게 발생하는 이슈는 C/C++ 사전 컴파일 바이너리 호환성입니다.
 
-### 5.1 Prisma Engine 二进制适配核心
-在 `prisma/schema.prisma` 中：
+### 5.1 Prisma Engine 바이너리 적응 핵심
+`prisma/schema.prisma` 설정 표준:
 ```prisma
 generator client {
   provider      = "prisma-client-js"
@@ -161,28 +162,28 @@ generator client {
 }
 ```
 
-#### 常见踩坑与对策：
-1. **错误**：`PrismaClientInitializationError: Query engine binary for current platform "linux-arm64-openssl-3.0.x" could not be found.`
-   - **成因**：默认配置下，Prisma 仅拉取当前执行构建宿主机（如 macOS 或 x86 容器）的二进制。当将构建产物打包并在基于 Ubuntu 22.04+ 或 Debian Bookworm 的 ARM64 生产镜像中启动时，因缺少 `linux-arm64-openssl-3.0.x` 引发崩溃。
-   - **对策**：显式指定 `linux-arm64-openssl-3.0.x`。
-2. **Alpine Linux (musl libc) 陷阱**：
-   - Alpine 使用 `musl` 而非 `glibc`。若基础镜像为 `node:alpine` 且部署于 ARM64，Prisma 依赖的目标二进制为 `linux-musl-arm64-openssl-3.0.x`。缺失时会导致 `ENOENT`。
-   - **对策**：在 `binaryTargets` 中追加 `linux-musl-arm64-openssl-3.0.x`，或选用标准 glibc 镜像 `node:20-bookworm-slim`。
-3. **OpenSSL 依赖版本**：
-   - Node 20+ 的 Linux 镜像默认预装 OpenSSL 3.0，而旧版或某些嵌入式环境可能仅有 OpenSSL 1.1。同时声明 `openssl-3.0.x` 与 `openssl-1.1.x` 可保证在不同 Linux 发行版基座间无缝迁移。
+#### 주요 트러블슈팅 및 해결책:
+1. **오류**: `PrismaClientInitializationError: Query engine binary for current platform "linux-arm64-openssl-3.0.x" could not be found.`
+   - **원인**: 기본 설정 시 Prisma는 빌드를 수행하는 호스트 환경(예: macOS x86 또는 amd64 컨테이너)의 바이너리만 다운로드합니다. 이 빌드 결과물을 Ubuntu/Debian 기반 ARM64 이미지에서 실행하면 해당 바이너리가 누락되어 기동 즉시 크래시가 발생합니다.
+   - **대책**: `binaryTargets`에 `linux-arm64-openssl-3.0.x`를 명시적으로 선언합니다.
+2. **Alpine Linux (musl libc) 호환성 문제**:
+   - Alpine은 표준 `glibc` 대신 `musl`을 사용합니다. 베이스 이미지가 `node:alpine`이고 배포 대상이 ARM64인 경우, Prisma는 `linux-musl-arm64-openssl-3.0.x` 바이너리를 요구합니다. 누락 시 `ENOENT`가 발생합니다.
+   - **대책**: `binaryTargets`에 `linux-musl-arm64-openssl-3.0.x`를 추가하거나, 표준 glibc 기반인 `node:bookworm-slim` 이미지를 권장합니다.
+3. **OpenSSL 버전 차이 대응**:
+   - 최신 Linux 이미지는 OpenSSL 3.0을 기본 탑재하지만, 구형 또는 특수 환경은 OpenSSL 1.1에 머물러 있을 수 있습니다. `openssl-3.0.x`와 `openssl-1.1.x`를 함께 명시하여 다양한 Linux 배포판에서 중단 없이 동작하도록 보장합니다.
 
-### 5.2 生产级多架构 Dockerfile 标准实践
-我们为 46Hz 创建了针对跨架构编译优化的 `Dockerfile`：
-- 基于 `node:20-bookworm-slim`，使用多阶段构建（dependencies $\rightarrow$ builder $\rightarrow$ runner）。
-- 在构建阶段强制执行 `npx prisma generate`，为所有目标架构生成适配绑定。
-- 剥离 devDependencies，以非 root 用户 `nextjs (1001:1001)` 运行容器。
+### 5.2 프로덕션급 멀티 아키텍처 Dockerfile 모범 실무
+46Hz는 크로스 아키텍처 빌드에 최적화된 표준 `Dockerfile`을 구축했습니다:
+- 멀티 스테이지 빌드 (`dependencies` $\rightarrow$ `builder` $\rightarrow$ `runner`).
+- 빌드 단계에서 `npx prisma generate`를 명시적으로 실행하여 모든 대상 아키텍처에 맞는 바인딩 생성.
+- 프로덕션 런타임에서 devDependencies를 완전히 배제하고 비루트 계정 `nextjs (1001:1001)`로 실행.
 
-#### 多架构编译命令示例：
+#### 멀티 아키텍처 빌드 명령어 예시:
 ```bash
-# 启用 Buildx 支持
+# Docker Buildx 활성화
 docker buildx create --use
 
-# 一键跨架构并发编译并推送镜像
+# amd64 및 arm64 동시 빌드 및 레지스트리 푸시
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   -t your-registry/46hz-letterbox:latest \
@@ -191,139 +192,118 @@ docker buildx build \
 
 ---
 
-## 6. 舒曼共鸣 7 次谐波与深度扩容机制 (46Hz Schumann Resonance Harmonic Reply Cap)
+## 6. 슈만 공명 7차 고조파 및 심층 확장 메커니즘 (46Hz Schumann Resonance Cap)
 
-### 6.1 科学物理渊源与品牌调性
-- **物理学本源**：
-  地球电离层与地表构成的空腔谐振波——**舒曼共鸣（Schumann Resonance）**，其基频约为 $7.83\text{ Hz}$。
-  当计算其各阶自然高次谐波时：
-  - 1阶谐波: $\approx 7.83\text{ Hz}$
-  - 2阶谐波: $\approx 14.3\text{ Hz}$
-  - 3阶谐波: $\approx 20.8\text{ Hz}$
-  - 4阶谐波: $\approx 27.3\text{ Hz}$
-  - 5阶谐波: $\approx 33.8\text{ Hz}$
-  - 6阶谐波: $\approx 39.0\text{ Hz}$
-  - **7阶谐波: $\approx 45.3 - 46.0\text{ Hz}$** $\longrightarrow$ **这正是 46Hz 品牌命名的科学物理本源！**
+### 6.1 과학 물리적 근거 및 브랜드 아이덴티티
+- **지구 전리층의 자연 공명**:
+  지구 표면과 전리층 사이의 도파관 공동에서 번개 방전에 의해 발생하는 극저주파수 정상파인 **슈만 공명(Schumann Resonance)**의 기본 주파수는 약 $7.83\text{ Hz}$입니다.
+  지구-전리층 공동의 유한 전도도 및 감쇠(Damping)를 반영하여 자연 고조파 모드를 실측하면 다음과 같습니다:
+  - 1차 고조파: $\approx 7.83\text{ Hz}$
+  - 2차 고조파: $\approx 14.3\text{ Hz}$
+  - 3차 고조파: $\approx 20.8\text{ Hz}$
+  - 4차 고조파: $\approx 27.3\text{ Hz}$
+  - 5차 고조파: $\approx 33.8\text{ Hz}$
+  - 6차 고조파: $\approx 39.0\text{ Hz}$
+  - **7차 고조파: $\approx 45.3 \sim 46.0\text{ Hz} \approx 46\text{Hz}$** $\longrightarrow$ **이것이 바로 46Hz 브랜드 명칭의 과학 물리적 기원입니다.**
 
-### 6.2 产品情绪哲学与容量控制
-- **默认 7 次谐波保护 (The 7 Harmonic Resonances)**：
-  在快节奏与噪音充斥的互联网环境中，信件极易被海量琐碎评论淹没。为了保护写信人的内心平静，避免信息与情绪过载（Anti-Overwhelm），系统每封信件**默认限定最多接收 7 封回信**。
-  7 次回信对应地球自然脉动的 7 次谐振，让写信人能够静心、郑重地阅读每一封真诚的回音。
-- **作者明确知情与自主扩容 (Conscious Opt-in Expansion up to 15)**：
-  当写信人准备好接纳更多关怀、希望听到更多同伴的共鸣时，写信人可以在自己的信件详情页明确点击：
-  `"더 깊은 공명 열기 (최대 15개로 확장)"` / `"开启更深共鸣（扩展至15次回响）"`。
-  系统通过服务端原子事务 `expandLetterResonanceAction` 将该信件的 `maxReplies` 提升至 15。
-- **系统性能与并发检索优化 (System Optimization)**：
-  1. **复合索引加速**：在 `prisma/schema.prisma` 中为 `Letter` 配置 `@@index([status, riskLevel, maxReplies, createdAt])`，让公共回信池的高频分页检索走覆益索引。
-  2. **回信池容量实时剪裁**：在 `findAvailableReplyLetters` 中通过 Prisma `_count: { select: { replies: { where: { status: { not: "REJECTED" } } } } }` 统计有效回信数，将达到或超出共鸣上限的信件即时过滤出公共池。
-  3. **机会性超时锁自动回收 (Stale Lock Auto-Purge)**：在查询公共池时自动异步批量清理超过 15 分钟的废弃 `OFFERED` 预占锁（更新为 `EXPIRED`），无需常驻 Cron 轮询。
-  4. **完结状态温情转译**：当信件达到容量上限后，若同伴直接访问 `/reply/[letterId]`，系统优雅呈现“共鸣已圆满”的温润界面（`RESONANCE_LIMIT_REACHED`），引导同伴浏览其他需要陪伴的心事。
+### 6.2 제품 정서 철학 및 수용 한도 제어
+- **기본 7개 고조파 보호 (The 7 Harmonic Resonances)**:
+  수백 개의 댓글이 달리는 자극적인 SNS 피드는 상처받은 마음에게 위로가 아닌 정서적 소음과 정보 과부하를 초래합니다. 46Hz는 작성자의 마음을 안전하게 보호하기 위해, **편지당 기본 최대 7개의 승인된 답장**만을 수신하도록 엄격히 제한합니다. 7개의 답장은 지구의 7차 자연 진동과 맞닿아 있으며, 작성자가 한 통 한 통 정성을 다해 음미할 수 있는 최적의 정서적 한계입니다.
+- **작성자의 능동적 선택에 의한 15개 심층 확장 (Opt-in Expansion up to 15)**:
+  작성자가 더 많은 온기를 받아들일 마음의 준비가 되었을 때, 편지 상세 화면에서 직접 **"더 깊은 공명 열기 (최대 15개로 확장)"** 버튼을 클릭할 수 있습니다. 서버 액션 `expandLetterResonanceAction`을 통해 안전하게 상한을 15개로 확장합니다.
+- **시스템 성능 및 동시성 쿼리 최적화**:
+  1. **복합 인덱스 가속**: `Letter` 테이블에 `@@index([status, riskLevel, maxReplies, createdAt])`를 구성하여 공용 답장 풀의 고빈도 페이징 조회를 커버링 인덱스로 고속 처리.
+  2. **답장 풀 실시간 필터링**: `findAvailableReplyLetters`에서 Prisma `_count` 조건을 통해 유효 답장 수가 상한에 도달한 편지를 실시간으로 목록에서 제외.
+  3. **기회주의적 만료 락 자동 회수**: 별도의 무거운 Cron 데몬 없이, 목록 조회 시점에 15분이 경과한 방치된 `OFFERED` 점유 락을 일괄 비동기 감지하여 `EXPIRED`로 정리.
+  4. **온화한 완결 화면 UI**: 답장 상한에 도달한 편지에 접근할 경우, "공명이 아름답게 완결되었습니다" 카드(`RESONANCE_LIMIT_REACHED`)를 안내하며 다른 편지로 온기를 나누도록 유도.
 
 ---
 
-## 7. 极简主义技术栈精简与深度安全无障碍加固 (Minimalism, Security & Barrier-Free)
+## 7. 미니멀리즘 기술 스택 경량화 및 심층 보안/무장애 강화 (Minimalism & Security)
 
-### 7.1 极简主义技术栈瘦身 (Zero-Dependency Engineering)
-- **剔除 `clsx` 微依赖**：在 `lib/utils.ts` 中以纯原生 TypeScript（约 30 行递归）实现 `cn` 类名合并工具，天然兼容字符串、数字、条件布尔、嵌套数组及属性对象，零运行时外部依赖。
-- **剔除 `autoprefixer`**：Tailwind CSS v4 内部已深度集成高性能 Rust/Lightning CSS 引擎，自动处理浏览器厂商前缀，无需额外的 PostCSS 插件开销。
-- **依赖纯粹度提升**：核心运行时仅保留 Next.js 16、React 19、Prisma 7、pg 原生驱动池、Zod 及 Lucide 图标集，构建极其轻量高效。
+### 7.1 미니멀리즘 기술 스택 군살 제거 (Zero-Dependency Engineering)
+- **`clsx` 마이크로 의존성 제거**: `lib/utils.ts` 내에 순수 TypeScript 재귀 알고리즘(약 30줄)으로 자체 `cn` 함수를 구현하여 외부 런타임 종속성을 완전히 제거.
+- **`autoprefixer` 제거**: Tailwind CSS v4에 내장된 고성능 Rust/Lightning CSS 엔진을 직접 활용하여 불필요한 PostCSS 플러그인 오버헤드 제거.
+- **순수 런타임 정제**: Next.js 16, React 19, Prisma 7, pg 원시 드라이버 풀, Zod, Lucide Icons만으로 핵심 스택을 압축.
 
-### 7.2 多层级安全加固 (Multi-Tier Security Hardening)
-1. **全面生产级 HTTP 安全响应头**：
-   在 `next.config.mjs` 中全局注册现代安全防线：
-   - `Content-Security-Policy (CSP)`：严格限制来源域与脚本加载，阻断跨站脚本注入。
-   - `X-Frame-Options: DENY`：阻止页面被嵌入 iframe，防御点击劫持 (Clickjacking)。
-   - `X-Content-Type-Options: nosniff`：禁止浏览器对响应体执行 MIME 类型嗅探。
-   - `Referrer-Policy: strict-origin-when-cross-origin`：保护跨域访问时的隐私来源。
-   - `Permissions-Policy`：全面禁用相机、麦克风、地理定位等无用硬件权限。
-   - `Strict-Transport-Security (HSTS)`：强制长期全量 HTTPS 传输。
-2. **防计时攻击的管理员凭证认证 (Timing-Safe Passcode Verification)**：
-   - 使用 Node.js 原生 `crypto.timingSafeEqual`。
-   - 比较前通过 SHA-256 计算固定 32 字节哈希摘要，既标准化了任意长度的输入，又完全消除了基于比对耗时推断密码字符的侧信道时序攻击风险。
-3. **内存滑动窗口防爆破限流器 (`lib/safety/rate-limit.ts`)**：
-   - 纯原生内存滑动窗口算法，自动剔除过期时间戳。
-   - 对后台登录尝试实施 IP 级限流（5 分钟内最多 5 次），防止暴力撞库；同时保护信件发布与 AI 润色高成本接口免受恶意洪泛。
+### 7.2 다계층 보안 강화 (Multi-Tier Security Hardening)
+1. **프로덕션급 HTTP 보안 헤더**:
+   - `Content-Security-Policy (CSP)`: 엄격한 스크립트 도메인 제한으로 XSS 차단.
+   - `X-Frame-Options: DENY`: iframe 임베딩 방지를 통한 클릭재킹(Clickjacking) 원천 차단.
+   - `X-Content-Type-Options: nosniff`: 브라우저의 임의 MIME 스니핑 차단.
+   - `Referrer-Policy: strict-origin-when-cross-origin`: 크로스 오리진 요청 시 리퍼러 유출 방지.
+   - `Permissions-Policy`: 마이크, 카메라, 지오로케이션 등 불필요한 브라우저 디바이스 권한 완전 비활성화.
+   - `Strict-Transport-Security (HSTS)`: 전 구간 HTTPS 강제 전송.
+2. **타이밍 공격 방지 인증 (Timing-Safe Passcode Verification)**:
+   - Node.js 원시 `crypto.timingSafeEqual` 사용.
+   - 검증 전 SHA-256을 통해 고정 32바이트 다이제스트로 정규화하여, 문자열 길이에 따른 응답 시간 편차로 암호를 추론하는 사이드 채널 공격을 원천 방어.
+3. **인메모리 슬라이딩 윈도우 레이트 리미터 (`lib/safety/rate-limit.ts`)**:
+   - 만료된 타임스탬프를 실시간으로 정리하는 슬라이딩 윈도우 알고리즘.
+   - 관리자 로그인 시도에 대해 IP당 5분 내 최대 5회로 제한하여 무차별 대입 공격(Brute-Force)을 방어하고, AI 윤문 API의 과도한 오남용을 방지.
 
-### 7.3 无障碍与障壁清扫设计 (Barrier-Free for TalkBack / VoiceOver / Narrator)
-为了确保 Android TalkBack、iOS/macOS 旁白 (VoiceOver) 以及 Windows 讲述人 (Narrator) 能无障碍流畅使用 46Hz：
-- **跳过至主要内容链接 (Skip to Content)**：页面首个可聚焦元素为屏幕阅读器专用的快速跳过链接，支持 Tab 键呼出并瞬时定位至 `<main id="main-content">`。
-- **无障碍地标角色 (Landmark Roles)**：
-  - `<header role="banner">`
-  - `<nav aria-label="Main Navigation">`
-  - `<main id="main-content" role="main">`
-- **触控区域达标 (KWCAG 2.2 / WCAG 2.2 Level AA)**：所有导航图标与操作按钮的有效交互区域均确保在 `min-h-[44px] min-w-[44px]` 以上，大幅改善移动端及视障手势交互体验。
-- **动态状态实时朗读 (ARIA Live Regions)**：
-  - 舒曼共振计数器配置 `role="progressbar"`，提供精确的 `aria-valuenow`、`aria-valuemax` 与 `aria-valuetext`，并在状态变化时通过 `aria-live="polite"` 友好通知。
-  - 表单提交按钮在挂起时挂载 `aria-busy="true"` 并提供隐藏提示 `<span className="sr-only">Processing...</span>`。
-  - 表单校验错误通过 `role="alert"` 与 `aria-live="assertive"` 触发即时告警。
+### 7.3 스크린리더 무장애 웹 접근성 (KWCAG 2.2 / KS X 9256:2024 준수)
+Android TalkBack, iOS VoiceOver, Windows Narrator 사용자를 위한 세심한 접근성 지원:
+- **본문 건너뛰기 링크 (Skip to Content)**: 첫 Tab 입력 시 화면 최상단에 나타나 `<main id="main-content">`로 즉시 초점 이동.
+- **시맨틱 랜드마크 명시**: `<header role="banner">`, `<nav aria-label="...">`, `<main id="main-content" role="main">`, `<footer role="contentinfo">`.
+- **최소 조작 영역 확보 (Target Size)**: 모든 버튼과 링크의 인터랙션 면적을 **44px × 44px 이상**으로 구현.
+- **동적 상태 실시간 음성 출력 (ARIA Live Regions)**:
+  - 슈만 공명 미터에 `role="progressbar"`, `aria-valuenow`, `aria-live="polite"` 적용.
+  - 전송 중 상태는 `aria-busy="true"`와 스크린리더 전용 문구(`<span className="sr-only">처리 중...</span>`)로 실시간 전달.
+  - 유효성 검증 오류는 `role="alert"`와 `aria-live="assertive"`로 즉시 낭독.
 
-### 7.4 后端管理合规与执法数据最小化收集 (Law Enforcement Data Minimization Principle)
-在遵循 GDPR 最小化原则（Art 5(1)(c) Data Minimisation）与隐私保护的同时，平台确立了面向司法调证与紧急生命安全干预的法定底线：
-1. **绝对零 PII 承诺 (Zero-PII Architecture)**：
-   - 系统数据库中自始至终**不记录**任何真实姓名、手机号、电子邮箱、登录密码、精准 GPS 坐标或设备硬件序列号。用户在平台内仅以去标识化的随机代号 (`anonymousHandle`) 存在。
-2. **14 天动态保留周期与自动剪裁 (14-Day Rolling Horizon)**：
-   - 连接 IP 记录严格限制为最多 5 条最新动态队列，并在每次更新时自动执行 `pruneExpiredIps`，超过 14 天的历史记录无条件从数据库中物理裁剪。
-3. **日常运维内部遮罩脱敏 (`maskIp`)**：
-   - 管理员与审核员在日常监控面板中仅能看到脱敏后的网段（如 `192.168.***.***` 或 `2001:0db8:****:****`），防止内部工作人员窥探用户网络环境。
-4. **防篡改加密合规凭证包 (`generateIncidentPacket` & `/admin/compliance`)**：
-   - 当收到法定调证函或处理高危自伤/违法涉案内容时，系统通过 `/admin/compliance` 一键生成标准化证据数据包（`ComplianceIncidentPacket`）。
-   - 数据包内对违规文本生成 SHA-256 密码学指纹，完整封存事件发生时刻的 UTC 时间戳、内容风险分类、审核处置历史责任链以及最小必要网络源点，形成不可抵赖的法庭证据链。
+### 7.4 백엔드 관리 규제 준수 및 사법 공조 데이터 최소화 원칙 (Data Minimization)
+GDPR 제5조 1항 (c)호의 데이터 최소화 원칙과 사법 공조 의무를 기술적으로 균형 있게 결합:
+1. **절대적 제로 PII 원칙 (Zero-PII Architecture)**:
+   - 데이터베이스에 실명, 주민등록번호, 연락처, 비밀번호, GPS 위치, 기기 고유 시리얼을 일절 기록하지 않으며, 무작위 익명 닉네임(`Letter RNJME` 등)으로만 관리.
+2. **14일 롤링 보관 주기 및 자동 물리 파기 (14-Day Rolling Horizon)**:
+   - 보안 목적의 연결 IP는 계정당 최대 5건으로 제한되며, 14일 경과 시 데이터베이스에서 영구 물리 삭제.
+3. **일상 운영 IP 마스킹 (`maskIp`)**:
+   - 일반 운영 대시보드에서는 `192.168.***.***` 형태로 마스킹하여 내부자의 사적 정보 열람을 방지.
+4. **암호학적 위변조 방지 컴플라이언스 인시던트 패킷 (`generateIncidentPacket`)**:
+   - 법원 영장 등 법적 요청 발생 시 `/admin/compliance`에서 표준 JSON 증거 패킷(`ComplianceIncidentPacket`) 생성.
+   - 대상 텍스트에 대한 SHA-256 해시, UTC 타임스탬프, 모더레이션 이력 체인, 최소한의 마스킹된 네트워크 출처를 포함하여 법정 증거 능력을 확보.
 
-### 7.5 客户端 User Agent 信息收集与统一根配置设计
-1. **浏览器 User Agent 信息收集与纯原生解析**：
-   - 在 [`lib/ip.ts`](../lib/ip.ts) 中增加 `getClientUserAgent` 与轻量无外部依赖的 `parseUserAgent` 解析器，智能识别浏览器名称（Chrome, Safari, Firefox, Edge 等）、操作系统（Windows, macOS, iOS, Android, Linux）以及设备类型（Mobile, Tablet, Desktop, Bot）。
-   - 随 IP 连接记录一并写入 `User.recentIps` 队列（通过 PostgreSQL 原生 JSONB 兼容扩展，无破坏性变更），并在 [`ComplianceIncidentPacket`](../lib/compliance/incident-packet.ts) 和后台合规审查面板中清晰关联呈递。
-2. **全局统一设置中心 (`settings.ts`)**：
-   - 在根目录下建立专有的单一真实配置源文件 [`settings.ts`](../settings.ts)，收敛全局所有参数：
-     - **品牌元数据** (`brand`)：产品名、全称标题、标语。
-     - **国际化引擎** (`i18n`)：默认语言 (`ko_KR`)、支持语言清单、语言标签。
-     - **主题配置** (`theme`)：默认主题 (`system`)、支持模式及标签。
-     - **会话持久化** (`session`)：Cookie 名称、180 天过期时效、迁移码前缀 (`46HZ-`) 与 Base32 字符集。
-     - **权限管理** (`admin`)：角色 Cookie 名称、默认管理员/审核员密码。
-     - **舒曼共振** (`resonance`)：默认 7 次上限、作者同意扩容 15 次。
-     - **并发守护** (`claiming`)：15 分钟静心撰写独占保留窗口。
-     - **安全限流** (`security`)：后台登录防爆破阈值与写信频率限制。
-     - **合规审计** (`compliance`)：14 天滚动保留、最多 5 条记录、合规协议代号。
-     - **模型适配** (`ai`)：默认服务商与超时机制。
-   - 所有业务模块（`lib/session.ts`, `lib/preferences.ts`, `lib/admin.ts`, `lib/ip.ts`, `lib/reply/claiming.ts`, `lib/compliance/incident-packet.ts`, `app/layout.tsx` 等）统一从 `@/settings` 引用，彻底杜绝硬编码参数散落。
-3. **根目录冗余无用文件彻底清理 (Root Directory Purge)**：
-   - 物理移除 `tailwind.config.ts`：由于 Tailwind CSS v4 已全面转向 CSS 内 `@theme` 配置，根目录遗留的 Tailwind 3 配置文件已毫无作用。
-   - 物理移除 `start.bat`：统一收敛为原生功能更完备的 PowerShell 启动编排脚本 `start.ps1`。
-   - 配置 `tsconfig.json` 的 `tsBuildInfoFile: ".next/cache/tsconfig.tsbuildinfo"` 并清理根目录 `tsconfig.tsbuildinfo` 缓存文件，消除构建临时文件对项目根目录的污染。
+### 7.5 클라이언트 User-Agent 정보 수집 및 단일 루트 설정 센터 (`settings.ts`)
+1. **경량 원시 User-Agent 파서**:
+   - 외부 라이브러리 없이 브라우저(Chrome, Safari 등), 운영체제(Windows, iOS, Android 등), 디바이스 유형을 판별하여 `User.recentIps`에 JSONB로 안전하게 적재.
+2. **단일 루트 설정 파일 (`settings.ts`) 집중화**:
+   - 브랜드, i18n, 테마, 세션, 관리자 암호, 슈만 공명 한도, 레이트 리밋 등 전역 설정값을 루트의 `settings.ts`에서 단일 관리.
+3. **루트 디렉터리 정돈**:
+   - Tailwind v4 전환에 따른 잉여 `tailwind.config.ts` 및 구형 `start.bat`을 정리하고, PowerShell 기반 `start.ps1`으로 실행 체계 통일.
 
 ---
 
-## 8. 验证记录与质量保证 (Verification Record)
+## 8. 검증 기록 및 품질 보증 (Verification Record)
 
-### 8.1 自动化测试覆盖指标
-- **测试框架**：Vitest 5.0.4
-- **测试套件总览**：17 个测试文件，109 个单元与集成测试用例，100% 全部通过。
-- **全链路测试涵盖**：
-  - `tests/client/user-agent.test.ts`: 浏览器 User Agent 深度提取、多平台与设备类型解析实测。
-  - `tests/settings/settings.test.ts`: 根目录统一配置文件 `settings.ts` 各维度配置契约断言。
-  - `tests/ip.test.ts`: IP 队列与 User Agent 协同持久化与 14 天裁剪验证。
-  - `tests/utils/cn.test.ts`: 原生极简 `cn` 工具的条件合并与嵌套数组覆盖。
-  - `tests/security/security.test.ts`: 常数时间比对算法与滑动窗口限流器全场景实测。
-  - `tests/compliance/compliance.test.ts`: SHA-256 证据包哈希、IP 隐私遮罩与 14 天自动物理剪裁。
-  - `tests/reply/resonance.test.ts`: 舒曼共振 7 次与 15 次流转逻辑。
-  - `tests/reply/claiming.test.ts`: 15 分钟回信独占守护协议。
-  - `scripts/verify_backend.ts`: PostgreSQL 7 阶段全链路数据库实测全部通过。
+### 8.1 자동화 테스트 지표
+- **테스트 러너**: Vitest 5.0.4
+- **테스트 결과**: 19개 테스트 파일, 125개 단위/통합 테스트 100% 전원 통과.
+- **주요 검증 영역**:
+  - `tests/client/user-agent.test.ts`: User-Agent 추출 및 플랫폼 파싱 검증.
+  - `tests/settings/settings.test.ts`: 전역 `settings.ts` 계약 단언 검증.
+  - `tests/ip.test.ts`: IP 큐 저장 및 14일 자동 파기 로직 검증.
+  - `tests/utils/cn.test.ts`: 순수 TypeScript `cn` 유틸리티 검증.
+  - `tests/security/security.test.ts`: 시간차 공격 방지 비교 및 슬라이딩 윈도우 레이트 리밋 검증.
+  - `tests/compliance/compliance.test.ts`: SHA-256 증거 패킷 및 14일 롤링 보관 검증.
+  - `tests/reply/resonance.test.ts`: 7개 및 15개 슈만 공명 흐름 검증.
+  - `tests/reply/claiming.test.ts`: 15분 편지 점유 보호 프로토콜 검증.
+  - `scripts/verify_backend.ts`: PostgreSQL 7단계 백엔드 통합 검증 전원 통과.
 
-### 8.2 常用开发维护指令
+### 8.2 주요 개발 및 유지보수 명령어
 ```bash
-# 运行全部单元与集成测试 (128 tests)
+# 전체 단위 및 통합 테스트 실행 (125 tests)
 npm run test:run
 
-# 运行全链路后端与数据库完整性实测 (7단계 파이프라인)
+# PostgreSQL 백엔드 7단계 전 구간 무결성 실측
 npm run verify:backend
 
-# 运行 Prisma 8 RC 数据契约构建 (Contract Emit)
+# Prisma 8 RC 데이터 계약 아티팩트 발행 (Contract Emit)
 npm run prisma8:contract
 
-# 运行 TypeScript 类型静态检查
+# TypeScript 정적 타입 검사
 npm run lint
 
-# 构建 Next.js 生产产物 (Prisma 7 Client + Standalone Output)
+# Next.js 프로덕션 빌드 (Prisma 7 Client + Standalone Output)
 npm run build
 ```
 
@@ -361,4 +341,3 @@ npm run build
    - 관리자 및 중재자 세션 쿠키(`46hz_admin_role`, `46hz_admin`)의 `sameSite` 설정을 `"lax"`에서 **`"strict"`**로 격상하여 외부 유입 링크를 통한 CSRF 공격을 원천 무력화.
 3. **컨테이너 최소 권한 원칙 (Principle of Least Privilege)**:
    - `Dockerfile` 내 non-root 사용자(`nextjs:nodejs`, UID/GID 1001) 권한으로만 서버 프로세스를 구동하여 컨테이너 탈출 및 호스트 권한 탈취 방지.
-
