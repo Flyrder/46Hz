@@ -12,6 +12,7 @@ import {
   FileCode2,
   CheckCircle2
 } from "lucide-react";
+import { ExitIsoIcon } from "@/components/exit-sign-emblem";
 import type { EditableSystemSettings } from "@/settings";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useI18n } from "@/lib/i18n";
@@ -70,6 +71,10 @@ export const aiSettings = {
   defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)} as const,
   timeoutMs: ${cfg.aiTimeoutMs},
   mockDelayMs: ${cfg.aiMockDelayMs}
+} as const;
+
+export const supportResourcesSettings = {
+  enableChinaSupportInfo: ${cfg.enableChinaSupportInfo}
 } as const;`;
 }
 
@@ -154,10 +159,10 @@ export function AdminSettingsForm({
               </div>
               <div>
                 <h2 className="text-base font-bold text-foreground">
-                  Brand &amp; Identity (`brandSettings`)
+                  {t("admin.settingsSecBrandTitle")}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  브랜드 이름, 타이틀, 태그라인 및 버전을 설정합니다.
+                  {t("admin.settingsSecBrandDesc")}
                 </p>
               </div>
             </div>
@@ -165,7 +170,7 @@ export function AdminSettingsForm({
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="brandName" className="block text-xs font-semibold text-foreground">
-                  Brand Name <span className="text-danger">*</span>
+                  {t("admin.settingsBrandNameLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="brandName"
@@ -185,13 +190,13 @@ export function AdminSettingsForm({
                   className={inputClassName}
                 />
                 <p id="brandName-error" className="field-error-msg mt-1 text-[11px] text-danger">
-                  2~32자 사이의 브랜드 이름을 입력해 주세요.
+                  {t("admin.settingsBrandNameError")}
                 </p>
               </div>
 
               <div>
                 <label htmlFor="brandVersion" className="block text-xs font-semibold text-foreground">
-                  Version <span className="text-danger">*</span>
+                  {t("admin.settingsBrandVersionLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="brandVersion"
@@ -211,13 +216,13 @@ export function AdminSettingsForm({
                   className={inputClassName}
                 />
                 <p id="brandVersion-error" className="field-error-msg mt-1 text-[11px] text-danger">
-                  버전 문자열을 입력해 주세요.
+                  {t("admin.settingsBrandVersionError")}
                 </p>
               </div>
 
               <div className="sm:col-span-2">
                 <label htmlFor="brandTitle" className="block text-xs font-semibold text-foreground">
-                  Title <span className="text-danger">*</span>
+                  {t("admin.settingsBrandTitleLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="brandTitle"
@@ -237,13 +242,13 @@ export function AdminSettingsForm({
                   className={inputClassName}
                 />
                 <p id="brandTitle-error" className="field-error-msg mt-1 text-[11px] text-danger">
-                  2~80자 사이의 사이트 타이틀을 입력해 주세요.
+                  {t("admin.settingsBrandTitleError")}
                 </p>
               </div>
 
               <div className="sm:col-span-2">
                 <label htmlFor="brandTagline" className="block text-xs font-semibold text-foreground">
-                  Tagline <span className="text-danger">*</span>
+                  {t("admin.settingsBrandTaglineLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="brandTagline"
@@ -263,7 +268,7 @@ export function AdminSettingsForm({
                   className={inputClassName}
                 />
                 <p id="brandTagline-error" className="field-error-msg mt-1 text-[11px] text-danger">
-                  4~160자 사이의 태그라인을 입력해 주세요.
+                  {t("admin.settingsBrandTaglineError")}
                 </p>
               </div>
             </div>
@@ -277,10 +282,10 @@ export function AdminSettingsForm({
               </div>
               <div>
                 <h2 className="text-base font-bold text-foreground">
-                  Schumann Resonance &amp; Claiming (`resonanceSettings`, `claimingSettings`)
+                  {t("admin.settingsSecResonanceTitle")}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  편지당 기본 답장 한도(7통), 확장 답장 한도(15통), 답장 작성 잠금 시간(15분)을 조절합니다.
+                  {t("admin.settingsSecResonanceDesc")}
                 </p>
               </div>
             </div>
@@ -291,7 +296,7 @@ export function AdminSettingsForm({
                   htmlFor="defaultMaxReplies"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  기본 답장 한도 (통) <span className="text-danger">*</span>
+                  {t("admin.settingsDefaultMaxRepliesLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="defaultMaxReplies"
@@ -319,7 +324,7 @@ export function AdminSettingsForm({
                   htmlFor="expandedMaxReplies"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  확장 답장 한도 (통) <span className="text-danger">*</span>
+                  {t("admin.settingsExpandedMaxRepliesLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="expandedMaxReplies"
@@ -347,7 +352,7 @@ export function AdminSettingsForm({
                   htmlFor="leaseDurationMinutes"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  답장 작성 홀딩 (분) <span className="text-danger">*</span>
+                  {t("admin.settingsLeaseDurationLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="leaseDurationMinutes"
@@ -380,10 +385,10 @@ export function AdminSettingsForm({
               </div>
               <div>
                 <h2 className="text-base font-bold text-foreground">
-                  i18n, Theme &amp; Session (`i18nSettings`, `themeSettings`, `sessionSettings`)
+                  {t("admin.settingsSecI18nTitle")}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  기본 언어, 테마, 익명 세션 유지 기간 및 마이그레이션 코드 접두사를 관리합니다.
+                  {t("admin.settingsSecI18nDesc")}
                 </p>
               </div>
             </div>
@@ -394,7 +399,7 @@ export function AdminSettingsForm({
                   htmlFor="defaultLocale"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  기본 언어 (Default Locale)
+                  {t("admin.settingsDefaultLocaleLabel")}
                 </label>
                 <select
                   id="defaultLocale"
@@ -409,9 +414,9 @@ export function AdminSettingsForm({
                   }
                   className={inputClassName}
                 >
-                  <option value="ko_KR">한국어 (ko_KR)</option>
-                  <option value="en_US">English (en_US)</option>
-                  <option value="zh_CN">简体中文 (zh_CN)</option>
+                  <option value="ko_KR">{t("common.langKo")} (ko_KR)</option>
+                  <option value="en_US">{t("common.langEn")} (en_US)</option>
+                  <option value="zh_CN">{t("common.langZh")} (zh_CN)</option>
                 </select>
               </div>
 
@@ -420,7 +425,7 @@ export function AdminSettingsForm({
                   htmlFor="defaultTheme"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  기본 테마 (Default Theme)
+                  {t("admin.settingsDefaultThemeLabel")}
                 </label>
                 <select
                   id="defaultTheme"
@@ -435,9 +440,9 @@ export function AdminSettingsForm({
                   }
                   className={inputClassName}
                 >
-                  <option value="system">System</option>
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
+                  <option value="system">{t("theme.system")}</option>
+                  <option value="light">{t("theme.light")}</option>
+                  <option value="dark">{t("theme.dark")}</option>
                 </select>
               </div>
 
@@ -446,7 +451,7 @@ export function AdminSettingsForm({
                   htmlFor="cookieMaxAgeDays"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  세션 쿠키 유지 일수 (일) <span className="text-danger">*</span>
+                  {t("admin.settingsCookieDaysLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="cookieMaxAgeDays"
@@ -474,7 +479,7 @@ export function AdminSettingsForm({
                   htmlFor="migrationCodePrefix"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  마이그레이션 코드 접두사 <span className="text-danger">*</span>
+                  {t("admin.settingsMigrationPrefixLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="migrationCodePrefix"
@@ -496,6 +501,43 @@ export function AdminSettingsForm({
                   className={inputClassName}
                 />
               </div>
+
+              {/* EXIT Support Resources: Mainland China (CN) Hotline & Support Info Toggle */}
+              <div className="sm:col-span-2 mt-2 rounded-2xl border border-emerald-600/25 bg-emerald-500/6 p-4 dark:border-emerald-400/25 dark:bg-emerald-500/10">
+                <label
+                  htmlFor="enableChinaSupportInfo"
+                  className="brand-checkbox-label flex min-h-[44px] cursor-pointer items-start justify-between gap-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#16794B]/15 p-1.5">
+                      <ExitIsoIcon className="h-6 w-6" />
+                    </span>
+                    <div>
+                      <span className="block text-xs sm:text-sm font-bold text-foreground">
+                        {t("admin.settingsChinaSupportTitle")}
+                      </span>
+                      <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                        {t("admin.settingsChinaSupportDesc")}
+                      </span>
+                    </div>
+                  </div>
+                  <input
+                    id="enableChinaSupportInfo"
+                    name="enableChinaSupportInfo"
+                    type="checkbox"
+                    disabled={!canEdit}
+                    checked={draft.enableChinaSupportInfo}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        enableChinaSupportInfo: e.target.checked
+                      }))
+                    }
+                    className="visually-hidden-fallback mt-1 h-5 w-5 shrink-0 cursor-pointer rounded"
+                  />
+                  <span className="sr-only">{t("admin.settingsChinaSupportSrOnly")}</span>
+                </label>
+              </div>
             </div>
           </section>
 
@@ -507,10 +549,10 @@ export function AdminSettingsForm({
               </div>
               <div>
                 <h2 className="text-base font-bold text-foreground">
-                  Security &amp; Data Minimization (`securitySettings`, `complianceSettings`)
+                  {t("admin.settingsSecSecurityTitle")}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  요청 속도 제한(Rate Limits) 및 개인정보 최소 수집/보관 정책을 설정합니다.
+                  {t("admin.settingsSecSecurityDesc")}
                 </p>
               </div>
             </div>
@@ -521,7 +563,7 @@ export function AdminSettingsForm({
                   htmlFor="adminLoginMaxRequests"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  관리자 로그인 제한 (회) <span className="text-danger">*</span>
+                  {t("admin.settingsAdminLoginMaxLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="adminLoginMaxRequests"
@@ -549,7 +591,7 @@ export function AdminSettingsForm({
                   htmlFor="adminLoginWindowSeconds"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  로그인 윈도우 (초) <span className="text-danger">*</span>
+                  {t("admin.settingsAdminLoginWindowLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="adminLoginWindowSeconds"
@@ -577,7 +619,7 @@ export function AdminSettingsForm({
                   htmlFor="writeLetterMaxRequests"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  편지 작성 제한 (회) <span className="text-danger">*</span>
+                  {t("admin.settingsWriteLetterMaxLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="writeLetterMaxRequests"
@@ -605,7 +647,7 @@ export function AdminSettingsForm({
                   htmlFor="writeLetterWindowSeconds"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  편지 작성 윈도우 (초) <span className="text-danger">*</span>
+                  {t("admin.settingsWriteLetterWindowLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="writeLetterWindowSeconds"
@@ -633,7 +675,7 @@ export function AdminSettingsForm({
                   htmlFor="coachReplyMaxRequests"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  AI 답장 코칭 제한 (회) <span className="text-danger">*</span>
+                  {t("admin.settingsCoachReplyMaxLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="coachReplyMaxRequests"
@@ -661,7 +703,7 @@ export function AdminSettingsForm({
                   htmlFor="coachReplyWindowSeconds"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  답장 코칭 윈도우 (초) <span className="text-danger">*</span>
+                  {t("admin.settingsCoachReplyWindowLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="coachReplyWindowSeconds"
@@ -691,7 +733,7 @@ export function AdminSettingsForm({
                   htmlFor="ipRetentionDays"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  IP 해시 보관 일수 (일) <span className="text-danger">*</span>
+                  {t("admin.settingsIpRetentionDaysLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="ipRetentionDays"
@@ -719,7 +761,7 @@ export function AdminSettingsForm({
                   htmlFor="maxRecentIps"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  최대 최근 IP 슬롯 수 <span className="text-danger">*</span>
+                  {t("admin.settingsMaxRecentIpsLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="maxRecentIps"
@@ -744,7 +786,7 @@ export function AdminSettingsForm({
 
               <div className="sm:col-span-2">
                 <label htmlFor="legalBasis" className="block text-xs font-semibold text-foreground">
-                  법적 근거 (Legal Basis) <span className="text-danger">*</span>
+                  {t("admin.settingsLegalBasisLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="legalBasis"
@@ -769,7 +811,7 @@ export function AdminSettingsForm({
                   htmlFor="dataMinimizationNotice"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  데이터 최소화 고지문 <span className="text-danger">*</span>
+                  {t("admin.settingsDataMinimizationLabel")} <span className="text-danger">*</span>
                 </label>
                 <textarea
                   id="dataMinimizationNotice"
@@ -802,10 +844,10 @@ export function AdminSettingsForm({
               </div>
               <div>
                 <h2 className="text-base font-bold text-foreground">
-                  AI Middleware (`aiSettings`)
+                  {t("admin.settingsSecAiTitle")}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  익명화 및 답장 코칭을 위한 기본 AI 공급자와 타임아웃을 설정합니다.
+                  {t("admin.settingsSecAiDesc")}
                 </p>
               </div>
             </div>
@@ -816,7 +858,7 @@ export function AdminSettingsForm({
                   htmlFor="aiDefaultProvider"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  기본 AI 공급자
+                  {t("admin.settingsAiProviderLabel")}
                 </label>
                 <select
                   id="aiDefaultProvider"
@@ -831,9 +873,9 @@ export function AdminSettingsForm({
                   }
                   className={inputClassName}
                 >
-                  <option value="mock">Mock (Offline Heuristic)</option>
-                  <option value="openai">OpenAI Compatible</option>
-                  <option value="deepseek">DeepSeek</option>
+                  <option value="mock">{t("admin.settingsAiProviderMock")}</option>
+                  <option value="openai">{t("admin.settingsAiProviderOpenai")}</option>
+                  <option value="deepseek">{t("admin.settingsAiProviderDeepseek")}</option>
                 </select>
               </div>
 
@@ -842,7 +884,7 @@ export function AdminSettingsForm({
                   htmlFor="aiTimeoutMs"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  AI 요청 타임아웃 (ms) <span className="text-danger">*</span>
+                  {t("admin.settingsAiTimeoutLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="aiTimeoutMs"
@@ -871,7 +913,7 @@ export function AdminSettingsForm({
                   htmlFor="aiMockDelayMs"
                   className="block text-xs font-semibold text-foreground"
                 >
-                  Mock 지연 시간 (ms) <span className="text-danger">*</span>
+                  {t("admin.settingsAiMockDelayLabel")} <span className="text-danger">*</span>
                 </label>
                 <input
                   id="aiMockDelayMs"
@@ -943,11 +985,7 @@ export function AdminSettingsForm({
 
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-border/60 bg-muted/40 p-3 text-[11px] text-muted-foreground">
             <Database className="h-4 w-4 shrink-0 text-accent mt-0.5" aria-hidden="true" />
-            <span>
-              저장 시 루트의 <code className="font-mono text-foreground">settings.ts</code> 파일과{" "}
-              <code className="font-mono text-foreground">.settings.override.json</code>에 동시에
-              기록되며 서버 재시작 없이 즉시 반영됩니다.
-            </span>
+            <span>{t("admin.settingsSyncNote")}</span>
           </div>
         </div>
       </aside>

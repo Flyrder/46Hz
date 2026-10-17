@@ -1,9 +1,15 @@
-export default function Loading() {
+import { createTranslator } from "@/lib/i18n";
+import { getLocalePreference } from "@/lib/preferences";
+
+export default async function Loading() {
+  const locale = await getLocalePreference();
+  const t = createTranslator(locale);
+
   return (
     <div
       role="status"
       aria-live="polite"
-      aria-label="Loading"
+      aria-label={t("common.loadingAria")}
       className="mx-auto max-w-2xl rounded-3xl border border-border/70 bg-surface/70 p-6 sm:p-8 shadow-soft backdrop-blur-xs transition-all animate-pulse"
     >
       <div className="flex items-center justify-between border-b border-border/60 pb-4">
@@ -23,7 +29,8 @@ export default function Loading() {
         <div className="h-3 w-28 rounded-md bg-muted/50" />
         <div className="h-9 w-24 rounded-xl bg-muted/70" />
       </div>
-      <span className="sr-only">조용히 편지를 불러오는 중입니다...</span>
+      <span className="sr-only">{t("common.loadingLettersSrOnly")}</span>
     </div>
   );
 }
+

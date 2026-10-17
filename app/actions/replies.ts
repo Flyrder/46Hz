@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAiMiddleware } from "@/lib/ai";
 import { prisma } from "@/lib/db";
+import { createTranslator } from "@/lib/i18n";
+import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
 import { isPeerMatchable } from "@/lib/safety/routing";
 import { coachReplySchema, formValue, submitReplySchema } from "@/lib/validators";
@@ -32,7 +34,8 @@ export async function coachReplyAction(
   _previousState: CoachReplyState,
   formData: FormData
 ): Promise<CoachReplyState> {
-  const user = await requireUser();
+  const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
+  const t = createTranslator(locale);
   const input = coachReplySchema.safeParse({
     letterId: formValue(formData, "letterId"),
     replyText: formValue(formData, "replyText")
@@ -41,7 +44,7 @@ export async function coachReplyAction(
   if (!input.success) {
     return {
       ok: false,
-      error: "Please write a little more before asking for reply coaching."
+      error: t("reply.errorTooShort")
     };
   }
 
@@ -66,14 +69,14 @@ export async function coachReplyAction(
   ) {
     return {
       ok: false,
-      error: "This letter is not available for peer response."
+      error: t("reply.errorNotAvailable")
     };
   }
 
   if (letter.replies.some((r) => r.responderId === user.id)) {
     return {
       ok: false,
-      error: "You have already submitted a reply to this letter."
+      error: t("reply.errorAlreadyReplied")
     };
   }
 
@@ -81,7 +84,7 @@ export async function coachReplyAction(
   if (activeRepliesCount >= (letter.maxReplies ?? 7)) {
     return {
       ok: false,
-      error: "This letter has reached its maximum resonance replies."
+      error: t("reply.errorResonanceFull")
     };
   }
 
@@ -93,7 +96,7 @@ export async function coachReplyAction(
   if (lockedByOther) {
     return {
       ok: false,
-      error: "This letter is currently being answered by another peer."
+      error: t("reply.errorLockedByOther")
     };
   }
 
@@ -102,7 +105,7 @@ export async function coachReplyAction(
     letterText: letter.processedText,
     replyText: input.data.replyText,
     desiredReplyType: letter.desiredReplyType,
-    language: letter.language
+    language: locale
   });
 
   return {

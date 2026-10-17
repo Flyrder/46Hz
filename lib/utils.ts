@@ -32,8 +32,16 @@ export function cn(...inputs: ClassValue[]): string {
   return classes.join(" ");
 }
 
-export function formatDate(value: Date | string): string {
-  return new Intl.DateTimeFormat("en", {
+export function formatDate(value: Date | string, locale = "ko-KR"): string {
+  const normalized =
+    locale === "ko_KR"
+      ? "ko-KR"
+      : locale === "zh_CN"
+        ? "zh-CN"
+        : locale === "en_US"
+          ? "en-US"
+          : locale;
+  return new Intl.DateTimeFormat(normalized, {
     month: "short",
     day: "numeric",
     hour: "numeric",

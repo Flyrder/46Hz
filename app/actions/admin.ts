@@ -273,7 +273,8 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
     dataMinimizationNotice: formValue(formData, "dataMinimizationNotice"),
     aiDefaultProvider: formValue(formData, "aiDefaultProvider"),
     aiTimeoutMs: formValue(formData, "aiTimeoutMs"),
-    aiMockDelayMs: formValue(formData, "aiMockDelayMs")
+    aiMockDelayMs: formValue(formData, "aiMockDelayMs"),
+    enableChinaSupportInfo: formData.get("enableChinaSupportInfo") === "on" || formData.get("enableChinaSupportInfo") === "true"
   });
 
   if (!parsed.success) {
@@ -289,7 +290,7 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
       targetType: "SUPPORT_RESOURCE",
       targetId: "settings.ts",
       action: "SYSTEM_SETTINGS_UPDATED",
-      reason: `Updated settings.ts (Replies: ${updated.defaultMaxReplies}->${updated.expandedMaxReplies}, Lease: ${updated.leaseDurationMinutes}m, AI: ${updated.aiDefaultProvider})`,
+      reason: `Updated settings.ts (Replies: ${updated.defaultMaxReplies}->${updated.expandedMaxReplies}, Lease: ${updated.leaseDurationMinutes}m, AI: ${updated.aiDefaultProvider}, CN Support: ${updated.enableChinaSupportInfo ? "ON" : "OFF"})`,
       previousStatus: "LIVE",
       newStatus: syncedSettingsTs ? "SYNCED_TO_SETTINGS_TS" : "RUNTIME_OVERRIDDEN"
     }
@@ -300,6 +301,7 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
   revalidatePath("/admin/settings");
   revalidatePath("/reply");
   revalidatePath("/settings");
+  revalidatePath("/support-resources");
   redirect("/admin/settings?saved=1");
 }
 
@@ -324,6 +326,7 @@ export async function resetSystemSettingsAction(): Promise<void> {
   revalidatePath("/admin/settings");
   revalidatePath("/reply");
   revalidatePath("/settings");
+  revalidatePath("/support-resources");
   redirect("/admin/settings?reset=1");
 }
 

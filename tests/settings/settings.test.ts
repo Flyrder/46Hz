@@ -8,6 +8,7 @@ import settings, {
   claimingSettings,
   securitySettings,
   complianceSettings,
+  supportResourcesSettings,
   getEditableSystemSettings,
   applyRuntimeSettingsUpdate,
   resetRuntimeSettingsToDefault
@@ -70,6 +71,7 @@ describe("Unified Settings (settings.ts)", () => {
     editable.defaultMaxReplies = 9;
     editable.expandedMaxReplies = 18;
     editable.leaseDurationMinutes = 20;
+    editable.enableChinaSupportInfo = true;
 
     applyRuntimeSettingsUpdate(editable);
 
@@ -77,14 +79,17 @@ describe("Unified Settings (settings.ts)", () => {
     expect(resonanceSettings.defaultMaxReplies).toBe(9);
     expect(resonanceSettings.expandedMaxReplies).toBe(18);
     expect(claimingSettings.leaseDurationMinutes).toBe(20);
+    expect(supportResourcesSettings.enableChinaSupportInfo).toBe(true);
 
     const preview = formatSettingsTsPreview(getEditableSystemSettings());
     expect(preview).toContain('"46Hz Studio"');
     expect(preview).toContain("defaultMaxReplies: 9");
+    expect(preview).toContain("enableChinaSupportInfo: true");
 
     resetRuntimeSettingsToDefault();
     expect(brandSettings.name).toBe("46Hz");
     expect(resonanceSettings.defaultMaxReplies).toBe(7);
+    expect(supportResourcesSettings.enableChinaSupportInfo).toBe(false);
   });
 
   it("validates systemSettingsSchema and rejects expandedMaxReplies < defaultMaxReplies", () => {

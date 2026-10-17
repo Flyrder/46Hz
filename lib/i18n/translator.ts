@@ -27,3 +27,28 @@ export function createTranslator(locale: Locale) {
   return (key: string, replacements?: Record<string, string>) =>
     translate(locale, key, replacements);
 }
+
+export function formatTag(
+  tag: string,
+  t: (key: string, replacements?: Record<string, string>) => string
+): string {
+  const clean = tag.replace(/^#+/, "").trim();
+  if (!clean) return tag;
+  const slug = clean.toLowerCase().replace(/[\s-]+/g, "_");
+  const key = `tag.${slug}`;
+  const translated = t(key);
+  return translated !== key ? translated : clean;
+}
+
+export function formatToneFlag(
+  flag: string,
+  t: (key: string, replacements?: Record<string, string>) => string
+): string {
+  const clean = flag.trim();
+  if (!clean) return flag;
+  const slug = clean.toLowerCase().replace(/[\s-]+/g, "_");
+  const key = `flag.${slug}`;
+  const translated = t(key);
+  return translated !== key ? translated : clean;
+}
+

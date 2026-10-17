@@ -3,6 +3,7 @@
 import { useFormStatus } from "react-dom";
 import { Loader2 } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 
 export function SubmitButton({
   children,
@@ -12,6 +13,7 @@ export function SubmitButton({
   variant?: "primary" | "secondary" | "danger" | "ghost";
 }) {
   const { pending } = useFormStatus();
+  const { t } = useI18n();
 
   return (
     <button
@@ -23,10 +25,11 @@ export function SubmitButton({
       {pending ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          <span className="sr-only">Processing...</span>
+          <span className="sr-only">{t("common.processingSrOnly")}</span>
         </>
       ) : null}
       {children}
     </button>
   );
 }
+

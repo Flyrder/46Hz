@@ -184,21 +184,23 @@ export class LlmAiMiddleware implements AiMiddleware {
     try {
       const systemPrompt = `You are the empathetic processing middleware for the 46Hz emotional support letterbox.
 Analyze the user's incoming anonymous letter.
+IMPORTANT: Write "processedText", "anonymization.text", and "risk.supportMessage" in the exact language specified by Language (e.g. Korean for ko_KR, Simplified Chinese for zh_CN, English for en_US).
+However, "emotionTags" and "situationTags" MUST use canonical lowercase English slugs from the allowed sets below so the UI can translate them cleanly.
 Output a valid JSON object strictly matching this schema:
 {
-  "processedText": "cleaned up and gently normalized letter text with no PII",
-  "emotionTags": ["array of 1-3 lowercase emotion tags e.g. lonely, anxious, sad, overwhelmed, ashamed, angry"],
-  "situationTags": ["array of 1-3 lowercase situation tags e.g. work, family, relationship, school, health, friendship"],
+  "processedText": "cleaned up and gently normalized letter text with no PII, in the user's language",
+  "emotionTags": ["array of 1-3 lowercase emotion slugs from: lonely, anxious, sad, overwhelmed, ashamed, angry, uncertain, tired, seeking_comfort, comfort, reflective, self_compassion, burnout, grief, hopeful"],
+  "situationTags": ["array of 1-3 lowercase situation slugs from: work, family, relationship, school, health, friendship, life, career, future, self"],
   "desiredReplyType": "one of: COMFORT, ADVICE, SIMILAR_EXPERIENCES, JUST_BEING_HEARD",
   "anonymization": {
-    "text": "text with names, phones, emails removed",
+    "text": "text with names, phones, emails removed, in the user's language",
     "flaggedTerms": ["array of detected PII types"]
   },
   "risk": {
     "level": "one of: NORMAL, SENSITIVE, HIGH, BLOCKED",
     "reasons": ["array of risk explanations if any"],
     "peerSafe": boolean,
-    "supportMessage": "optional crisis helpline guidance if level is HIGH or BLOCKED"
+    "supportMessage": "optional crisis helpline guidance if level is HIGH or BLOCKED, in the user's language"
   }
 }
 Risk level rules:
@@ -248,17 +250,25 @@ Risk level rules:
     }
 
     try {
+      const isKo = !input.language || input.language.toLowerCase().startsWith("ko");
+      const isZh = input.language?.toLowerCase().startsWith("zh");
+      const labelWarm = isKo ? "온화한 공감" : isZh ? "温润共情" : "Gentle Empathy";
+      const labelListen = isKo ? "경청 중심" : isZh ? "专注倾听" : "Deep Listening";
+      const labelGround = isKo ? "차분한 지지" : isZh ? "从容支持" : "Calm Grounding";
+
       const systemPrompt = `You are the gentle reply coaching middleware for 46Hz.
 Review the peer's draft reply to ensure it is supportive, non-judgmental, and respects the writer's desired reply type (${input.desiredReplyType}).
+IMPORTANT: Write "coachedText", all items in "suggestions", and all "reframings[].text" in the language specified by Language (${input.language}).
+Keep "flags" as canonical lowercase slugs from: judgmental, too_advice_heavy, invalidating, centers_responder.
 Output a valid JSON object strictly matching this schema:
 {
-  "coachedText": "a warm, refined, gentle version of the reply that keeps the responder's voice",
+  "coachedText": "a warm, refined, gentle version of the reply that keeps the responder's voice, in ${input.language}",
   "flags": ["array of detected tone flags e.g. judgmental, too_advice_heavy, invalidating, centers_responder"],
-  "suggestions": ["array of practical gentle suggestions for the responder"],
+  "suggestions": ["array of practical gentle suggestions for the responder, written in ${input.language}"],
   "reframings": [
-    { "label": "온화한 공감", "text": "...", "tone": "warm" },
-    { "label": "경청 중심", "text": "...", "tone": "listening" },
-    { "label": "차분한 지지", "text": "...", "tone": "grounding" }
+    { "label": "${labelWarm}", "text": "...", "tone": "warm" },
+    { "label": "${labelListen}", "text": "...", "tone": "listening" },
+    { "label": "${labelGround}", "text": "...", "tone": "grounding" }
   ],
   "metrics": {
     "empathy": 90,
@@ -280,7 +290,7 @@ Output a valid JSON object strictly matching this schema:
         suggestions:
           Array.isArray(parsed.suggestions) && parsed.suggestions.length > 0
             ? parsed.suggestions
-            : ["This reply feels considerate and gentle."],
+            : mockCoached.suggestions,
         reframings:
           Array.isArray(parsed.reframings) && parsed.reframings.length >= 3
             ? parsed.reframings
@@ -308,6 +318,7 @@ Output a valid JSON object strictly matching this schema:
     try {
       const systemPrompt = `You are the safety classifier for 46Hz.
 Classify incoming text into: NORMAL, SENSITIVE, HIGH, or BLOCKED.
+Write "reasons" and "supportMessage" in the language specified by Language (${input.language}).
 Output a valid JSON object strictly matching:
 {
   "level": "NORMAL" | "SENSITIVE" | "HIGH" | "BLOCKED",
@@ -340,7 +351,8 @@ Output a valid JSON object strictly matching:
 
     try {
       const systemPrompt = `You are the anonymization middleware for 46Hz.
-Remove any personally identifiable information (PII) including full names, telephone numbers, emails, resident numbers, and exact locations. Replace them with [name removed], [phone removed], etc.
+Remove any personally identifiable information (PII) including full names, telephone numbers, emails, resident numbers, and exact locations.
+If Language is ko_KR, replace with [이름 비공개], [연락처 비공개], [이메일 비공개], [식별번호 비공개]. Otherwise replace with [name removed], [phone removed], etc.
 Output JSON:
 {
   "text": "anonymized text",
@@ -369,6 +381,8 @@ Output JSON:
     try {
       const systemPrompt = `You are the creative writing prompt assistant for 46Hz emotional letterbox.
 Generate 3 gentle, evocative first sentences to help someone begin writing an anonymous letter about their feelings.
+IMPORTANT: Write "sparks[].text" and "sparks[].prompt" in the language specified by Language (${input.language}).
+However, "suggestedEmotionTags" MUST use canonical lowercase slugs from: lonely, anxious, sad, overwhelmed, ashamed, angry, uncertain, tired, seeking_comfort, comfort, reflective, self_compassion.
 Output a valid JSON object strictly matching this schema:
 {
   "sparks": [
@@ -410,18 +424,20 @@ Output a valid JSON object strictly matching this schema:
     }
 
     try {
+      const lang = input.language ?? "ko_KR";
       const systemPrompt = `You are the empathetic resonance matcher for 46Hz.
 Given a responder's preferred reply style and a list of available anonymous letters seeking support, pick the letters that best resonate with the responder.
+IMPORTANT: Write all "matchReasons" values in the language specified by Language (${lang}).
 Output a valid JSON object strictly matching this schema:
 {
   "recommendedLetterIds": ["id1", "id2"],
   "matchReasons": {
-    "id1": "short gentle reason why this resonates",
-    "id2": "short gentle reason why this resonates"
+    "id1": "short gentle reason why this resonates, in ${lang}",
+    "id2": "short gentle reason why this resonates, in ${lang}"
   }
 }`;
 
-      const userPrompt = `Responder preference: ${input.responderPreference}\nAvailable Letters:\n${JSON.stringify(input.availableLetters, null, 2)}`;
+      const userPrompt = `Language: ${lang}\nResponder preference: ${input.responderPreference}\nAvailable Letters:\n${JSON.stringify(input.availableLetters, null, 2)}`;
 
       const rawJson = await this.callChatCompletion(systemPrompt, userPrompt);
       const parsed = extractJson(rawJson);

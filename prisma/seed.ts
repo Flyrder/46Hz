@@ -13,7 +13,7 @@ async function main() {
     prisma.user.create({
       data: {
         anonymousHandle: "Letter MIRA",
-        language: "en",
+        language: "ko_KR",
         ageRange: "ADULT",
         preferredReplyType: "COMFORT",
         trustScore: 54
@@ -22,7 +22,7 @@ async function main() {
     prisma.user.create({
       data: {
         anonymousHandle: "Letter SOL",
-        language: "en",
+        language: "ko_KR",
         ageRange: "ADULT",
         preferredReplyType: "JUST_BEING_HEARD",
         trustScore: 68
@@ -31,7 +31,7 @@ async function main() {
     prisma.user.create({
       data: {
         anonymousHandle: "Letter NAMI",
-        language: "en",
+        language: "ko_KR",
         ageRange: "UNDER_18",
         preferredReplyType: "SIMILAR_EXPERIENCES",
         trustScore: 47
@@ -74,8 +74,8 @@ async function main() {
         active: true
       },
       {
-        title: "Korea Mental Health Welfare Center",
-        description: "Regional mental health welfare centers and counseling information.",
+        title: "국립정신건강센터 마음건강 포털",
+        description: "전국 광역·기초 정신건강복지센터 위치 안내 및 정신건강 지원 정보 포털",
         region: "KR",
         language: "ko",
         url: "https://www.mentalhealth.go.kr",
@@ -112,14 +112,14 @@ async function main() {
     data: {
       authorId: writer.id,
       rawText:
-        "I moved for work and I feel lonely most nights. I do not need a solution right now. I mostly want to feel heard by someone kind.",
+        "직장 때문에 낯선 도시로 이사 온 뒤로 밤마다 마음이 유독 공허하고 외롭습니다. 당장 거창한 해결책보다는 누군가 제 이야기를 따뜻하게 들어주었으면 좋겠어요.",
       processedText:
-        "I moved for work and I feel lonely most nights. I do not need a solution right now. I mostly want to feel heard by someone kind.",
+        "직장 때문에 낯선 도시로 이사 온 뒤로 밤마다 마음이 유독 공허하고 외롭습니다. 당장 거창한 해결책보다는 누군가 제 이야기를 따뜻하게 들어주었으면 좋겠어요.",
       emotionTags: ["lonely"],
       situationTags: ["work"],
       desiredReplyType: "JUST_BEING_HEARD",
       riskLevel: "NORMAL",
-      language: "en",
+      language: "ko_KR",
       status: "APPROVED"
     }
   });
@@ -128,14 +128,14 @@ async function main() {
     data: {
       authorId: responder.id,
       rawText:
-        "My friend group changed quickly and I feel left behind. I would appreciate comfort, not a big list of advice.",
+        "가깝게 지내던 친구들과의 관계가 빠르게 변하면서 저만 홀로 남겨진 기분이 듭니다. 긴 조언보다는 따뜻한 위로의 한마디가 간절해요.",
       processedText:
-        "My friend group changed quickly and I feel left behind. I would appreciate comfort, not a big list of advice.",
+        "가깝게 지내던 친구들과의 관계가 빠르게 변하면서 저만 홀로 남겨진 기분이 듭니다. 긴 조언보다는 따뜻한 위로의 한마디가 간절해요.",
       emotionTags: ["sad", "lonely"],
       situationTags: ["friendship"],
       desiredReplyType: "COMFORT",
       riskLevel: "NORMAL",
-      language: "en",
+      language: "ko_KR",
       status: "PENDING"
     }
   });
@@ -144,14 +144,14 @@ async function main() {
     data: {
       authorId: secondResponder.id,
       rawText:
-        "I do not feel safe with myself tonight and I need someone near me to know.",
+        "오늘 밤 혼자 버티기가 너무 두렵고 제 자신이 안전하지 않은 것 같아 누군가에게 도움을 청하고 싶습니다.",
       processedText:
-        "I do not feel safe with myself tonight and I need someone near me to know.",
+        "오늘 밤 혼자 버티기가 너무 두렵고 제 자신이 안전하지 않은 것 같아 누군가에게 도움을 청하고 싶습니다.",
       emotionTags: ["overwhelmed"],
       situationTags: ["life"],
       desiredReplyType: "COMFORT",
       riskLevel: "HIGH",
-      language: "en",
+      language: "ko_KR",
       status: "ROUTED_TO_SUPPORT"
     }
   });
@@ -161,9 +161,9 @@ async function main() {
       letterId: approvedLetter.id,
       responderId: responder.id,
       rawText:
-        "That sounds really lonely. I am glad you wrote it here, and I hope tonight feels a little less empty.",
+        "낯선 곳에서 혼자 밤을 보내는 마음이 얼마나 쓸쓸했을지 전해져요. 이곳에 마음을 적어주셔서 고맙고, 오늘 밤은 조금이나마 덜 외로우셨으면 좋겠습니다.",
       coachedText:
-        "That sounds really lonely. I am glad you wrote it here, and I hope tonight feels a little less empty. You do not have to solve all of it before your feelings deserve care.",
+        "낯선 곳에서 혼자 밤을 보내는 마음이 얼마나 쓸쓸했을지 전해져요. 이곳에 마음을 적어주셔서 고맙고, 오늘 밤은 조금이나마 덜 외로우셨으면 좋겠습니다. 모든 것을 당장 해결하지 않아도 당신의 마음은 그 자체로 소중해요.",
       status: "APPROVED"
     }
   });
@@ -173,9 +173,9 @@ async function main() {
       letterId: approvedLetter.id,
       responderId: secondResponder.id,
       rawText:
-        "You should just join clubs and make a schedule, then it will be fixed.",
+        "동호회에 가입하고 규칙적인 일정을 만들면 금방 해결될 거예요.",
       coachedText:
-        "It makes sense that moving for work could feel lonely. I hope you can be patient with yourself while this new place starts to feel less unfamiliar.",
+        "일 때문에 새로운 곳으로 옮겨오며 외로움을 느끼시는 게 당연해요. 낯선 환경이 조금씩 익숙해질 때까지 스스로에게 너그러운 시간을 선물하셨으면 좋겠습니다.",
       status: "PENDING"
     }
   });
@@ -185,7 +185,7 @@ async function main() {
       letterId: approvedLetter.id,
       responderId: responder.id,
       status: "RESPONDED",
-      matchReason: "Seeded approved normal-risk letter."
+      matchReason: "선호하시는 답장 방식과 깊이 공명하는 편지입니다."
     }
   });
 
@@ -206,7 +206,7 @@ async function main() {
         targetType: "LETTER",
         targetId: approvedLetter.id,
         action: "ADMIN_MODERATED",
-        reason: "Seed approved normal-risk letter.",
+        reason: "일반 위험도 편지 승인 완료",
         previousStatus: "PENDING/NORMAL",
         newStatus: "APPROVED/NORMAL"
       },
@@ -214,7 +214,7 @@ async function main() {
         targetType: "LETTER",
         targetId: pendingLetter.id,
         action: "SUBMITTED",
-        reason: "Seed pending letter.",
+        reason: "작성자 편지 제출 및 검토 대기",
         previousStatus: "DRAFT",
         newStatus: "PENDING"
       },
@@ -222,7 +222,7 @@ async function main() {
         targetType: "LETTER",
         targetId: highRiskLetter.id,
         action: "SAFETY_ROUTED",
-        reason: "Seed high-risk route to support resources.",
+        reason: "고위험 위기 감지 — EXIT 전문 지원 정보로 즉시 안내",
         previousStatus: "DRAFT",
         newStatus: "ROUTED_TO_SUPPORT"
       },
@@ -230,7 +230,7 @@ async function main() {
         targetType: "REPLY",
         targetId: approvedReply.id,
         action: "ADMIN_MODERATED",
-        reason: "Seed approved reply.",
+        reason: "또래 공감 답장 승인 완료",
         previousStatus: "PENDING",
         newStatus: "APPROVED"
       }
