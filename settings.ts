@@ -15,7 +15,12 @@
 
 export type SupportedLocale = "ko_KR" | "en_US" | "zh_CN";
 export type SupportedTheme = "system" | "light" | "dark";
-export type SupportedAiProvider = "mock" | "openai" | "deepseek";
+export type SupportedAiProvider = "mock" | "openai" | "deepseek" | "gemini";
+
+export const DEFAULT_AI_SYSTEM_PROMPT =
+  "You are an empathetic, trauma-informed, and non-judgmental emotional support companion for 46Hz. " +
+  "You protect user privacy by strictly scrubbing personal identifiers (Zero PII), evaluate safety with utmost care, " +
+  "and offer gentle, warm, and authentic support without clinical preachiness or generic platitudes.";
 
 export interface EditableSystemSettings {
   brandName: string;
@@ -51,6 +56,9 @@ export interface EditableSystemSettings {
   aiTemperature: number;
   aiMaxTokens: number;
   aiModel: string;
+  aiApiKey: string;
+  aiBaseUrl: string;
+  aiSystemPrompt: string;
   enableChinaSupportInfo: boolean;
 }
 
@@ -89,6 +97,9 @@ export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
   aiTemperature: 0.7,
   aiMaxTokens: 1500,
   aiModel: "gpt-4o-mini",
+  aiApiKey: "",
+  aiBaseUrl: "",
+  aiSystemPrompt: DEFAULT_AI_SYSTEM_PROMPT,
   enableChinaSupportInfo: false
 };
 
@@ -251,6 +262,9 @@ export const aiSettings: {
   temperature: number;
   maxTokens: number;
   model: string;
+  apiKey: string;
+  baseUrl: string;
+  systemPrompt: string;
 } = {
   enabled: true,
   enableRiskSafety: true,
@@ -263,7 +277,10 @@ export const aiSettings: {
   mockDelayMs: 150,
   temperature: 0.7,
   maxTokens: 1500,
-  model: "gpt-4o-mini"
+  model: "gpt-4o-mini",
+  apiKey: "",
+  baseUrl: "",
+  systemPrompt: DEFAULT_AI_SYSTEM_PROMPT
 };
 
 export const supportResourcesSettings: {
@@ -322,6 +339,9 @@ export function getEditableSystemSettings(): EditableSystemSettings {
     aiTemperature: aiSettings.temperature,
     aiMaxTokens: aiSettings.maxTokens,
     aiModel: aiSettings.model,
+    aiApiKey: aiSettings.apiKey,
+    aiBaseUrl: aiSettings.baseUrl,
+    aiSystemPrompt: aiSettings.systemPrompt,
     enableChinaSupportInfo: supportResourcesSettings.enableChinaSupportInfo
   };
 }
@@ -377,6 +397,9 @@ export function applyRuntimeSettingsUpdate(
   aiSettings.temperature = next.aiTemperature;
   aiSettings.maxTokens = next.aiMaxTokens;
   aiSettings.model = next.aiModel;
+  aiSettings.apiKey = next.aiApiKey;
+  aiSettings.baseUrl = next.aiBaseUrl;
+  aiSettings.systemPrompt = next.aiSystemPrompt;
 
   supportResourcesSettings.enableChinaSupportInfo = next.enableChinaSupportInfo;
 

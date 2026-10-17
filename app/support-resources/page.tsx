@@ -1,4 +1,4 @@
-import { Phone, Radio } from "lucide-react";
+import { Phone } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
@@ -53,12 +53,6 @@ export default async function SupportResourcesPage({
             <p className="mt-3.5 text-xs leading-relaxed text-emerald-50/85 sm:text-sm">
               {isRouted ? t("resources.highRiskNotice") : t("resources.intro")}
             </p>
-
-            {/* Movie <EXIT> SOS Morse Signal Bar */}
-            <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-emerald-400/25 bg-black/25 px-3.5 py-2.5 text-[11px] sm:text-xs font-medium text-emerald-100/95 backdrop-blur-xs">
-              <Radio className="h-3.5 w-3.5 shrink-0 text-amber-400 animate-pulse" aria-hidden="true" />
-              <span className="tracking-wide">{t("resources.exitSosSignal")}</span>
-            </div>
 
             {/* Rapid 1-Tap Emergency Exit Direct Call Buttons */}
             <div className="mt-5 flex flex-wrap items-center gap-3">

@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
 import { getLetterRouting } from "@/lib/safety/routing";
-import { formValue, reviewLetterSchema, writeLetterSchema } from "@/lib/validators";
+import { formValue, replyTypeSchema, reviewLetterSchema, writeLetterSchema } from "@/lib/validators";
 
 export async function processLetterAction(formData: FormData): Promise<void> {
   const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
@@ -203,5 +203,48 @@ export async function deleteLetterAction(formData: FormData): Promise<void> {
   revalidatePath("/inbox");
   revalidatePath("/reply");
   redirect("/inbox?deleted=1");
+}
+
+export async function updateDesiredReplyTypeAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const letterId = formValue(formData, "letterId");
+  const desiredReplyTypeRaw = formValue(formData, "desiredReplyType");
+
+  const parsed = replyTypeSchema.safeParse(desiredReplyTypeRaw);
+  if (!parsed.success) {
+    throw new Error("Invalid desired reply type.");
+  }
+
+  const letter = await prisma.letter.findFirst({
+    where: {
+      id: letterId,
+      authorId: user.id
+    }
+  });
+
+  if (!letter) {
+    throw new Error("Letter not found or you are not authorized to update it.");
+  }
+
+  await prisma.$transaction([
+    prisma.letter.update({
+      where: { id: letter.id },
+      data: { desiredReplyType: parsed.data }
+    }),
+    prisma.moderationEvent.create({
+      data: {
+        targetType: "LETTER",
+        targetId: letter.id,
+        action: "DESIRED_REPLY_TYPE_UPDATED",
+        reason: `Author updated desired reply type from ${letter.desiredReplyType} to ${parsed.data}.`,
+        previousStatus: letter.status,
+        newStatus: letter.status
+      }
+    })
+  ]);
+
+  revalidatePath(`/letters/${letter.id}`);
+  revalidatePath("/inbox");
+  revalidatePath("/reply");
 }
 

@@ -41,6 +41,9 @@ export function getAiMiddleware(override?: Partial<LlmConfig>): AiMiddleware {
     return new LlmAiMiddleware({
       provider,
       model: aiSettings.model,
+      apiKey: aiSettings.apiKey || undefined,
+      baseURL: aiSettings.baseUrl || undefined,
+      systemPrompt: aiSettings.systemPrompt || undefined,
       timeoutMs: aiSettings.timeoutMs,
       temperature: aiSettings.temperature,
       maxTokens: aiSettings.maxTokens,

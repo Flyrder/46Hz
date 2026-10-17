@@ -3,6 +3,7 @@ import { leaveAnonymousSessionAction } from "@/app/actions/settings";
 import { PreferenceForm } from "@/components/preference-form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { CopyButton } from "@/components/copy-button";
+import { RegenerateMigrationCodeButton } from "@/components/regenerate-migration-code-button";
 import { createTranslator, localeOptions } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
@@ -78,6 +79,9 @@ export default async function SettingsPage() {
             </dd>
             <dd className="mt-2 text-xs leading-relaxed text-muted-foreground">
               ⚠️ {t("settings.migrationCodeHelp")}
+            </dd>
+            <dd>
+              <RegenerateMigrationCodeButton t={t} />
             </dd>
           </div>
         </dl>

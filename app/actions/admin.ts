@@ -309,6 +309,9 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
     aiTemperature: formValue(formData, "aiTemperature"),
     aiMaxTokens: formValue(formData, "aiMaxTokens"),
     aiModel: formValue(formData, "aiModel"),
+    aiApiKey: formValue(formData, "aiApiKey"),
+    aiBaseUrl: formValue(formData, "aiBaseUrl"),
+    aiSystemPrompt: formValue(formData, "aiSystemPrompt"),
     enableChinaSupportInfo: formData.get("enableChinaSupportInfo") === "on" || formData.get("enableChinaSupportInfo") === "true"
   });
 
