@@ -18,6 +18,7 @@ export const koKR: Translations = {
   "age.adult": "19세 이상",
   "age.under18": "19세 미만",
   "common.cancel": "취소",
+  "common.confirm": "확인",
   "common.optionalReason": "선택 사유",
   "common.report": "신고",
   "language.label": "언어",
@@ -251,6 +252,7 @@ export const koKR: Translations = {
   "common.errorTitle": "문제가 발생했습니다",
   "common.returnHome": "홈으로 돌아가기",
   "common.retry": "다시 시도하기",
+
 
   "admin.navMetrics": "지표",
   "admin.navLetters": "편지",

@@ -18,6 +18,7 @@ export const zhCN: Translations = {
   "age.adult": "18 岁及以上",
   "age.under18": "未满 18 岁",
   "common.cancel": "取消",
+  "common.confirm": "确认",
   "common.optionalReason": "可选原因",
   "common.report": "举报",
   "language.label": "语言",

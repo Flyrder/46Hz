@@ -20,7 +20,8 @@
     "start:mac": "./start.sh",
     "start:mac:verify": "./start.sh --verify-only",
     "purge:modules": "tsx scripts/purge_standalone.ts",
-    "verify:backend": "tsx scripts/verify_backend.ts"
+    "verify:backend": "tsx scripts/verify_backend.ts",
+    "contract:verify": "tsx scripts/verify_contract.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",

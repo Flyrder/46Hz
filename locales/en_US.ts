@@ -18,6 +18,7 @@ export const enUS: Translations = {
   "age.adult": "18+",
   "age.under18": "Under 18",
   "common.cancel": "Cancel",
+  "common.confirm": "Confirm",
   "common.optionalReason": "Optional reason",
   "common.report": "Report",
   "language.label": "Language",

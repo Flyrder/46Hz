@@ -22,6 +22,7 @@ export type TranslationKey =
   | "age.adult"
   | "age.under18"
   | "common.cancel"
+  | "common.confirm"
   | "common.optionalReason"
   | "common.report"
   | "feedback.feltUnderstood"
