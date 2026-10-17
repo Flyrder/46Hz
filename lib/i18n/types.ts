@@ -662,8 +662,6 @@ export type TranslationKey =
   | "admin.settingsSecAiDesc"
   | "admin.settingsAiProviderLabel"
   | "admin.settingsAiProviderMock"
-  | "admin.settingsAiProviderOpenai"
-  | "admin.settingsAiProviderDeepseek"
   | "admin.settingsAiTimeoutLabel"
   | "admin.settingsAiMockDelayLabel"
   | "admin.settingsSyncNote"
@@ -749,6 +747,23 @@ export type TranslationKey =
   | "license.libLucideDesc"
   | "license.libTailwindDesc"
   | "license.libTypescriptDesc"
-  | "license.libVitestDesc";
+  | "license.libVitestDesc"
+  | "admin.settingsAiThinkingLevelLabel"
+  | "admin.settingsAiThinkingMinimal"
+  | "admin.settingsAiThinkingLow"
+  | "admin.settingsAiThinkingMedium"
+  | "admin.settingsAiThinkingHigh"
+  | "admin.settingsAiStoreInteractionsLabel"
+  | "admin.settingsAiStoreInteractionsDesc"
+  | "admin.settingsAiFunctionPromptsTitle"
+  | "admin.settingsAiFunctionPromptsDesc"
+  | "admin.settingsAiEditFunctionPrompt"
+  | "admin.settingsAiPromptRiskSafetyDesc"
+  | "admin.settingsAiPromptAnonymizationDesc"
+  | "admin.settingsAiPromptReplyCoachDesc"
+  | "admin.settingsAiPromptWritingSparksDesc"
+  | "admin.settingsAiPromptResonanceMatchDesc"
+  | "admin.settingsAiTestConnectionBtn"
+  | "admin.settingsAiTestingConnection";
 
 export type Translations = Record<TranslationKey, string>;

@@ -84,7 +84,7 @@ flowchart LR
 
 ### 3. 공감 지능형 AI 미들웨어 & 톤 레이더 (`AiMiddleware`)
 - **100% 무중단 오프라인 Mock 지원 (`MockAiMiddleware`)**: 외부 API 키가 없거나 네트워크가 단절된 격리망 환경에서도 완벽한 한국어 형태소 기반 익명화, 공감 코칭, 글감 생성이 오프라인으로 결정론적 동작합니다.
-- **핫스왑 프로덕션 멀티 LLM (`LlmAiMiddleware`)**: OpenAI (GPT-4o), DeepSeek (추론 태그 `<think>...</think>` 자동 정제), Google Gemini, Anthropic Claude, Ollama 등 다양한 공급자를 `.env` 설정만으로 즉시 교체 가능하며, 상위 API 장애 시 지체 없이 Mock으로 자동 폴백(Fallback)합니다.
+- **Gemini 네이티브 AI (`LlmAiMiddleware`)**: Google Gemini Interactions API(`POST /v1beta/interactions`, `Api-Revision: 2026-05-20`)를 구조화 출력(`response_format` JSON Schema)·`thinking_level`·`store` 제어와 함께 직접 호출합니다. 위험 감지/익명화/답장 코칭/글감/공명 매칭 5대 기능은 각각 개별 프롬프트와 토글을 갖고, 관리자 설정에서 API Key·모델·시스템 프롬프트·연결 테스트까지 제어하며, 장애나 키 미설정 시 Mock으로 자동 폴백합니다.
 - **글쓰기 마중물 어시스턴트 (Writing Sparks)**: 무거운 마음에 첫 문장을 시작하기 어려운 이용자를 위해 감정 상태(번아웃, 불안, 외로움, 자책)에 맞춘 4가지 온화한 시작 문장을 원클릭으로 제안합니다.
 - **3차원 톤 레이더 (Tone Radar)**: 또래 답장의 **공감(Empathy)**, **온화함(Gentleness)**, **비판단성(Non-judgmental)**을 실시간 측정하고, 지시적이거나 훈계조의 표현을 "공감과 온기", "부드러운 인정", "따뜻한 관점 제시"의 3가지 치유적 문장으로 자동 다듬어 줍니다.
 - **시맨틱 공명 매칭 (Resonance Matcher)**: 코사인 유사도를 활용하여 작성자의 고민과 답장 작성자의 심리적 지향점이 가장 잘 어우러지는 편지에 "공명 추천" 배지를 부여합니다.
@@ -280,7 +280,7 @@ cp .env.example .env
 DATABASE_URL="postgresql://46hz:46hz@localhost:5432/46hz_letterbox?schema=public"
 ADMIN_PASSCODE="local-admin"
 MODERATOR_PASSCODE="local-moderator"
-AI_PROVIDER="mock" # 옵션: mock | openai | deepseek | gemini | claude | custom
+AI_PROVIDER="mock" # 옵션: mock | gemini (gemini 사용 시 GEMINI_API_KEY 필요)
 ```
 
 ### 2. PostgreSQL 데이터베이스 실행

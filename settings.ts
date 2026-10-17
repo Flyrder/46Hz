@@ -15,12 +15,32 @@
 
 export type SupportedLocale = "ko_KR" | "en_US" | "zh_CN";
 export type SupportedTheme = "system" | "light" | "dark";
-export type SupportedAiProvider = "mock" | "openai" | "deepseek" | "gemini";
+export type SupportedAiProvider = "mock" | "gemini";
+export type SupportedAiThinkingLevel = "minimal" | "low" | "medium" | "high";
 
 export const DEFAULT_AI_SYSTEM_PROMPT =
   "You are an empathetic, trauma-informed, and non-judgmental emotional support companion for 46Hz. " +
   "You protect user privacy by strictly scrubbing personal identifiers (Zero PII), evaluate safety with utmost care, " +
   "and offer gentle, warm, and authentic support without clinical preachiness or generic platitudes.";
+
+export const DEFAULT_AI_PROMPT_RISK_SAFETY =
+  "Evaluate incoming letters for acute self-harm, suicide intent, violence, or severe trauma. " +
+  "Classify strictly into NORMAL (peer-safe everyday distress), SENSITIVE (trauma/abuse needing moderator care), " +
+  "HIGH (acute self-harm/crisis), or BLOCKED (threats/violence), and provide warm crisis support guidance when risk is elevated.";
+
+export const DEFAULT_AI_PROMPT_ANONYMIZATION =
+  "Strictly scrub all Personally Identifiable Information (Zero PII) including legal names, phone numbers, emails, " +
+  "resident registration numbers, bank accounts, messenger IDs, and exact addresses while preserving the writer's authentic emotional voice.";
+
+export const DEFAULT_AI_PROMPT_REPLY_COACH =
+  "Review the peer responder's draft reply to ensure it is warm, non-judgmental, and aligned with the writer's desired reply type. " +
+  "Flag judgmental, invalidating, advice-heavy, or self-centering phrasing, and offer 3 compassionate reframings (warm empathy, deep listening, calm grounding).";
+
+export const DEFAULT_AI_PROMPT_WRITING_SPARKS =
+  "Generate 3 gentle, poetic, low-pressure opening sentences tailored to the writer's current mood so they can begin expressing their feelings safely without writer's block.";
+
+export const DEFAULT_AI_PROMPT_RESONANCE_MATCH =
+  "Match available anonymous letters with the responder's preferred support style and emotional resonance, explaining gently why each letter connects with their capacity to care.";
 
 export interface EditableSystemSettings {
   brandName: string;
@@ -55,10 +75,17 @@ export interface EditableSystemSettings {
   aiMockDelayMs: number;
   aiTemperature: number;
   aiMaxTokens: number;
+  aiThinkingLevel: SupportedAiThinkingLevel;
+  aiStoreInteractions: boolean;
   aiModel: string;
   aiApiKey: string;
   aiBaseUrl: string;
   aiSystemPrompt: string;
+  aiPromptRiskSafety: string;
+  aiPromptAnonymization: string;
+  aiPromptReplyCoach: string;
+  aiPromptWritingSparks: string;
+  aiPromptResonanceMatch: string;
   enableChinaSupportInfo: boolean;
 }
 
@@ -95,11 +122,18 @@ export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
   aiTimeoutMs: 10_000,
   aiMockDelayMs: 150,
   aiTemperature: 0.7,
-  aiMaxTokens: 1500,
-  aiModel: "gpt-4o-mini",
+  aiMaxTokens: 4096,
+  aiThinkingLevel: "low",
+  aiStoreInteractions: false,
+  aiModel: "gemini-3.8-flash",
   aiApiKey: "",
   aiBaseUrl: "",
   aiSystemPrompt: DEFAULT_AI_SYSTEM_PROMPT,
+  aiPromptRiskSafety: DEFAULT_AI_PROMPT_RISK_SAFETY,
+  aiPromptAnonymization: DEFAULT_AI_PROMPT_ANONYMIZATION,
+  aiPromptReplyCoach: DEFAULT_AI_PROMPT_REPLY_COACH,
+  aiPromptWritingSparks: DEFAULT_AI_PROMPT_WRITING_SPARKS,
+  aiPromptResonanceMatch: DEFAULT_AI_PROMPT_RESONANCE_MATCH,
   enableChinaSupportInfo: false
 };
 
@@ -261,10 +295,17 @@ export const aiSettings: {
   mockDelayMs: number;
   temperature: number;
   maxTokens: number;
+  thinkingLevel: SupportedAiThinkingLevel;
+  storeInteractions: boolean;
   model: string;
   apiKey: string;
   baseUrl: string;
   systemPrompt: string;
+  promptRiskSafety: string;
+  promptAnonymization: string;
+  promptReplyCoach: string;
+  promptWritingSparks: string;
+  promptResonanceMatch: string;
 } = {
   enabled: true,
   enableRiskSafety: true,
@@ -276,11 +317,18 @@ export const aiSettings: {
   timeoutMs: 10_000,
   mockDelayMs: 150,
   temperature: 0.7,
-  maxTokens: 1500,
-  model: "gpt-4o-mini",
+  maxTokens: 4096,
+  thinkingLevel: "low",
+  storeInteractions: false,
+  model: "gemini-3.8-flash",
   apiKey: "",
   baseUrl: "",
-  systemPrompt: DEFAULT_AI_SYSTEM_PROMPT
+  systemPrompt: DEFAULT_AI_SYSTEM_PROMPT,
+  promptRiskSafety: DEFAULT_AI_PROMPT_RISK_SAFETY,
+  promptAnonymization: DEFAULT_AI_PROMPT_ANONYMIZATION,
+  promptReplyCoach: DEFAULT_AI_PROMPT_REPLY_COACH,
+  promptWritingSparks: DEFAULT_AI_PROMPT_WRITING_SPARKS,
+  promptResonanceMatch: DEFAULT_AI_PROMPT_RESONANCE_MATCH
 };
 
 export const supportResourcesSettings: {
@@ -338,10 +386,17 @@ export function getEditableSystemSettings(): EditableSystemSettings {
     aiMockDelayMs: aiSettings.mockDelayMs,
     aiTemperature: aiSettings.temperature,
     aiMaxTokens: aiSettings.maxTokens,
+    aiThinkingLevel: aiSettings.thinkingLevel,
+    aiStoreInteractions: aiSettings.storeInteractions,
     aiModel: aiSettings.model,
     aiApiKey: aiSettings.apiKey,
     aiBaseUrl: aiSettings.baseUrl,
     aiSystemPrompt: aiSettings.systemPrompt,
+    aiPromptRiskSafety: aiSettings.promptRiskSafety,
+    aiPromptAnonymization: aiSettings.promptAnonymization,
+    aiPromptReplyCoach: aiSettings.promptReplyCoach,
+    aiPromptWritingSparks: aiSettings.promptWritingSparks,
+    aiPromptResonanceMatch: aiSettings.promptResonanceMatch,
     enableChinaSupportInfo: supportResourcesSettings.enableChinaSupportInfo
   };
 }
@@ -352,9 +407,60 @@ export function getEditableSystemSettings(): EditableSystemSettings {
 export function applyRuntimeSettingsUpdate(
   partial: Partial<EditableSystemSettings>
 ): EditableSystemSettings {
-  const next: EditableSystemSettings = {
+  const definedPartial = Object.fromEntries(
+    Object.entries(partial ?? {}).filter(([, value]) => value !== undefined)
+  ) as Partial<EditableSystemSettings>;
+
+  const rawNext: EditableSystemSettings = {
     ...getEditableSystemSettings(),
-    ...partial
+    ...definedPartial
+  };
+
+  const validProviders: SupportedAiProvider[] = ["mock", "gemini"];
+  const normalizedProvider: SupportedAiProvider = validProviders.includes(
+    rawNext.aiDefaultProvider as SupportedAiProvider
+  )
+    ? (rawNext.aiDefaultProvider as SupportedAiProvider)
+    : "mock";
+
+  const validThinkingLevels: SupportedAiThinkingLevel[] = ["minimal", "low", "medium", "high"];
+  const normalizedThinkingLevel: SupportedAiThinkingLevel = validThinkingLevels.includes(
+    rawNext.aiThinkingLevel as SupportedAiThinkingLevel
+  )
+    ? (rawNext.aiThinkingLevel as SupportedAiThinkingLevel)
+    : "low";
+
+  const next: EditableSystemSettings = {
+    ...rawNext,
+    aiDefaultProvider: normalizedProvider,
+    aiThinkingLevel: normalizedThinkingLevel,
+    aiSystemPrompt:
+      typeof rawNext.aiSystemPrompt === "string" && rawNext.aiSystemPrompt.trim().length > 0
+        ? rawNext.aiSystemPrompt
+        : DEFAULT_AI_SYSTEM_PROMPT,
+    aiPromptRiskSafety:
+      typeof rawNext.aiPromptRiskSafety === "string" && rawNext.aiPromptRiskSafety.trim().length > 0
+        ? rawNext.aiPromptRiskSafety
+        : DEFAULT_AI_PROMPT_RISK_SAFETY,
+    aiPromptAnonymization:
+      typeof rawNext.aiPromptAnonymization === "string" &&
+      rawNext.aiPromptAnonymization.trim().length > 0
+        ? rawNext.aiPromptAnonymization
+        : DEFAULT_AI_PROMPT_ANONYMIZATION,
+    aiPromptReplyCoach:
+      typeof rawNext.aiPromptReplyCoach === "string" && rawNext.aiPromptReplyCoach.trim().length > 0
+        ? rawNext.aiPromptReplyCoach
+        : DEFAULT_AI_PROMPT_REPLY_COACH,
+    aiPromptWritingSparks:
+      typeof rawNext.aiPromptWritingSparks === "string" &&
+      rawNext.aiPromptWritingSparks.trim().length > 0
+        ? rawNext.aiPromptWritingSparks
+        : DEFAULT_AI_PROMPT_WRITING_SPARKS,
+    aiPromptResonanceMatch:
+      typeof rawNext.aiPromptResonanceMatch === "string" &&
+      rawNext.aiPromptResonanceMatch.trim().length > 0
+        ? rawNext.aiPromptResonanceMatch
+        : DEFAULT_AI_PROMPT_RESONANCE_MATCH
   };
 
   brandSettings.name = next.brandName;
@@ -396,10 +502,17 @@ export function applyRuntimeSettingsUpdate(
   aiSettings.mockDelayMs = next.aiMockDelayMs;
   aiSettings.temperature = next.aiTemperature;
   aiSettings.maxTokens = next.aiMaxTokens;
+  aiSettings.thinkingLevel = next.aiThinkingLevel;
+  aiSettings.storeInteractions = next.aiStoreInteractions;
   aiSettings.model = next.aiModel;
   aiSettings.apiKey = next.aiApiKey;
   aiSettings.baseUrl = next.aiBaseUrl;
   aiSettings.systemPrompt = next.aiSystemPrompt;
+  aiSettings.promptRiskSafety = next.aiPromptRiskSafety;
+  aiSettings.promptAnonymization = next.aiPromptAnonymization;
+  aiSettings.promptReplyCoach = next.aiPromptReplyCoach;
+  aiSettings.promptWritingSparks = next.aiPromptWritingSparks;
+  aiSettings.promptResonanceMatch = next.aiPromptResonanceMatch;
 
   supportResourcesSettings.enableChinaSupportInfo = next.enableChinaSupportInfo;
 

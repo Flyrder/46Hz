@@ -10,8 +10,8 @@ describe("AI Settings Toggles & Runtime Heuristics", () => {
   });
 
   it("respects aiSettings.defaultProvider when AI_PROVIDER environment variable is unset", () => {
-    aiSettings.defaultProvider = "deepseek";
-    expect(getAiProviderName()).toBe("deepseek");
+    aiSettings.defaultProvider = "gemini";
+    expect(getAiProviderName()).toBe("gemini");
 
     aiSettings.defaultProvider = "mock";
     expect(getAiProviderName()).toBe("mock");
