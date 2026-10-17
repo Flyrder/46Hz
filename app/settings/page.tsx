@@ -81,7 +81,7 @@ export default async function SettingsPage() {
               ⚠️ {t("settings.migrationCodeHelp")}
             </dd>
             <dd>
-              <RegenerateMigrationCodeButton t={t} />
+              <RegenerateMigrationCodeButton />
             </dd>
           </div>
         </dl>

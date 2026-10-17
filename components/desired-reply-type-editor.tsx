@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Check, ChevronDown, Sparkles, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { updateDesiredReplyTypeAction } from "@/app/actions/letters";
+import { useI18n } from "@/lib/i18n";
 
 const REPLY_TYPES = [
   "COMFORT",
@@ -18,15 +19,17 @@ interface DesiredReplyTypeEditorProps {
   letterId: string;
   currentType: ReplyType;
   isAuthor: boolean;
-  t: (key: string, replacements?: Record<string, string>) => string;
+  t?: (key: string, replacements?: Record<string, string>) => string;
 }
 
 export function DesiredReplyTypeEditor({
   letterId,
   currentType,
   isAuthor,
-  t
+  t: propT
 }: DesiredReplyTypeEditorProps) {
+  const { t: contextT } = useI18n();
+  const t = propT ?? contextT;
   const [isOpen, setIsOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<ReplyType>(currentType);
   const [isPending, startTransition] = useTransition();

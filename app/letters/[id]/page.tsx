@@ -100,7 +100,6 @@ export default async function LetterDetailPage({
             letterId={letter.id}
             currentType={letter.desiredReplyType}
             isAuthor={letter.authorId === user.id}
-            t={t}
           />
           {letter.emotionTags.map((tag) => (
             <span key={tag} className="text-xs font-medium text-muted-foreground/80">

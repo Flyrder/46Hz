@@ -3,12 +3,15 @@
 import { useState, useTransition } from "react";
 import { RefreshCw, AlertTriangle, CheckCircle2, ShieldAlert } from "lucide-react";
 import { regenerateMigrationCodeAction } from "@/app/actions/settings";
+import { useI18n } from "@/lib/i18n";
 
 interface RegenerateMigrationCodeButtonProps {
-  t: (key: string, replacements?: Record<string, string>) => string;
+  t?: (key: string, replacements?: Record<string, string>) => string;
 }
 
-export function RegenerateMigrationCodeButton({ t }: RegenerateMigrationCodeButtonProps) {
+export function RegenerateMigrationCodeButton({ t: propT }: RegenerateMigrationCodeButtonProps = {}) {
+  const { t: contextT } = useI18n();
+  const t = propT ?? contextT;
   const [showConfirm, setShowConfirm] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isPending, startTransition] = useTransition();
