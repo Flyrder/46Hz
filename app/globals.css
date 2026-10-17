@@ -213,6 +213,99 @@ html.theme-dark .stationery-card {
   animation: schumann-glow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Modern Web Guidance: precise-text-alignment (text-box: trim-both cap alphabetic) */
+.text-box-trim {
+  text-box: trim-both cap alphabetic;
+}
+
+@keyframes exit-beacon-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45), 0 0 24px -4px rgba(16, 185, 129, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0), 0 0 32px 2px rgba(16, 185, 129, 0.5);
+  }
+}
+
+.exit-beacon-pulse {
+  animation: exit-beacon-glow 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .schumann-pulse,
+  .exit-beacon-pulse {
+    animation: none;
+  }
+}
+
+/* Modern Web Guidance: brand-consistent-forms (accent-color + color-scheme + @supports not fallback) */
+body {
+  accent-color: #16794B;
+  color-scheme: light dark;
+}
+
+html.theme-dark body {
+  accent-color: #34D399;
+}
+
+@supports not (accent-color: #16794B) {
+  .brand-checkbox-label {
+    position: relative;
+    padding-left: 2rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .brand-checkbox-label input[type="checkbox"].visually-hidden-fallback {
+    position: absolute !important;
+    clip-path: inset(50%) !important;
+    overflow: hidden !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .brand-checkbox-label input[type="checkbox"] + span::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid hsl(var(--border));
+    background: hsl(var(--surface));
+    border-radius: 4px;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .brand-checkbox-label input[type="checkbox"]:focus-visible + span::before {
+    outline: 2px solid #16794B;
+    outline-offset: 2px;
+  }
+
+  .brand-checkbox-label input[type="checkbox"]:checked + span::before {
+    background-color: #16794B;
+    border-color: #16794B;
+  }
+
+  .brand-checkbox-label input[type="checkbox"]:checked + span::after {
+    content: "✓";
+    position: absolute;
+    left: 0.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+}
+
 textarea,
 input,
 select,

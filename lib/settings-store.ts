@@ -98,6 +98,10 @@ export const aiSettings = {
   defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)} as const,
   timeoutMs: ${cfg.aiTimeoutMs},
   mockDelayMs: ${cfg.aiMockDelayMs}
+} as const;
+
+export const supportResourcesSettings = {
+  enableChinaSupportInfo: ${cfg.enableChinaSupportInfo}
 } as const;`;
 }
 
@@ -160,6 +164,11 @@ function syncRootSettingsTsLiterals(cfg: EditableSystemSettings): boolean {
     source = source.replace(
       /(export const aiSettings[\s\S]*?=\s*\{)([\s\S]*?)(\n\};)/,
       `$1\n  defaultProvider: ${JSON.stringify(cfg.aiDefaultProvider)},\n  timeoutMs: ${cfg.aiTimeoutMs},\n  mockDelayMs: ${cfg.aiMockDelayMs}$3`
+    );
+
+    source = source.replace(
+      /(export const supportResourcesSettings[\s\S]*?=\s*\{)([\s\S]*?)(\n\};)/,
+      `$1\n  enableChinaSupportInfo: ${cfg.enableChinaSupportInfo}$3`
     );
 
     fs.writeFileSync(filePath, source, "utf-8");

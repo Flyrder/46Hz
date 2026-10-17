@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { AlertCircle, RotateCcw } from "lucide-react";
+import { createTranslator, defaultLocale } from "@/lib/i18n";
 
 export default function GlobalError({
   error,
@@ -10,6 +11,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = createTranslator(defaultLocale);
+
   useEffect(() => {
     console.error("[46Hz Global Error]:", error);
   }, [error]);
@@ -22,10 +25,10 @@ export default function GlobalError({
             <AlertCircle className="h-7 w-7" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-bold tracking-tight text-stone-900">
-            시스템 연결 오류가 발생했습니다
+            {t("common.globalErrorTitle")}
           </h1>
           <p className="mt-2 text-sm text-stone-600 leading-relaxed">
-            서비스 초기화 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.
+            {t("common.globalErrorDesc")}
           </p>
           <div className="mt-6">
             <button
@@ -34,7 +37,7 @@ export default function GlobalError({
               className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-teal-700 transition-all active:scale-98"
             >
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
-              <span>다시 시도하기</span>
+              <span>{t("common.retry")}</span>
             </button>
           </div>
         </div>
@@ -42,3 +45,4 @@ export default function GlobalError({
     </html>
   );
 }
+

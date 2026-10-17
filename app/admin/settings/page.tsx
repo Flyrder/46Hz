@@ -93,7 +93,7 @@ export default async function AdminSettingsPage({
           className="mb-6 flex items-center gap-2.5 rounded-2xl border border-danger/35 bg-danger/10 px-4 py-3.5 text-xs font-semibold text-danger animate-entry"
         >
           <AlertCircle className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
-          <span>입력값 범위를 다시 확인해 주세요 (최대 답장 한도는 기본 한도 이상이어야 합니다).</span>
+          <span>{t("admin.settingsValidationError")}</span>
         </div>
       ) : null}
 

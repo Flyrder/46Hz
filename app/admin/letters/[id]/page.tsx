@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireStaff } from "@/lib/admin";
 import { prisma } from "@/lib/db";
-import { createTranslator } from "@/lib/i18n";
+import { createTranslator, formatTag } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
 import { FileText, ShieldAlert, Sparkles, User, Tag, Calendar } from "lucide-react";
@@ -77,7 +77,9 @@ export default async function AdminLetterDetailPage({
                 {t("admin.tagsLabel")}
               </dt>
               <dd className="mt-1 font-medium text-foreground">
-                {[...letter.emotionTags, ...letter.situationTags].join(", ") || t("admin.noTags")}
+                {[...letter.emotionTags, ...letter.situationTags]
+                  .map((tag) => formatTag(tag, t))
+                  .join(", ") || t("admin.noTags")}
               </dd>
             </div>
           </dl>

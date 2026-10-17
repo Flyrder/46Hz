@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { ResonanceMeter } from "@/components/resonance-meter";
 import { prisma } from "@/lib/db";
-import { createTranslator } from "@/lib/i18n";
+import { createTranslator, formatTag } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { shouldMaskLetterContent } from "@/lib/safety/routing";
 import { requireUser } from "@/lib/session";
@@ -88,9 +88,14 @@ export default async function LetterDetailPage({
           <StatusBadge tone="neutral">{t(`replyType.${letter.desiredReplyType}`)}</StatusBadge>
           {letter.emotionTags.map((tag) => (
             <span key={tag} className="text-xs font-medium text-muted-foreground/80">
-              #{tag}
+              #{formatTag(tag, t)}
             </span>
           ))}
+          {letter.situationTags.length > 0 && (
+            <span className="text-xs text-muted-foreground/60">
+              · {letter.situationTags.map((tag) => formatTag(tag, t)).join(", ")}
+            </span>
+          )}
         </div>
       </div>
 

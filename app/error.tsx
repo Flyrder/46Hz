@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { AlertCircle, RotateCcw, Home } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { createTranslator, defaultLocale } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 
 export default function ErrorPage({
   error,
@@ -13,7 +13,7 @@ export default function ErrorPage({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const t = createTranslator(defaultLocale);
+  const { t } = useI18n();
 
   useEffect(() => {
     console.error("[46Hz App Error]:", error);
@@ -28,7 +28,7 @@ export default function ErrorPage({
         {t("common.errorTitle")}
       </h1>
       <p className="mt-2.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-        {error.message || "일시적인 오류가 발생했습니다. 잠시 후 다시 시도해 주세요."}
+        {error.message || t("common.errorFallback")}
       </p>
       <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
         <button

@@ -4,12 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAiMiddleware } from "@/lib/ai";
 import { prisma } from "@/lib/db";
+import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
 import { getLetterRouting } from "@/lib/safety/routing";
 import { formValue, reviewLetterSchema, writeLetterSchema } from "@/lib/validators";
 
 export async function processLetterAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
   const parsed = writeLetterSchema.safeParse({
     rawText: formValue(formData, "rawText")
   });
@@ -23,7 +24,7 @@ export async function processLetterAction(formData: FormData): Promise<void> {
   const ai = getAiMiddleware();
   const result = await ai.processLetter({
     text: input.rawText,
-    language: user.language,
+    language: locale,
     preferredReplyType: user.preferredReplyType
   });
 
@@ -36,7 +37,7 @@ export async function processLetterAction(formData: FormData): Promise<void> {
       situationTags: result.situationTags,
       desiredReplyType: result.desiredReplyType,
       riskLevel: result.risk.level,
-      language: user.language,
+      language: locale,
       status: "DRAFT"
     }
   });

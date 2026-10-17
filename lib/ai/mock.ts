@@ -66,59 +66,90 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async coachReply(input: CoachReplyInput): Promise<CoachedReplyResult> {
+    const lang = normalizeAiLang(input.language);
     const lower = input.replyText.toLowerCase();
     const flags: string[] = [];
     const suggestions: string[] = [];
 
-    if (/\b(should|must|just|obviously|stop feeling sorry)\b/i.test(input.replyText) ||
-        /(당연히|해야 해|해야지|틀렸어|왜 그랬어|그만 징징)/.test(input.replyText) ||
-        /(你应该|必须|显然|别再矫情)/.test(input.replyText)) {
+    if (
+      /\b(should|must|just|obviously|stop feeling sorry)\b/i.test(input.replyText) ||
+      /(당연히|해야 해|해야지|틀렸어|왜 그랬어|그만 징징)/.test(input.replyText) ||
+      /(你应该|必须|显然|别再矫情)/.test(input.replyText)
+    ) {
       flags.push("judgmental");
-      suggestions.push("Name the feeling without telling the writer what they must do.");
+      suggestions.push(
+        lang === "ko_KR"
+          ? "작성자가 무엇을 해야 하는지 단정하거나 지시하기보다, 지금 느끼는 감정을 먼저 있는 그대로 읽어주세요."
+          : lang === "zh_CN"
+            ? "请先温柔地看见并呼应写信人的感受，而不是直接告诉对方应该怎么做。"
+            : "Name the feeling without telling the writer what they must do."
+      );
     }
 
     if (
       input.desiredReplyType !== "ADVICE" &&
       (/\b(fix|solution|you need to|you have to|routine|plan)\b/i.test(input.replyText) ||
-       /(해결책|방법은|이렇게 해봐|플랜|루틴|실천)/.test(input.replyText) ||
-       /(解决方法|你得|去做计划)/.test(input.replyText))
+        /(해결책|방법은|이렇게 해봐|플랜|루틴|실천)/.test(input.replyText) ||
+        /(解决方法|你得|去做计划)/.test(input.replyText))
     ) {
       flags.push("too_advice_heavy");
-      suggestions.push("The writer asked to be heard, so keep advice light or leave it out.");
+      suggestions.push(
+        lang === "ko_KR"
+          ? "작성자는 해결책보다 따뜻한 경청을 원하고 있어요. 조언은 가볍게 줄이거나 공감의 말로 대신해 보세요."
+          : lang === "zh_CN"
+            ? "写信人更希望被倾听，建议减少具体解决方案，多给予温暖的陪伴。"
+            : "The writer asked to be heard, so keep advice light or leave it out."
+      );
     }
 
-    if (/\b(at least|not a big deal|get over it)\b/i.test(input.replyText) ||
-        /(별일 아니야|시간이 약|다들 그래|나 때는)/.test(input.replyText) ||
-        /(算了吧|没什么大不了|大家都是这样)/.test(input.replyText)) {
+    if (
+      /\b(at least|not a big deal|get over it)\b/i.test(input.replyText) ||
+      /(별일 아니야|시간이 약|다들 그래|나 때는)/.test(input.replyText) ||
+      /(算了吧|没什么大不了|大家都是这样)/.test(input.replyText)
+    ) {
       flags.push("invalidating");
-      suggestions.push("Avoid minimizing the experience.");
+      suggestions.push(
+        lang === "ko_KR"
+          ? "작성자가 겪은 아픔이나 무게를 가볍게 여기거나 축소하는 표현은 피해 주세요."
+          : lang === "zh_CN"
+            ? "请避免淡化或轻视写信人正在经历的痛苦与不易。"
+            : "Avoid minimizing the experience."
+      );
     }
 
-    if (/\b(i|me|my)\b/g.test(lower) && lower.split(/\b(i|me|my)\b/g).length > 6) {
+    const enFirstPersonCount = lower.split(/\b(i|me|my)\b/g).length;
+    const koFirstPersonCount = (input.replyText.match(/(제가|나는|내 생각엔|저도|내가)/g) ?? []).length;
+    if (enFirstPersonCount > 6 || koFirstPersonCount >= 5) {
       flags.push("centers_responder");
-      suggestions.push("Use your experience only briefly, then return attention to the writer.");
+      suggestions.push(
+        lang === "ko_KR"
+          ? "자신의 경험은 짧게 나누고, 다시 편지 작성자의 마음에 초점을 돌려주세요."
+          : lang === "zh_CN"
+            ? "只需简短分享您的个人经历，随后请将注意力重新回到写信人身上。"
+            : "Use your experience only briefly, then return attention to the writer."
+      );
     }
 
     const coachedText =
       flags.length === 0
         ? normalizeReply(input.replyText)
-        : buildWarmerReply(input.replyText, input.desiredReplyType, input.language);
+        : buildWarmerReply(input.replyText, input.desiredReplyType, lang);
 
     // Dynamic reframings across 3 compassionate tones
     const reframings = [
       {
-        label: input.language === "ko_KR" ? "온화한 공감" : input.language === "zh_CN" ? "温润共情" : "Gentle Empathy",
-        text: buildEmpatheticReframing(input.replyText, input.language),
+        label: lang === "ko_KR" ? "온화한 공감" : lang === "zh_CN" ? "温润共情" : "Gentle Empathy",
+        text: buildEmpatheticReframing(input.replyText, lang),
         tone: "warm" as const
       },
       {
-        label: input.language === "ko_KR" ? "경청 중심" : input.language === "zh_CN" ? "专注倾听" : "Deep Listening",
-        text: buildListeningReframing(input.replyText, input.language),
+        label: lang === "ko_KR" ? "경청 중심" : lang === "zh_CN" ? "专注倾听" : "Deep Listening",
+        text: buildListeningReframing(input.replyText, lang),
         tone: "listening" as const
       },
       {
-        label: input.language === "ko_KR" ? "차분한 지지" : input.language === "zh_CN" ? "从容支持" : "Calm Grounding",
-        text: buildGroundingReframing(input.replyText, input.language),
+        label: lang === "ko_KR" ? "차분한 지지" : lang === "zh_CN" ? "从容支持" : "Calm Grounding",
+        text: buildGroundingReframing(input.replyText, lang),
         tone: "grounding" as const
       }
     ];
@@ -129,13 +160,17 @@ export class MockAiMiddleware implements AiMiddleware {
       nonJudgmental: flags.includes("judgmental") ? 50 : 98
     };
 
+    const defaultSuggestion =
+      lang === "ko_KR"
+        ? "작성자의 마음에 초점을 맞춘 다정하고 온기 있는 답장입니다."
+        : lang === "zh_CN"
+          ? "这封回信温和体贴，很好地将关怀聚焦在写信人身上。"
+          : "This reads gentle and centered on the writer.";
+
     return {
       coachedText,
       flags,
-      suggestions:
-        suggestions.length > 0
-          ? suggestions
-          : ["This reads gentle and centered on the writer."],
+      suggestions: suggestions.length > 0 ? suggestions : [defaultSuggestion],
       reframings,
       metrics
     };
@@ -144,16 +179,25 @@ export class MockAiMiddleware implements AiMiddleware {
   async classifyRisk(
     input: RiskClassificationInput
   ): Promise<RiskClassificationResult> {
+    const lang = normalizeAiLang(input.language);
     const text = input.text.toLowerCase();
 
-    if (/\b(kill someone|hurt someone|graphic violence|explicit threat)\b/i.test(text) ||
-        /(타인을 해치|죽이겠다|폭력|테러|살해)/.test(text) ||
-        /(伤害他人|暴力威胁|杀人)/.test(text)) {
+    if (
+      /\b(kill someone|hurt someone|graphic violence|explicit threat)\b/i.test(text) ||
+      /(타인을 해치|죽이겠다|폭력|테러|살해)/.test(text) ||
+      /(伤害他人|暴力威胁|杀人)/.test(text)
+    ) {
       return {
         level: "BLOCKED",
-        reasons: ["possible threat or graphic unsafe content"],
+        reasons: [
+          lang === "ko_KR"
+            ? "타인 위협 또는 폭력적 위험 요소 감지"
+            : lang === "zh_CN"
+              ? "检测到潜在威胁或暴力风险内容"
+              : "possible threat or graphic unsafe content"
+        ],
         peerSafe: false,
-        supportMessage: getSafetySupportMessage(input.language)
+        supportMessage: getSafetySupportMessage(lang)
       };
     }
 
@@ -164,18 +208,32 @@ export class MockAiMiddleware implements AiMiddleware {
     ) {
       return {
         level: "HIGH",
-        reasons: ["possible immediate personal safety risk"],
+        reasons: [
+          lang === "ko_KR"
+            ? "자해·자살 등 즉각적인 신변 안전 위기 징후 감지"
+            : lang === "zh_CN"
+              ? "检测到直接个人安全或自伤风险"
+              : "possible immediate personal safety risk"
+        ],
         peerSafe: false,
-        supportMessage: getSafetySupportMessage(input.language)
+        supportMessage: getSafetySupportMessage(lang)
       };
     }
 
-    if (/\b(abuse|assault|trauma|stalking|unsafe at home)\b/i.test(text) ||
-        /(학대|폭행|가정폭력|스토킹|성범죄|트라우마)/.test(text) ||
-        /(虐待|家暴|跟踪|创伤|受袭)/.test(text)) {
+    if (
+      /\b(abuse|assault|trauma|stalking|unsafe at home)\b/i.test(text) ||
+      /(학대|폭행|가정폭력|스토킹|성범죄|트라우마)/.test(text) ||
+      /(虐待|家暴|跟踪|创伤|受袭)/.test(text)
+    ) {
       return {
         level: "SENSITIVE",
-        reasons: ["sensitive experience needing extra moderation review"],
+        reasons: [
+          lang === "ko_KR"
+            ? "트라우마·학대 등 세심한 검토가 필요한 민감 사연"
+            : lang === "zh_CN"
+              ? "涉及创伤或敏感经历，需额外人工审核"
+              : "sensitive experience needing extra moderation review"
+        ],
         peerSafe: false
       };
     }
@@ -188,6 +246,7 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async anonymize(input: AnonymizationInput): Promise<AnonymizationResult> {
+    const lang = normalizeAiLang(input.language);
     const flaggedTerms: string[] = [];
     let text = input.text;
 
@@ -198,7 +257,11 @@ export class MockAiMiddleware implements AiMiddleware {
     });
     text = text.replace(/\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/g, () => {
       flaggedTerms.push("phone number");
-      return "[phone removed]";
+      return lang === "ko_KR"
+        ? "[연락처 비공개]"
+        : lang === "zh_CN"
+          ? "[已隐藏电话]"
+          : "[phone removed]";
     });
 
     // 2. Korean Resident Registration Number (주민등록번호)
@@ -216,23 +279,38 @@ export class MockAiMiddleware implements AiMiddleware {
     // 4. Email Addresses
     text = text.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, () => {
       flaggedTerms.push("email address");
-      return "[email removed]";
+      return lang === "ko_KR"
+        ? "[이메일 비공개]"
+        : lang === "zh_CN"
+          ? "[已隐藏邮箱]"
+          : "[email removed]";
     });
 
     // 5. KakaoTalk / Social IDs
-    text = text.replace(/(?:카카오톡|카톡|Kakao|Line|라인|텔레그램|Telegram)\s*(?:아이디|ID|id)?(?:\s*(?:는|은|이|가))?\s*[:：]?\s*([a-zA-Z0-9._-]{4,20})/gi, () => {
-      flaggedTerms.push("messaging handle");
-      return "[메신저 아이디 비공개]";
-    });
+    text = text.replace(
+      /(?:카카오톡|카톡|Kakao|Line|라인|텔레그램|Telegram)\s*(?:아이디|ID|id)?(?:\s*(?:는|은|이|가))?\s*[:：]?\s*([a-zA-Z0-9._-]{4,20})/gi,
+      () => {
+        flaggedTerms.push("messaging handle");
+        return "[메신저 아이디 비공개]";
+      }
+    );
 
     // 6. Names (English & Korean)
     text = text.replace(/\b[Mm]y name is\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g, () => {
       flaggedTerms.push("possible name");
-      return "my name is [name removed]";
+      return lang === "ko_KR"
+        ? "제 이름은 [이름 비공개]"
+        : lang === "zh_CN"
+          ? "我的名字是 [已隐藏姓名]"
+          : "my name is [name removed]";
     });
     text = text.replace(/\bI am\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g, () => {
       flaggedTerms.push("possible name");
-      return "I am [name removed]";
+      return lang === "ko_KR"
+        ? "저는 [이름 비공개]"
+        : lang === "zh_CN"
+          ? "我是 [已隐藏姓名]"
+          : "I am [name removed]";
     });
     text = text.replace(/(?:제 이름은|저는)\s+([가-힣]{2,4})(?:입니다|이라고 합니다|예요|에요)/g, () => {
       flaggedTerms.push("possible name");
@@ -246,7 +324,7 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async generateWritingSparks(input: WritingSparksInput): Promise<WritingSparksResult> {
-    const lang = input.language ?? "ko_KR";
+    const lang = normalizeAiLang(input.language);
     const mood = (input.mood ?? "").toLowerCase();
 
     if (lang === "ko_KR") {
@@ -270,6 +348,16 @@ export class MockAiMiddleware implements AiMiddleware {
           suggestedEmotionTags: ["anxious", "uncertain"]
         };
       }
+      if (mood.includes("ashamed") || mood.includes("자책") || mood.includes("부끄")) {
+        return {
+          sparks: [
+            { id: "spark-1", text: "이미 지나간 일인데도 자꾸만 내 탓인 것 같아 마음이 무겁고 스스로가 작아지는 기분이에요.", prompt: "자책 내려놓기" },
+            { id: "spark-2", text: "누구에게도 말 못 할 실수나 부끄러운 마음을 혼자 삼키다 보니 어느새 숨이 턱 막혀왔어요.", prompt: "서툰 나 마주하기" },
+            { id: "spark-3", text: "완벽하지 못했던 어제의 나를 너무 미워하지 않도록, 오늘은 조용히 속마음을 털어놓아 봅니다.", prompt: "스스로 용서하기" }
+          ],
+          suggestedEmotionTags: ["ashamed", "self_compassion"]
+        };
+      }
       // Default: loneliness / comfort
       return {
         sparks: [
@@ -282,6 +370,36 @@ export class MockAiMiddleware implements AiMiddleware {
     }
 
     if (lang === "zh_CN") {
+      if (mood.includes("burnout")) {
+        return {
+          sparks: [
+            { id: "spark-1", text: "一直拼命往前跑，停下来才发现心里的力气好像已经耗尽了。", prompt: "觉察疲惫" },
+            { id: "spark-2", text: "不想成为任何人的负担而假装坚强，但今天我想承认自己真的很累。", prompt: "拥抱自己" },
+            { id: "spark-3", text: "想暂时放下所有身份与期待，做一个不需要证明任何事的自己。", prompt: "卸下重担" }
+          ],
+          suggestedEmotionTags: ["overwhelmed", "tired"]
+        };
+      }
+      if (mood.includes("anxious")) {
+        return {
+          sparks: [
+            { id: "spark-1", text: "对明天感到莫名的惶恐，脑海里思绪万千，久久难以入眠。", prompt: "梳理思绪" },
+            { id: "spark-2", text: "不确定眼前的选择是否正确，每一步都走得很沉重。", prompt: "安放迷茫" },
+            { id: "spark-3", text: "心跳总是不由自主地加快，想借着这封信慢下来深呼吸一次。", prompt: "平复呼吸" }
+          ],
+          suggestedEmotionTags: ["anxious", "uncertain"]
+        };
+      }
+      if (mood.includes("ashamed")) {
+        return {
+          sparks: [
+            { id: "spark-1", text: "明明事情已经过去，却还是忍不住把错都揽在自己身上。", prompt: "放下自责" },
+            { id: "spark-2", text: "有些难以启齿的遗憾一直压在心底，今天想鼓起勇气写下来。", prompt: "直面脆弱" },
+            { id: "spark-3", text: "希望能对那个不够完美的自己温柔一点，不再一味苛责。", prompt: "自我宽恕" }
+          ],
+          suggestedEmotionTags: ["ashamed", "self_compassion"]
+        };
+      }
       return {
         sparks: [
           { id: "spark-1", text: "最近一个人待着的时间变长了，总觉得心底深处空落落的。", prompt: "倾吐孤单" },
@@ -293,6 +411,36 @@ export class MockAiMiddleware implements AiMiddleware {
     }
 
     // en_US default
+    if (mood.includes("burnout")) {
+      return {
+        sparks: [
+          { id: "spark-1", text: "I kept pushing forward for so long, and only now realized my emotional battery is completely empty.", prompt: "Recognizing burnout" },
+          { id: "spark-2", text: "I did not want to burden anyone so I pretended to be fine, but today I need to admit I am exhausted.", prompt: "Dropping the mask" },
+          { id: "spark-3", text: "For just a moment, I want to set down every role and rest without having to prove anything.", prompt: "Setting down weight" }
+        ],
+        suggestedEmotionTags: ["overwhelmed", "tired"]
+      };
+    }
+    if (mood.includes("anxious")) {
+      return {
+        sparks: [
+          { id: "spark-1", text: "Tomorrow feels daunting, and my thoughts keep tangling up whenever I try to rest.", prompt: "Untangling worry" },
+          { id: "spark-2", text: "I am not sure if I am walking in the right direction, and every step feels heavy with doubt.", prompt: "Walking through doubt" },
+          { id: "spark-3", text: "My heart has been racing lately, so I am pausing here to take a slow breath and write honestly.", prompt: "Slowing the breath" }
+        ],
+        suggestedEmotionTags: ["anxious", "uncertain"]
+      };
+    }
+    if (mood.includes("ashamed")) {
+      return {
+        sparks: [
+          { id: "spark-1", text: "Even though time has passed, I keep blaming myself and feeling small inside.", prompt: "Releasing self-blame" },
+          { id: "spark-2", text: "Swallowing mistakes I could not tell anyone has left a heavy knot in my chest.", prompt: "Facing imperfection" },
+          { id: "spark-3", text: "I want to stop being so harsh on yesterday's version of me and speak gently here.", prompt: "Self-forgiveness" }
+        ],
+        suggestedEmotionTags: ["ashamed", "self_compassion"]
+      };
+    }
     return {
       sparks: [
         { id: "spark-1", text: "Lately the days feel unusually quiet, and there is an empty corner in my chest.", prompt: "Quiet loneliness" },
@@ -304,16 +452,38 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 
   async matchResonantLetters(input: ResonanceMatchInput): Promise<ResonanceMatchResult> {
+    const lang = normalizeAiLang(input.language);
     const recommended: string[] = [];
     const reasons: Record<string, string> = {};
+
+    const modeReason =
+      lang === "ko_KR"
+        ? "선호하시는 답장 방식과 깊이 공명하는 편지입니다."
+        : lang === "zh_CN"
+          ? "与您偏好的回信方式高度契合。"
+          : "Matches your preferred reply mode perfectly.";
+
+    const healingReason =
+      lang === "ko_KR"
+        ? "따뜻한 감정적 위로와 경청이 필요한 사연입니다."
+        : lang === "zh_CN"
+          ? "这封信正需要温柔的情感共鸣与倾听。"
+          : "Resonates with common emotional healing needs.";
+
+    const openReason =
+      lang === "ko_KR"
+        ? "조용한 또래 공명을 기다리고 있는 편지입니다."
+        : lang === "zh_CN"
+          ? "正在等待一份温暖的同伴回音。"
+          : "Open for gentle peer resonance.";
 
     for (const letter of input.availableLetters) {
       if (letter.desiredReplyType === input.responderPreference) {
         recommended.push(letter.id);
-        reasons[letter.id] = "Matches your preferred reply mode perfectly.";
+        reasons[letter.id] = modeReason;
       } else if (letter.emotionTags.some((tag) => ["lonely", "sad", "overwhelmed"].includes(tag))) {
         recommended.push(letter.id);
-        reasons[letter.id] = "Resonates with common emotional healing needs.";
+        reasons[letter.id] = healingReason;
       }
     }
 
@@ -322,7 +492,7 @@ export class MockAiMiddleware implements AiMiddleware {
       const fallbackIds = input.availableLetters.slice(0, 3).map((l) => l.id);
       return {
         recommendedLetterIds: fallbackIds,
-        matchReasons: Object.fromEntries(fallbackIds.map((id) => [id, "Open for gentle peer resonance."]))
+        matchReasons: Object.fromEntries(fallbackIds.map((id) => [id, openReason]))
       };
     }
 
@@ -333,11 +503,20 @@ export class MockAiMiddleware implements AiMiddleware {
   }
 }
 
+function normalizeAiLang(language?: string): "ko_KR" | "zh_CN" | "en_US" {
+  if (!language) return "ko_KR";
+  const lower = language.trim().toLowerCase();
+  if (lower.startsWith("ko")) return "ko_KR";
+  if (lower.startsWith("zh")) return "zh_CN";
+  return "en_US";
+}
+
 function getSafetySupportMessage(language: string): string {
-  if (language === "ko_KR") {
+  const lang = normalizeAiLang(language);
+  if (lang === "ko_KR") {
     return "현재 겪고 계신 마음의 무게는 익명 또래 편지만으로는 안전하게 다루기 어려울 수 있습니다. 언제든 도움을 받을 수 있는 24시간 전문 위기상담 기관으로 연결해 드립니다.";
   }
-  if (language === "zh_CN") {
+  if (lang === "zh_CN") {
     return "您当前的心情与困境非常重要，匿名同伴信箱可能无法提供及时的专业保护。我们建议您联系身边的信任者或24小时专业危机求助热线。";
   }
   return "This situation feels too delicate for an anonymous peer letterbox alone. Please consider reaching out to a professional 24/7 crisis helpline where someone can support you immediately.";
@@ -374,7 +553,8 @@ function inferDesiredReplyType(text: string, fallback: ReplyType): ReplyType {
 }
 
 function buildWarmerReply(replyText: string, desiredReplyType: ReplyType, language = "ko_KR"): string {
-  if (language === "ko_KR") {
+  const lang = normalizeAiLang(language);
+  if (lang === "ko_KR") {
     const base = "그 마음이 얼마나 무거웠을지 짐작이 가요. 용기 내어 솔직한 감정을 적어주셔서 참 고맙습니다.";
     if (desiredReplyType === "ADVICE") {
       return `${base} 서두르지 말고, 오늘 하루 나를 위해 할 수 있는 가장 작은 휴식 하나부터 챙겨보셨으면 좋겠어요.`;
@@ -383,6 +563,17 @@ function buildWarmerReply(replyText: string, desiredReplyType: ReplyType, langua
       return `${base} 저 역시 모든 게 낯설고 외로웠던 때가 있어 그 마음에 깊이 공감합니다. 온전히 편안해지시길 바랄게요.`;
     }
     return `${base} 억지로 괜찮은 척하지 않아도, 그 마음 그대로 충분히 소중합니다.`;
+  }
+
+  if (lang === "zh_CN") {
+    const base = "能感受到你心里的沉重。谢谢你鼓起勇气在这里写下真实的感受。";
+    if (desiredReplyType === "ADVICE") {
+      return `${base} 不必急着立刻解决所有问题，今天不妨先为自己留出一小段安静喘息的时间。`;
+    }
+    if (desiredReplyType === "SIMILAR_EXPERIENCES") {
+      return `${base} 我也曾有过感到陌生与孤单的时刻，很理解你的心情，愿你今晚能睡个安稳觉。`;
+    }
+    return `${base} 你不需要强颜欢笑，你此刻的感受本身就值得被温柔对待。`;
   }
 
   const base =
@@ -397,31 +588,35 @@ function buildWarmerReply(replyText: string, desiredReplyType: ReplyType, langua
 }
 
 function buildEmpatheticReframing(replyText: string, language: string): string {
-  if (language === "ko_KR") {
+  const lang = normalizeAiLang(language);
+  if (lang === "ko_KR") {
     return `보내주신 사연을 읽으며 마음이 많이 먹먹했어요. 혼자서 그 많은 짐을 감당하느라 얼마나 고단하셨을까요. 비록 멀리 있지만 온 마음으로 응원과 온기를 보냅니다.`;
   }
-  if (language === "zh_CN") {
+  if (lang === "zh_CN") {
     return `读着你的来信，心里感到一阵酸楚。一个人默默承受这些，一定很累吧。虽然隔着屏幕，但我真心为你送上一份陪伴与暖意。`;
   }
   return `Reading your words, I can really feel the weight you have been carrying alone. I hear you, and you are not as alone as it feels right now. Sending warmth your way.`;
 }
 
 function buildListeningReframing(replyText: string, language: string): string {
-  if (language === "ko_KR") {
+  const lang = normalizeAiLang(language);
+  if (lang === "ko_KR") {
     return `어떤 말로도 다 위로가 될 수 없겠지만, 당신이 겪은 아픔과 혼란을 조용히 끝까지 귀 기울여 들었습니다. 말해주셔서 감사해요.`;
   }
-  if (language === "zh_CN") {
+  if (lang === "zh_CN") {
     return `或许千言万语都不足以完全宽慰，但我只想静静地守在一旁，听你倾诉所有的委屈与疲惫。谢谢你愿意写下来。`;
   }
   return `No words can fix this instantly, but I wanted you to know that I listened to every single word. Thank you for trusting this space with your honest thoughts.`;
 }
 
 function buildGroundingReframing(replyText: string, language: string): string {
-  if (language === "ko_KR") {
+  const lang = normalizeAiLang(language);
+  if (lang === "ko_KR") {
     return `지금 당장 무언가를 해결하거나 괜찮아지려고 애쓰지 않아도 괜찮아요. 그저 오늘 하루, 숨 한 번 깊게 쉬며 나를 돌봐주세요.`;
   }
-  if (language === "zh_CN") {
+  if (lang === "zh_CN") {
     return `此刻你无需急着去解决一切，也不必强迫自己立刻振作起来。今天就请深呼吸一次，先好好善待疲惫的自己。`;
   }
   return `You do not have to figure everything out right now. Please give yourself permission to just breathe, rest, and take today one gentle moment at a time.`;
 }
+

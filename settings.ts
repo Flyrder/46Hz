@@ -42,13 +42,14 @@ export interface EditableSystemSettings {
   aiDefaultProvider: SupportedAiProvider;
   aiTimeoutMs: number;
   aiMockDelayMs: number;
+  enableChinaSupportInfo: boolean;
 }
 
 export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
   brandName: "46Hz",
   brandTitle: "46Hz Letterbox",
   brandTagline: "A quiet anonymous emotional support letterbox.",
-  brandVersion: "0.1.0",
+  brandVersion: "0.2.0",
   defaultLocale: "ko_KR",
   defaultTheme: "system",
   cookieMaxAgeDays: 180,
@@ -69,7 +70,8 @@ export const FACTORY_DEFAULT_SETTINGS: EditableSystemSettings = {
     "46Hz strictly collects zero PII (no legal names, no email, no phone, no biometrics). Retention policy is strictly capped at rolling 14 days.",
   aiDefaultProvider: "mock",
   aiTimeoutMs: 10_000,
-  aiMockDelayMs: 150
+  aiMockDelayMs: 150,
+  enableChinaSupportInfo: false
 };
 
 export const brandSettings: {
@@ -81,7 +83,7 @@ export const brandSettings: {
   name: "46Hz",
   title: "46Hz Letterbox",
   tagline: "A quiet anonymous emotional support letterbox.",
-  version: "0.1.0"
+  version: "0.2.0"
 };
 
 export const i18nSettings: {
@@ -228,6 +230,15 @@ export const aiSettings: {
   mockDelayMs: 150
 };
 
+export const supportResourcesSettings: {
+  /**
+   * Toggle display of Mainland China (CN) crisis hotlines & support organizations on EXIT page
+   */
+  enableChinaSupportInfo: boolean;
+} = {
+  enableChinaSupportInfo: false
+};
+
 /**
  * Snapshot current live settings into flat EditableSystemSettings structure
  */
@@ -265,7 +276,8 @@ export function getEditableSystemSettings(): EditableSystemSettings {
     dataMinimizationNotice: complianceSettings.dataMinimizationNotice,
     aiDefaultProvider: aiSettings.defaultProvider,
     aiTimeoutMs: aiSettings.timeoutMs,
-    aiMockDelayMs: aiSettings.mockDelayMs
+    aiMockDelayMs: aiSettings.mockDelayMs,
+    enableChinaSupportInfo: supportResourcesSettings.enableChinaSupportInfo
   };
 }
 
@@ -312,6 +324,8 @@ export function applyRuntimeSettingsUpdate(
   aiSettings.timeoutMs = next.aiTimeoutMs;
   aiSettings.mockDelayMs = next.aiMockDelayMs;
 
+  supportResourcesSettings.enableChinaSupportInfo = next.enableChinaSupportInfo;
+
   return next;
 }
 
@@ -335,7 +349,8 @@ export const settings = {
   claiming: claimingSettings,
   security: securitySettings,
   compliance: complianceSettings,
-  ai: aiSettings
+  ai: aiSettings,
+  supportResources: supportResourcesSettings
 } as const;
 
 export default settings;

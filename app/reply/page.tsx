@@ -22,6 +22,7 @@ export default async function ReplyOpportunitiesPage() {
     try {
       const matchResult = await ai.matchResonantLetters({
         responderPreference: user.preferredReplyType,
+        language: locale,
         availableLetters: letters.map((l) => ({
           id: l.id,
           emotionTags: l.emotionTags,

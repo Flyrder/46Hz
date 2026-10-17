@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Inbox, PenLine, Settings, ShieldCheck, Waves, HeartHandshake, ShieldAlert, Sliders } from "lucide-react";
+import { Inbox, PenLine, Settings, ShieldCheck, Waves, HeartHandshake, Sliders } from "lucide-react";
+import { ExitIsoIcon } from "@/components/exit-sign-emblem";
 import { PreferenceForm } from "@/components/preference-form";
 import { localeOptions, type Locale } from "@/lib/i18n";
 import { themeOptions, type ThemePreference } from "@/lib/theme";
-import { brandSettings, resonanceSettings } from "@/settings";
+import { brandSettings } from "@/settings";
 
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
 
@@ -37,27 +38,22 @@ export function AppShell({
         className="sticky top-0 z-30 -mx-3.5 border-b border-border/70 bg-background/85 px-3.5 py-2.5 backdrop-blur-md transition-colors sm:-mx-6 sm:px-6 sm:py-3 lg:-mx-8 lg:px-8"
       >
         <nav
-          aria-label="Main Navigation"
+          aria-label={t("nav.mainAriaLabel")}
           className="mx-auto flex max-w-5xl items-center justify-between gap-2 sm:gap-3"
         >
           {/* Logo & Brand Identity */}
           <Link
             href="/"
-            aria-label={`${brandSettings.name} Home`}
+            aria-label={`${brandSettings.name} ${t("nav.home")}`}
             className="group flex min-h-[44px] items-center gap-2.5 text-sm font-semibold rounded-xl pr-2 sm:pr-3 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
             <span className="grid h-9 w-9 place-items-center rounded-xl bg-accent text-accent-foreground shadow-xs ring-1 ring-accent/20 transition-transform group-hover:scale-105 active:scale-95">
               <Waves className="h-4.5 w-4.5" aria-hidden="true" />
             </span>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="text-base font-bold tracking-tight text-foreground">
-                  {brandSettings.name}
-                </span>
-                <span className="hidden md:inline-flex items-center rounded-full border border-accent/25 bg-accent/10 px-1.5 py-0.5 text-[9px] font-semibold text-accent">
-                  {resonanceSettings.defaultMaxReplies}→{resonanceSettings.expandedMaxReplies}
-                </span>
-              </div>
+              <span className="text-base font-bold tracking-tight text-foreground">
+                {brandSettings.name}
+              </span>
               <span className="text-[10px] font-normal text-muted-foreground/80 leading-none hidden sm:inline">
                 {brandTagline}
               </span>
@@ -82,7 +78,7 @@ export function AppShell({
             <div
               className="hidden sm:flex items-center gap-1 border-l border-border/60 pl-2"
               role="toolbar"
-              aria-label="Navigation actions"
+              aria-label={t("nav.actionsAriaLabel")}
             >
               <NavIcon href="/write" label={t("nav.write")}>
                 <PenLine className="h-4.5 w-4.5" aria-hidden="true" />
@@ -121,7 +117,7 @@ export function AppShell({
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-foreground font-medium">
               <Waves className="h-3.5 w-3.5 text-accent" />
-              <span>{brandSettings.name} · {brandSettings.tagline}</span>
+              <span>{brandSettings.name} · {brandTagline}</span>
             </div>
             <p className="max-w-md text-muted-foreground/80 leading-relaxed text-[11px]">
               {t("shell.footerDesc")}
@@ -131,10 +127,10 @@ export function AppShell({
           <div className="flex flex-wrap items-center gap-4 text-xs">
             <Link
               href="/support-resources"
-              className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+              className="inline-flex min-h-[44px] items-center gap-1.5 font-semibold text-[#16794B] dark:text-emerald-400 hover:opacity-90 transition-opacity underline-offset-4 hover:underline"
             >
-              <ShieldAlert className="h-3.5 w-3.5 text-amber-500/80" />
-              <span>{t("shell.crisisLink")}</span>
+              <ExitIsoIcon className="h-4 w-4 shrink-0" />
+              <span className="text-box-trim">{t("shell.crisisLink")}</span>
             </Link>
             <Link
               href="/settings"
@@ -151,7 +147,7 @@ export function AppShell({
             </Link>
             <span className="text-border" aria-hidden="true">·</span>
             <span className="text-[11px] text-muted-foreground/70">
-              Barrier-Free KWCAG 2.2 · Zero PII
+              {t("shell.footerComplianceBadge")}
             </span>
           </div>
         </div>

@@ -125,10 +125,32 @@ describe("MockAiMiddleware", () => {
 
     const result = await ai.matchResonantLetters({
       responderPreference: "COMFORT",
+      language: "ko_KR",
       availableLetters: letters
     });
 
     expect(result.recommendedLetterIds).toContain("letter-1");
-    expect(result.matchReasons["letter-1"]).toBeDefined();
+    expect(result.matchReasons["letter-1"]).toContain("공명");
+  });
+
+  it("localizes coaching suggestions and ashamed writing sparks in Korean (ko_KR)", async () => {
+    const coached = await ai.coachReply({
+      letterText: "요즘 마음이 너무 외롭고 그냥 제 이야기를 들어주셨으면 좋겠어요.",
+      replyText: "당연히 이렇게 해봐요! 플랜과 루틴을 짜서 실천해야 해.",
+      desiredReplyType: "JUST_BEING_HEARD",
+      language: "ko_KR"
+    });
+
+    expect(coached.flags).toEqual(expect.arrayContaining(["judgmental", "too_advice_heavy"]));
+    expect(coached.suggestions.join(" ")).toContain("작성자");
+    expect(coached.coachedText).toContain("마음이 얼마나 무거웠을지");
+
+    const ashamedSparks = await ai.generateWritingSparks({
+      mood: "ashamed",
+      language: "ko_KR"
+    });
+    expect(ashamedSparks.suggestedEmotionTags).toContain("ashamed");
+    expect(ashamedSparks.sparks[0].prompt).toBe("자책 내려놓기");
   });
 });
+

@@ -14,7 +14,7 @@ export default async function NotFound() {
         <MailQuestion className="h-7 w-7" aria-hidden="true" />
       </div>
       <span className="inline-block rounded-full bg-muted/70 px-3 py-1 font-mono text-xs font-semibold text-muted-foreground">
-        404 Not Found
+        {t("notfound.badge")}
       </span>
       <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">
         {t("notfound.title")}

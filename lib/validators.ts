@@ -90,6 +90,7 @@ export const writingSparksSchema = z.object({
 
 export const resonanceMatchSchema = z.object({
   responderPreference: replyTypeSchema,
+  language: z.enum(["en_US", "ko_KR", "zh_CN"]).optional(),
   availableLetters: z.array(
     z.object({
       id: z.string().min(1),
@@ -130,7 +131,8 @@ export const systemSettingsSchema = z
     dataMinimizationNotice: z.string().trim().min(10).max(500),
     aiDefaultProvider: z.enum(["mock", "openai", "deepseek"]),
     aiTimeoutMs: z.coerce.number().int().min(1000).max(60000),
-    aiMockDelayMs: z.coerce.number().int().min(0).max(5000)
+    aiMockDelayMs: z.coerce.number().int().min(0).max(5000),
+    enableChinaSupportInfo: z.boolean().default(false)
   })
   .refine((data) => data.expandedMaxReplies >= data.defaultMaxReplies, {
     message: "Expanded max replies must be greater than or equal to default max replies.",

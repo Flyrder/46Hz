@@ -105,7 +105,7 @@ export function ResonanceMeter({
               <div
                 key={index}
                 className="flex flex-1 flex-col items-center gap-1.5 group select-none"
-                title={`Resonance Harmonic ${index + 1} (${freqLabel})`}
+                title={t("resonance.harmonicNodeTitle", { index: String(index + 1), freq: freqLabel })}
                 aria-hidden="true"
               >
                 <div

@@ -83,6 +83,7 @@ export type CoachedReplyResult = {
 
 export type ResonanceMatchInput = {
   responderPreference: ReplyType;
+  language?: string;
   availableLetters: Array<{
     id: string;
     emotionTags: string[];

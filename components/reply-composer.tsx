@@ -16,7 +16,7 @@ import {
 } from "@/app/actions/replies";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { buttonVariants } from "@/components/ui/button";
-import { createTranslator, type Locale } from "@/lib/i18n";
+import { createTranslator, formatToneFlag, type Locale } from "@/lib/i18n";
 
 const initialState: CoachReplyState = {
   ok: false,
@@ -263,7 +263,10 @@ function CoachedReplyWorkbench({
 
         {state.flags.length > 0 ? (
           <p className="mt-3 border-t border-border/60 pt-2 text-[11px] text-muted-foreground">
-            {labels.flags.replace("{flags}", state.flags.join(", "))}
+            {labels.flags.replace(
+              "{flags}",
+              state.flags.map((flag) => formatToneFlag(flag, t)).join(", ")
+            )}
           </p>
         ) : null}
       </div>

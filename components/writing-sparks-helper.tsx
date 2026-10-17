@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, Loader2, ArrowRight, Heart } from "lucide-react";
-import { createTranslator, type Locale } from "@/lib/i18n";
+import { createTranslator, formatTag, type Locale } from "@/lib/i18n";
 
 interface WritingSparksHelperProps {
   locale: Locale;
@@ -149,9 +149,9 @@ export function WritingSparksHelper({
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-full bg-muted/60 px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+                    className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
                   >
-                    #{tag}
+                    #{formatTag(tag, t)}
                   </span>
                 ))}
               </div>

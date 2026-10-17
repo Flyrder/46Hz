@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  createTranslator,
   defaultLocale,
+  formatTag,
+  formatToneFlag,
   localeOptions,
   normalizeLocale,
   translate
@@ -31,6 +34,27 @@ describe("i18n preferences", () => {
     expect(translate("ko_KR", "age.under18")).toBe("19세 미만");
     expect(translate("en_US", "age.adult")).toBe("18+");
     expect(translate("en_US", "age.under18")).toBe("Under 18");
+  });
+
+  it("localizes emotion tags, situation tags, and AI tone flags across ko_KR, en_US, and zh_CN", () => {
+    const tKo = createTranslator("ko_KR");
+    const tEn = createTranslator("en_US");
+    const tZh = createTranslator("zh_CN");
+
+    expect(formatTag("lonely", tKo)).toBe("외로움");
+    expect(formatTag("overwhelmed", tKo)).toBe("버거움·번아웃");
+    expect(formatTag("work", tKo)).toBe("직장·일");
+    expect(formatTag("seeking-comfort", tKo)).toBe("위로가필요한");
+
+    expect(formatTag("lonely", tEn)).toBe("lonely");
+    expect(formatTag("life", tEn)).toBe("daily life");
+    expect(formatTag("lonely", tZh)).toBe("孤独");
+    expect(formatTag("work", tZh)).toBe("工作");
+
+    expect(formatToneFlag("judgmental", tKo)).toBe("단정적·지시적 표현");
+    expect(formatToneFlag("too_advice_heavy", tKo)).toBe("과도한 조언 위주");
+    expect(formatToneFlag("judgmental", tEn)).toBe("judgmental tone");
+    expect(formatToneFlag("judgmental", tZh)).toBe("评判性表达");
   });
 
   it("verifies 46Hz branding and clear warm claiming keys across locales without shadowban ambiguity", () => {
@@ -165,7 +189,63 @@ describe("i18n preferences", () => {
       "comment.submit",
       "comment.emptyTitle",
       "comment.emptyBody",
-      "comment.delete"
+      "comment.delete",
+      "resources.exitSlogan",
+      "resources.exitSosSignal",
+      "resources.exitStep1Title",
+      "resources.exitStep1Desc",
+      "resources.exitStep2Title",
+      "resources.exitStep2Desc",
+      "resources.exitStep3Title",
+      "resources.exitStep3Desc",
+      "resources.exitBreathStart",
+      "resources.exitBreathStop",
+      "resources.exitBreathPrompt",
+      "resources.directoryTitle",
+      "nav.home",
+      "nav.mainAriaLabel",
+      "nav.mobileAriaLabel",
+      "nav.actionsAriaLabel",
+      "shell.footerComplianceBadge",
+      "home.resonanceCapSuffix",
+      "home.philosophyAriaLabel",
+      "home.slowLoopBadge",
+      "home.stepBadge",
+      "common.errorFallback",
+      "common.globalErrorTitle",
+      "common.globalErrorDesc",
+      "common.loadingAria",
+      "common.loadingLettersSrOnly",
+      "common.processingSrOnly",
+      "notfound.badge",
+      "resonance.harmonicNodeTitle",
+      "reply.errorTooShort",
+      "reply.errorNotAvailable",
+      "reply.errorAlreadyReplied",
+      "reply.errorResonanceFull",
+      "reply.errorLockedByOther",
+      "resources.exitBreathPattern",
+      "resources.exitGuideAria",
+      "resources.exitPrimaryBadge",
+      "resources.quickCallCN",
+      "resources.quickCall1393",
+      "resources.regionKR",
+      "resources.regionCN",
+      "resources.hotlineTitle109",
+      "resources.hotlineTitle1393",
+      "resources.hotlineTitle1577",
+      "resources.hotlineTitle1388",
+      "resources.hotlineTitleCN400",
+      "resources.hotlineTitleCN12355",
+      "resources.hotlineTitleCN800",
+      "admin.settingsValidationError",
+      "admin.settingsSecBrandTitle",
+      "admin.settingsSecResonanceTitle",
+      "admin.settingsSecI18nTitle",
+      "admin.settingsChinaSupportTitle",
+      "admin.settingsSecSecurityTitle",
+      "admin.settingsSecAiTitle",
+      "admin.settingsSyncNote"
     ];
 
     for (const key of keysToCheck) {
@@ -181,6 +261,10 @@ describe("i18n preferences", () => {
       expect(en.length).toBeGreaterThan(0);
       expect(zh.length).toBeGreaterThan(0);
     }
+
+    expect(translate("ko_KR", "resources.title")).toBe("EXIT: 지원 정보");
+    expect(translate("en_US", "resources.title")).toBe("EXIT: Support Resources");
+    expect(translate("zh_CN", "resources.title")).toBe("EXIT：援助信息");
 
     // Dynamic interpolation check
     expect(translate("ko_KR", "write.counter", { current: "25", min: "40" })).toBe("25 / 40자 이상");

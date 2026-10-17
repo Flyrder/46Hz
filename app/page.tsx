@@ -6,9 +6,9 @@ import {
   Clock,
   ShieldCheck,
   HeartHandshake,
-  ArrowRight,
-  ShieldAlert
+  ArrowRight
 } from "lucide-react";
+import { ExitIsoIcon } from "@/components/exit-sign-emblem";
 import { buttonVariants } from "@/components/ui/button";
 import { createTranslator, type TranslationKey } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
@@ -61,7 +61,7 @@ export default async function HomePage() {
             <span>{t("home.schumannBadge")}</span>
             <span className="text-accent/50" aria-hidden="true">·</span>
             <span className="font-mono text-[11px]">
-              {resonanceSettings.defaultMaxReplies}→{resonanceSettings.expandedMaxReplies} Resonance Cap
+              {resonanceSettings.defaultMaxReplies}→{resonanceSettings.expandedMaxReplies} {t("home.resonanceCapSuffix")}
             </span>
           </div>
 
@@ -103,7 +103,7 @@ export default async function HomePage() {
       </section>
 
       {/* 3 Core Philosophy Pillars */}
-      <section aria-label="Brand Philosophy" className="grid gap-5 md:grid-cols-3">
+      <section aria-label={t("home.philosophyAriaLabel")} className="grid gap-5 md:grid-cols-3">
         {/* Pillar 1 */}
         <div className="stationery-card animate-entry p-6">
           <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent/10 text-accent mb-4">
@@ -144,7 +144,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 4-Step Slow Journey ("오늘의 편지함") */}
+      {/* 4-Step Slow Journey */}
       <section className="stationery-paper animate-entry p-8 sm:p-10">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 pb-5">
           <div>
@@ -156,7 +156,7 @@ export default async function HomePage() {
             </p>
           </div>
           <span className="rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
-            Slow Loop · {claimingSettings.leaseDurationMinutes}m Lease
+            {t("home.slowLoopBadge", { minutes: String(claimingSettings.leaseDurationMinutes) })}
           </span>
         </div>
 
@@ -171,7 +171,7 @@ export default async function HomePage() {
                   {index + 1}
                 </span>
                 <span className="text-[10px] font-mono text-muted-foreground/60 uppercase">
-                  Step 0{index + 1}
+                  {t("home.stepBadge", { step: `0${index + 1}` })}
                 </span>
               </div>
               <h3 className="text-sm font-bold text-foreground tracking-tight">
@@ -185,11 +185,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Gentle Crisis Care Banner */}
-      <section className="stationery-card animate-entry bg-muted/30 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
-            <ShieldAlert className="h-5 w-5" />
+      {/* Gentle EXIT Crisis Care Banner */}
+      <section className="stationery-card animate-entry border-emerald-600/25 bg-emerald-500/6 dark:border-emerald-400/25 dark:bg-emerald-500/10 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#16794B]/15 p-1.5 shadow-2xs">
+            <ExitIsoIcon className="h-7 w-7" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-foreground">
@@ -203,10 +203,11 @@ export default async function HomePage() {
 
         <Link
           href="/support-resources"
-          className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2.5 text-xs font-semibold hover:bg-muted transition-colors"
+          className="shrink-0 inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-[#16794B] px-4 py-2.5 text-xs font-bold text-white shadow-soft hover:bg-[#12633D] transition-all active:scale-98"
         >
-          <span>{t("home.crisisButton")}</span>
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ExitIsoIcon className="h-4 w-4 shrink-0" />
+          <span className="text-box-trim">{t("home.crisisButton")}</span>
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
         </Link>
       </section>
     </div>

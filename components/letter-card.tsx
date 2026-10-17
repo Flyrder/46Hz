@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Clock, MessageCircleHeart, Sparkles } from "lucide-react";
 import type { LetterStatus, ReplyType, RiskLevel } from "@/lib/domain";
+import { formatTag } from "@/lib/i18n";
 import { shouldMaskLetterContent } from "@/lib/safety/routing";
 import { excerpt, formatDate } from "@/lib/utils";
 import { StatusBadge } from "@/components/status-badge";
@@ -97,12 +98,12 @@ export function LetterCard({
           </span>
           {letter.emotionTags.length > 0 && (
             <span className="text-muted-foreground/80">
-              {letter.emotionTags.map((tag) => `#${tag}`).join(" ")}
+              {letter.emotionTags.map((tag) => `#${formatTag(tag, t)}`).join(" ")}
             </span>
           )}
           {mode !== "writer" && letter.situationTags.length > 0 && (
             <span className="text-muted-foreground/60 hidden sm:inline">
-              · {letter.situationTags.join(", ")}
+              · {letter.situationTags.map((tag) => formatTag(tag, t)).join(", ")}
             </span>
           )}
         </div>

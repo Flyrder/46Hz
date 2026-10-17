@@ -10,7 +10,7 @@ export function MobileBottomNav() {
   const { t } = useI18n();
 
   const navItems = [
-    { href: "/", label: "Home", icon: Home, exact: true },
+    { href: "/", label: t("nav.home"), icon: Home, exact: true },
     { href: "/write", label: t("nav.write"), icon: PenLine, exact: false },
     { href: "/reply", label: t("nav.reply"), icon: HeartHandshake, exact: false },
     { href: "/inbox", label: t("nav.inbox"), icon: Inbox, exact: false },
@@ -19,7 +19,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      aria-label="Mobile Navigation"
+      aria-label={t("nav.mobileAriaLabel")}
       className="fixed bottom-0 inset-x-0 z-40 border-t border-border/80 bg-surface/92 backdrop-blur-lg sm:hidden pb-safe shadow-tactile transition-colors"
     >
       <div className="flex h-16 items-center justify-around px-2 max-w-lg mx-auto">
