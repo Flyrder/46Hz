@@ -1,0 +1,41 @@
+{
+  "version": 3,
+  "skills": {
+    "gemini-api-dev": {
+      "source": "google-gemini/gemini-skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/google-gemini/gemini-skills.git",
+      "skillPath": "skills/gemini-api-dev/SKILL.md",
+      "skillFolderHash": "904a7b9bd28c6a3454752f5558910aca3b2d8e0a",
+      "installedAt": "2026-10-17T11:21:15.013Z",
+      "updatedAt": "2026-10-17T11:21:15.013Z"
+    },
+    "find-skills": {
+      "source": "vercel-labs/skills",
+      "sourceType": "github",
+      "sourceUrl": "https://github.com/vercel-labs/skills.git",
+      "skillPath": "skills/find-skills/SKILL.md",
+      "skillFolderHash": "76a98a285cb0434f3d39e1a873823556330e398b",
+      "installedAt": "2026-10-17T11:21:18.383Z",
+      "updatedAt": "2026-10-17T11:21:18.383Z"
+    }
+  },
+  "dismissed": {
+    "findSkillsPrompt": true
+  },
+  "lastSelectedAgents": [
+    "amp",
+    "cline",
+    "codex",
+    "cursor",
+    "droid",
+    "gemini-cli",
+    "github-copilot",
+    "kilo",
+    "kimi-code-cli",
+    "opencode",
+    "pi",
+    "warp",
+    "zed"
+  ]
+}
