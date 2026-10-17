@@ -14,10 +14,24 @@ import {
   Eye,
   EyeOff,
   Key,
-  Sparkles
+  Sparkles,
+  Activity,
+  AlertCircle,
+  ChevronDown,
+  Sliders
 } from "lucide-react";
 import { ExitIsoIcon } from "@/components/exit-sign-emblem";
-import { DEFAULT_AI_SYSTEM_PROMPT, type EditableSystemSettings } from "@/settings";
+import {
+  DEFAULT_AI_PROMPT_ANONYMIZATION,
+  DEFAULT_AI_PROMPT_REPLY_COACH,
+  DEFAULT_AI_PROMPT_RESONANCE_MATCH,
+  DEFAULT_AI_PROMPT_RISK_SAFETY,
+  DEFAULT_AI_PROMPT_WRITING_SPARKS,
+  DEFAULT_AI_SYSTEM_PROMPT,
+  type EditableSystemSettings,
+  type SupportedAiThinkingLevel
+} from "@/settings";
+import type { AiConnectionTestResult } from "@/lib/ai";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useI18n } from "@/lib/i18n";
 
@@ -83,10 +97,17 @@ export const aiSettings = {
   mockDelayMs: ${cfg.aiMockDelayMs},
   temperature: ${cfg.aiTemperature},
   maxTokens: ${cfg.aiMaxTokens},
+  thinkingLevel: ${JSON.stringify(cfg.aiThinkingLevel)} as const,
+  storeInteractions: ${cfg.aiStoreInteractions},
   model: ${JSON.stringify(cfg.aiModel)},
   apiKey: ${JSON.stringify(cfg.aiApiKey)},
   baseUrl: ${JSON.stringify(cfg.aiBaseUrl)},
-  systemPrompt: ${JSON.stringify(cfg.aiSystemPrompt)}
+  systemPrompt: ${JSON.stringify(cfg.aiSystemPrompt)},
+  promptRiskSafety: ${JSON.stringify(cfg.aiPromptRiskSafety)},
+  promptAnonymization: ${JSON.stringify(cfg.aiPromptAnonymization)},
+  promptReplyCoach: ${JSON.stringify(cfg.aiPromptReplyCoach)},
+  promptWritingSparks: ${JSON.stringify(cfg.aiPromptWritingSparks)},
+  promptResonanceMatch: ${JSON.stringify(cfg.aiPromptResonanceMatch)}
 } as const;
 
 export const supportResourcesSettings = {
@@ -108,8 +129,49 @@ export function AdminSettingsForm({
   const { t } = useI18n();
   const [draft, setDraft] = useState<EditableSystemSettings>(initialSettings);
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
+  const [testingAi, setTestingAi] = useState<boolean>(false);
+  const [aiTestResult, setAiTestResult] = useState<AiConnectionTestResult | null>(null);
 
   const livePreview = useMemo(() => generateLiveSettingsPreview(draft), [draft]);
+
+  const handleTestAiConnection = async () => {
+    setTestingAi(true);
+    setAiTestResult(null);
+    try {
+      const response = await fetch("/api/ai/test-connection", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          provider: draft.aiDefaultProvider,
+          apiKey: draft.aiApiKey,
+          baseUrl: draft.aiBaseUrl,
+          model: draft.aiModel,
+          thinkingLevel: draft.aiThinkingLevel,
+          storeInteractions: draft.aiStoreInteractions,
+          maxTokens: draft.aiMaxTokens,
+          timeoutMs: draft.aiTimeoutMs,
+          mockDelayMs: draft.aiMockDelayMs,
+          systemPrompt: draft.aiSystemPrompt
+        })
+      });
+      const data = (await response.json()) as AiConnectionTestResult;
+      setAiTestResult(data);
+    } catch (err) {
+      setAiTestResult({
+        ok: false,
+        provider: draft.aiDefaultProvider,
+        model: draft.aiModel,
+        endpoint: draft.aiBaseUrl || "https://generativelanguage.googleapis.com/v1beta/interactions",
+        thinkingLevel: draft.aiThinkingLevel,
+        storeInteractions: draft.aiStoreInteractions,
+        latencyMs: 0,
+        message: "Connection diagnostic failed.",
+        error: err instanceof Error ? err.message : String(err)
+      });
+    } finally {
+      setTestingAi(false);
+    }
+  };
 
   // Modern Web Guidance: required-field-feedback JS bridge for aria-invalid synchronization
   const syncFieldAriaInvalid = (
@@ -853,21 +915,72 @@ export function AdminSettingsForm({
             </div>
           </section>
 
-          {/* Section 5: AI Empathetic Middleware */}
+          {/* Section 5: AI Empathetic Middleware (Mock & Native Google Gemini Interactions API) */}
           <section className="stationery-card p-6 animate-entry">
-            <div className="flex items-start gap-3 border-b border-border/60 pb-4">
-              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent">
-                <Bot className="h-5 w-5" aria-hidden="true" />
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border/60 pb-4">
+              <div className="flex items-start gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent">
+                  <Bot className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-foreground">
+                    {t("admin.settingsSecAiTitle")}
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t("admin.settingsSecAiDesc")}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-base font-bold text-foreground">
-                  {t("admin.settingsSecAiTitle")}
-                </h2>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t("admin.settingsSecAiDesc")}
-                </p>
-              </div>
+
+              <button
+                type="button"
+                onClick={handleTestAiConnection}
+                disabled={testingAi || !canEdit}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-accent/35 bg-accent/10 px-3 py-2 text-xs font-bold text-accent transition-colors hover:bg-accent/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Activity className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>
+                  {testingAi
+                    ? t("admin.settingsAiTestingConnection")
+                    : t("admin.settingsAiTestConnectionBtn")}
+                </span>
+              </button>
             </div>
+
+            {aiTestResult ? (
+              <div
+                role="status"
+                className={`mt-4 rounded-xl border p-3.5 text-xs ${
+                  aiTestResult.ok
+                    ? "border-emerald-500/40 bg-emerald-500/10 text-foreground"
+                    : "border-danger/40 bg-danger/10 text-foreground"
+                }`}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 font-bold">
+                    {aiTestResult.ok ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 text-danger" />
+                    )}
+                    <span>{aiTestResult.message}</span>
+                  </div>
+                  <span className="rounded-full bg-background/80 px-2.5 py-0.5 font-mono text-[11px] text-muted-foreground">
+                    {aiTestResult.provider.toUpperCase()} · {aiTestResult.model} ·{" "}
+                    {aiTestResult.latencyMs}ms
+                  </span>
+                </div>
+                <p className="mt-1 font-mono text-[11px] text-muted-foreground break-all">
+                  Endpoint: {aiTestResult.endpoint} | thinking_level={aiTestResult.thinkingLevel} |
+                  store={String(aiTestResult.storeInteractions)}
+                </p>
+                {aiTestResult.error ? (
+                  <p className="mt-1.5 font-mono text-[11px] text-danger break-words">
+                    {aiTestResult.error}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
 
             {/* Master AI Toggle */}
             <div className="mt-5 flex items-center justify-between rounded-xl border border-border/80 bg-background/60 p-4">
@@ -894,80 +1007,352 @@ export function AdminSettingsForm({
               </label>
             </div>
 
-            {/* AI Function Capability Toggles */}
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
-                <span>{t("admin.settingsAiRiskSafetyLabel")}</span>
-                <input
-                  type="checkbox"
-                  name="enableAiRiskSafety"
-                  disabled={!canEdit || !draft.enableAi}
-                  checked={draft.enableAiRiskSafety}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, enableAiRiskSafety: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                />
-              </label>
+            {/* Per-Function AI Capability Toggles & Detailed Prompt Studio */}
+            <div className="mt-5 rounded-2xl border border-border/80 bg-background/40 p-4 space-y-3">
+              <div className="flex items-start gap-2.5 pb-1">
+                <Sliders className="h-4 w-4 text-accent shrink-0 mt-0.5" aria-hidden="true" />
+                <div>
+                  <h3 className="text-xs font-bold text-foreground">
+                    {t("admin.settingsAiFunctionPromptsTitle")}
+                  </h3>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed">
+                    {t("admin.settingsAiFunctionPromptsDesc")}
+                  </p>
+                </div>
+              </div>
 
-              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
-                <span>{t("admin.settingsAiAnonymizationLabel")}</span>
-                <input
-                  type="checkbox"
-                  name="enableAiAnonymization"
-                  disabled={!canEdit || !draft.enableAi}
-                  checked={draft.enableAiAnonymization}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, enableAiAnonymization: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                />
-              </label>
+              {/* 1. Risk & Safety Classification */}
+              <div className="rounded-xl border border-border/70 bg-background/70 p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="enableAiRiskSafety"
+                    className="flex-1 cursor-pointer text-xs font-semibold text-foreground"
+                  >
+                    <span className="block">{t("admin.settingsAiRiskSafetyLabel")}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {t("admin.settingsAiPromptRiskSafetyDesc")}
+                    </span>
+                  </label>
+                  <input
+                    id="enableAiRiskSafety"
+                    type="checkbox"
+                    name="enableAiRiskSafety"
+                    disabled={!canEdit || !draft.enableAi}
+                    checked={draft.enableAiRiskSafety}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, enableAiRiskSafety: e.target.checked }))
+                    }
+                    className="h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+                  />
+                </div>
+                <details name="ai-function-prompt-accordion" className="group mt-2.5 border-t border-border/50 pt-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] font-semibold text-accent hover:underline">
+                    <span>{t("admin.settingsAiEditFunctionPrompt")} (promptRiskSafety)</span>
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {draft.aiPromptRiskSafety.length} chars
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={() =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            aiPromptRiskSafety: DEFAULT_AI_PROMPT_RISK_SAFETY
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-accent hover:underline"
+                      >
+                        {t("admin.settingsAiResetPrompt")}
+                      </button>
+                    </div>
+                    <textarea
+                      id="aiPromptRiskSafety"
+                      name="aiPromptRiskSafety"
+                      rows={3}
+                      disabled={!canEdit}
+                      value={draft.aiPromptRiskSafety}
+                      onChange={(e) =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          aiPromptRiskSafety: e.target.value
+                        }))
+                      }
+                      className={`${inputClassName} text-xs font-mono leading-relaxed`}
+                    />
+                  </div>
+                </details>
+              </div>
 
-              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
-                <span>{t("admin.settingsAiReplyCoachLabel")}</span>
-                <input
-                  type="checkbox"
-                  name="enableAiReplyCoach"
-                  disabled={!canEdit || !draft.enableAi}
-                  checked={draft.enableAiReplyCoach}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, enableAiReplyCoach: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                />
-              </label>
+              {/* 2. PII Anonymization & Redaction */}
+              <div className="rounded-xl border border-border/70 bg-background/70 p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="enableAiAnonymization"
+                    className="flex-1 cursor-pointer text-xs font-semibold text-foreground"
+                  >
+                    <span className="block">{t("admin.settingsAiAnonymizationLabel")}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {t("admin.settingsAiPromptAnonymizationDesc")}
+                    </span>
+                  </label>
+                  <input
+                    id="enableAiAnonymization"
+                    type="checkbox"
+                    name="enableAiAnonymization"
+                    disabled={!canEdit || !draft.enableAi}
+                    checked={draft.enableAiAnonymization}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, enableAiAnonymization: e.target.checked }))
+                    }
+                    className="h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+                  />
+                </div>
+                <details name="ai-function-prompt-accordion" className="group mt-2.5 border-t border-border/50 pt-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] font-semibold text-accent hover:underline">
+                    <span>{t("admin.settingsAiEditFunctionPrompt")} (promptAnonymization)</span>
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {draft.aiPromptAnonymization.length} chars
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={() =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            aiPromptAnonymization: DEFAULT_AI_PROMPT_ANONYMIZATION
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-accent hover:underline"
+                      >
+                        {t("admin.settingsAiResetPrompt")}
+                      </button>
+                    </div>
+                    <textarea
+                      id="aiPromptAnonymization"
+                      name="aiPromptAnonymization"
+                      rows={3}
+                      disabled={!canEdit}
+                      value={draft.aiPromptAnonymization}
+                      onChange={(e) =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          aiPromptAnonymization: e.target.value
+                        }))
+                      }
+                      className={`${inputClassName} text-xs font-mono leading-relaxed`}
+                    />
+                  </div>
+                </details>
+              </div>
 
-              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30">
-                <span>{t("admin.settingsAiWritingSparksLabel")}</span>
-                <input
-                  type="checkbox"
-                  name="enableAiWritingSparks"
-                  disabled={!canEdit || !draft.enableAi}
-                  checked={draft.enableAiWritingSparks}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, enableAiWritingSparks: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                />
-              </label>
+              {/* 3. Empathetic Reply Coach */}
+              <div className="rounded-xl border border-border/70 bg-background/70 p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="enableAiReplyCoach"
+                    className="flex-1 cursor-pointer text-xs font-semibold text-foreground"
+                  >
+                    <span className="block">{t("admin.settingsAiReplyCoachLabel")}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {t("admin.settingsAiPromptReplyCoachDesc")}
+                    </span>
+                  </label>
+                  <input
+                    id="enableAiReplyCoach"
+                    type="checkbox"
+                    name="enableAiReplyCoach"
+                    disabled={!canEdit || !draft.enableAi}
+                    checked={draft.enableAiReplyCoach}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, enableAiReplyCoach: e.target.checked }))
+                    }
+                    className="h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+                  />
+                </div>
+                <details name="ai-function-prompt-accordion" className="group mt-2.5 border-t border-border/50 pt-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] font-semibold text-accent hover:underline">
+                    <span>{t("admin.settingsAiEditFunctionPrompt")} (promptReplyCoach)</span>
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {draft.aiPromptReplyCoach.length} chars
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={() =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            aiPromptReplyCoach: DEFAULT_AI_PROMPT_REPLY_COACH
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-accent hover:underline"
+                      >
+                        {t("admin.settingsAiResetPrompt")}
+                      </button>
+                    </div>
+                    <textarea
+                      id="aiPromptReplyCoach"
+                      name="aiPromptReplyCoach"
+                      rows={3}
+                      disabled={!canEdit}
+                      value={draft.aiPromptReplyCoach}
+                      onChange={(e) =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          aiPromptReplyCoach: e.target.value
+                        }))
+                      }
+                      className={`${inputClassName} text-xs font-mono leading-relaxed`}
+                    />
+                  </div>
+                </details>
+              </div>
 
-              <label className="flex items-center justify-between rounded-xl border border-border/70 bg-background/50 p-3 text-xs font-semibold text-foreground cursor-pointer hover:bg-muted/30 sm:col-span-2">
-                <span>{t("admin.settingsAiResonanceMatchLabel")}</span>
-                <input
-                  type="checkbox"
-                  name="enableAiResonanceMatch"
-                  disabled={!canEdit || !draft.enableAi}
-                  checked={draft.enableAiResonanceMatch}
-                  onChange={(e) =>
-                    setDraft((prev) => ({ ...prev, enableAiResonanceMatch: e.target.checked }))
-                  }
-                  className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
-                />
-              </label>
+              {/* 4. Writing Sparks Prompts */}
+              <div className="rounded-xl border border-border/70 bg-background/70 p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="enableAiWritingSparks"
+                    className="flex-1 cursor-pointer text-xs font-semibold text-foreground"
+                  >
+                    <span className="block">{t("admin.settingsAiWritingSparksLabel")}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {t("admin.settingsAiPromptWritingSparksDesc")}
+                    </span>
+                  </label>
+                  <input
+                    id="enableAiWritingSparks"
+                    type="checkbox"
+                    name="enableAiWritingSparks"
+                    disabled={!canEdit || !draft.enableAi}
+                    checked={draft.enableAiWritingSparks}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, enableAiWritingSparks: e.target.checked }))
+                    }
+                    className="h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+                  />
+                </div>
+                <details name="ai-function-prompt-accordion" className="group mt-2.5 border-t border-border/50 pt-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] font-semibold text-accent hover:underline">
+                    <span>{t("admin.settingsAiEditFunctionPrompt")} (promptWritingSparks)</span>
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {draft.aiPromptWritingSparks.length} chars
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={() =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            aiPromptWritingSparks: DEFAULT_AI_PROMPT_WRITING_SPARKS
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-accent hover:underline"
+                      >
+                        {t("admin.settingsAiResetPrompt")}
+                      </button>
+                    </div>
+                    <textarea
+                      id="aiPromptWritingSparks"
+                      name="aiPromptWritingSparks"
+                      rows={3}
+                      disabled={!canEdit}
+                      value={draft.aiPromptWritingSparks}
+                      onChange={(e) =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          aiPromptWritingSparks: e.target.value
+                        }))
+                      }
+                      className={`${inputClassName} text-xs font-mono leading-relaxed`}
+                    />
+                  </div>
+                </details>
+              </div>
+
+              {/* 5. Schumann Resonance Peer Matching */}
+              <div className="rounded-xl border border-border/70 bg-background/70 p-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor="enableAiResonanceMatch"
+                    className="flex-1 cursor-pointer text-xs font-semibold text-foreground"
+                  >
+                    <span className="block">{t("admin.settingsAiResonanceMatchLabel")}</span>
+                    <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
+                      {t("admin.settingsAiPromptResonanceMatchDesc")}
+                    </span>
+                  </label>
+                  <input
+                    id="enableAiResonanceMatch"
+                    type="checkbox"
+                    name="enableAiResonanceMatch"
+                    disabled={!canEdit || !draft.enableAi}
+                    checked={draft.enableAiResonanceMatch}
+                    onChange={(e) =>
+                      setDraft((prev) => ({ ...prev, enableAiResonanceMatch: e.target.checked }))
+                    }
+                    className="h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+                  />
+                </div>
+                <details name="ai-function-prompt-accordion" className="group mt-2.5 border-t border-border/50 pt-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between text-[11px] font-semibold text-accent hover:underline">
+                    <span>{t("admin.settingsAiEditFunctionPrompt")} (promptResonanceMatch)</span>
+                    <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="mt-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] text-muted-foreground">
+                        {draft.aiPromptResonanceMatch.length} chars
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!canEdit}
+                        onClick={() =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            aiPromptResonanceMatch: DEFAULT_AI_PROMPT_RESONANCE_MATCH
+                          }))
+                        }
+                        className="text-[11px] font-semibold text-accent hover:underline"
+                      >
+                        {t("admin.settingsAiResetPrompt")}
+                      </button>
+                    </div>
+                    <textarea
+                      id="aiPromptResonanceMatch"
+                      name="aiPromptResonanceMatch"
+                      rows={3}
+                      disabled={!canEdit}
+                      value={draft.aiPromptResonanceMatch}
+                      onChange={(e) =>
+                        setDraft((prev) => ({
+                          ...prev,
+                          aiPromptResonanceMatch: e.target.value
+                        }))
+                      }
+                      className={`${inputClassName} text-xs font-mono leading-relaxed`}
+                    />
+                  </div>
+                </details>
+              </div>
             </div>
 
-            {/* AI Provider & Endpoint Details */}
+            {/* AI Provider & Native Google Gemini Interactions API Configuration */}
             <div className="mt-5 rounded-2xl border border-border/80 bg-background/50 p-5 space-y-5">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
@@ -985,32 +1370,21 @@ export function AdminSettingsForm({
                     onChange={(e) => {
                       const newProv = e.target.value as EditableSystemSettings["aiDefaultProvider"];
                       let suggestedModel = draft.aiModel;
-                      let suggestedBaseUrl = draft.aiBaseUrl;
-                      if (newProv === "openai") {
-                        if (!draft.aiModel || draft.aiModel.includes("deepseek") || draft.aiModel.includes("gemini") || draft.aiModel.includes("mock")) {
-                          suggestedModel = "gpt-4o-mini";
-                        }
-                      } else if (newProv === "deepseek") {
-                        if (!draft.aiModel || draft.aiModel.includes("gpt") || draft.aiModel.includes("gemini") || draft.aiModel.includes("mock")) {
-                          suggestedModel = "deepseek-chat";
-                        }
-                      } else if (newProv === "gemini") {
-                        if (!draft.aiModel || draft.aiModel.includes("gpt") || draft.aiModel.includes("deepseek") || draft.aiModel.includes("mock")) {
-                          suggestedModel = "gemini-1.5-flash";
-                        }
+                      if (
+                        newProv === "gemini" &&
+                        (!draft.aiModel || draft.aiModel.startsWith("mock") || draft.aiModel.startsWith("gpt"))
+                      ) {
+                        suggestedModel = "gemini-3.8-flash";
                       }
                       setDraft((prev) => ({
                         ...prev,
                         aiDefaultProvider: newProv,
-                        aiModel: suggestedModel,
-                        aiBaseUrl: suggestedBaseUrl
+                        aiModel: suggestedModel
                       }));
                     }}
                     className={inputClassName}
                   >
                     <option value="mock">{t("admin.settingsAiProviderMock")}</option>
-                    <option value="openai">{t("admin.settingsAiProviderOpenai")}</option>
-                    <option value="deepseek">{t("admin.settingsAiProviderDeepseek")}</option>
                     <option value="gemini">{t("admin.settingsAiProviderGemini")}</option>
                   </select>
                 </div>
@@ -1036,23 +1410,35 @@ export function AdminSettingsForm({
                     }
                     className={inputClassName}
                   />
-                  {/* Model Presets Quick Select */}
+                  {/* Gemini Model Presets Quick Select */}
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <span className="text-[11px] font-medium text-muted-foreground mr-1">
                       {t("admin.settingsAiModelPresets")}:
                     </span>
-                    {(draft.aiDefaultProvider === "openai"
-                      ? ["gpt-4o-mini", "gpt-4o"]
-                      : draft.aiDefaultProvider === "deepseek"
-                      ? ["deepseek-chat", "deepseek-reasoner"]
-                      : draft.aiDefaultProvider === "gemini"
-                      ? ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"]
-                      : ["mock-v1"]
-                    ).map((m) => (
+                    {[
+                      "gemini-3.8-flash",
+                      "gemini-4-argon",
+                      "gemini-3.5-flash-lite",
+                      "gemini-3.1-flash-lite",
+                      "gemma-4-31b-it"
+                    ].map((m) => (
                       <button
                         key={m}
                         type="button"
-                        onClick={() => setDraft((prev) => ({ ...prev, aiModel: m }))}
+                        onClick={() =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            aiModel: m,
+                            aiMaxTokens:
+                              m === "gemini-4-argon"
+                                ? Math.max(32768, prev.aiMaxTokens)
+                                : prev.aiMaxTokens,
+                            aiThinkingLevel:
+                              m === "gemini-4-argon" && prev.aiThinkingLevel === "minimal"
+                                ? "low"
+                                : prev.aiThinkingLevel
+                          }))
+                        }
                         disabled={!canEdit}
                         className={`rounded-lg border px-2 py-0.5 text-[11px] font-mono transition-colors ${
                           draft.aiModel === m
@@ -1067,7 +1453,7 @@ export function AdminSettingsForm({
                 </div>
               </div>
 
-              {/* Provider API Key & Base URL */}
+              {/* Gemini API Key & Base URL */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <div className="flex items-center justify-between mb-1">
@@ -1102,15 +1488,7 @@ export function AdminSettingsForm({
                     name="aiApiKey"
                     type={showApiKey ? "text" : "password"}
                     disabled={!canEdit}
-                    placeholder={
-                      draft.aiDefaultProvider === "openai"
-                        ? "sk-proj-..."
-                        : draft.aiDefaultProvider === "deepseek"
-                        ? "sk-..."
-                        : draft.aiDefaultProvider === "gemini"
-                        ? "AIzaSy..."
-                        : "Optional"
-                    }
+                    placeholder="AIzaSy..."
                     value={draft.aiApiKey}
                     onChange={(e) =>
                       setDraft((prev) => ({
@@ -1137,15 +1515,7 @@ export function AdminSettingsForm({
                     name="aiBaseUrl"
                     type="text"
                     disabled={!canEdit}
-                    placeholder={
-                      draft.aiDefaultProvider === "openai"
-                        ? "https://api.openai.com/v1"
-                        : draft.aiDefaultProvider === "deepseek"
-                        ? "https://api.deepseek.com"
-                        : draft.aiDefaultProvider === "gemini"
-                        ? "https://generativelanguage.googleapis.com/v1beta/openai"
-                        : "https://..."
-                    }
+                    placeholder="https://generativelanguage.googleapis.com/v1beta"
                     value={draft.aiBaseUrl}
                     onChange={(e) =>
                       setDraft((prev) => ({
@@ -1161,7 +1531,65 @@ export function AdminSettingsForm({
                 </div>
               </div>
 
-              {/* System Initial Prompt Editor */}
+              {/* Gemini Interactions Reasoning Depth & Server Storage */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="aiThinkingLevel"
+                    className="block text-xs font-semibold text-foreground mb-1"
+                  >
+                    {t("admin.settingsAiThinkingLevelLabel")}
+                  </label>
+                  <select
+                    id="aiThinkingLevel"
+                    name="aiThinkingLevel"
+                    disabled={!canEdit}
+                    value={draft.aiThinkingLevel}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiThinkingLevel: e.target.value as SupportedAiThinkingLevel
+                      }))
+                    }
+                    className={inputClassName}
+                  >
+                    <option value="minimal">{t("admin.settingsAiThinkingMinimal")}</option>
+                    <option value="low">{t("admin.settingsAiThinkingLow")}</option>
+                    <option value="medium">{t("admin.settingsAiThinkingMedium")}</option>
+                    <option value="high">{t("admin.settingsAiThinkingHigh")}</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl border border-border/70 bg-background/60 p-3.5">
+                  <div className="pr-3">
+                    <label
+                      htmlFor="aiStoreInteractions"
+                      className="block cursor-pointer text-xs font-semibold text-foreground"
+                    >
+                      {t("admin.settingsAiStoreInteractionsLabel")}
+                    </label>
+                    <span className="mt-0.5 block text-[11px] text-muted-foreground leading-relaxed">
+                      {t("admin.settingsAiStoreInteractionsDesc")}
+                    </span>
+                  </div>
+                  <input
+                    id="aiStoreInteractions"
+                    name="aiStoreInteractions"
+                    type="checkbox"
+                    disabled={!canEdit}
+                    checked={draft.aiStoreInteractions}
+                    onChange={(e) =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        aiStoreInteractions: e.target.checked
+                      }))
+                    }
+                    className="h-4 w-4 shrink-0 rounded border-border text-accent focus:ring-accent"
+                  />
+                </div>
+              </div>
+
+              {/* System Initial Prompt Editor (system_instruction) */}
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label
@@ -1173,7 +1601,7 @@ export function AdminSettingsForm({
                   </label>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] font-mono text-muted-foreground">
-                      {draft.aiSystemPrompt.length}자
+                      {draft.aiSystemPrompt.length} chars
                     </span>
                     <button
                       type="button"
@@ -1209,34 +1637,9 @@ export function AdminSettingsForm({
                 </p>
               </div>
 
-              {/* Execution & Model Hyperparameters */}
-              <div className="grid gap-4 sm:grid-cols-4 border-t border-border/50 pt-4">
-                <div>
-                  <label
-                    htmlFor="aiTemperature"
-                    className="block text-xs font-semibold text-foreground mb-1"
-                  >
-                    {t("admin.settingsAiTemperatureLabel")}
-                  </label>
-                  <input
-                    id="aiTemperature"
-                    name="aiTemperature"
-                    type="number"
-                    min={0}
-                    max={2}
-                    step={0.1}
-                    disabled={!canEdit}
-                    value={draft.aiTemperature}
-                    onChange={(e) =>
-                      setDraft((prev) => ({
-                        ...prev,
-                        aiTemperature: Number(e.target.value) || 0.7
-                      }))
-                    }
-                    className={inputClassName}
-                  />
-                </div>
-
+              {/* Execution & Output Token Parameters */}
+              <input type="hidden" name="aiTemperature" value={draft.aiTemperature} />
+              <div className="grid gap-4 sm:grid-cols-3 border-t border-border/50 pt-4">
                 <div>
                   <label
                     htmlFor="aiMaxTokens"
@@ -1249,14 +1652,14 @@ export function AdminSettingsForm({
                     name="aiMaxTokens"
                     type="number"
                     min={50}
-                    max={8000}
-                    step={50}
+                    max={65536}
+                    step={256}
                     disabled={!canEdit}
                     value={draft.aiMaxTokens}
                     onChange={(e) =>
                       setDraft((prev) => ({
                         ...prev,
-                        aiMaxTokens: Number(e.target.value) || 1500
+                        aiMaxTokens: Number(e.target.value) || 4096
                       }))
                     }
                     className={inputClassName}
@@ -1276,14 +1679,14 @@ export function AdminSettingsForm({
                     type="number"
                     required
                     min={1000}
-                    max={60000}
+                    max={120000}
                     step={500}
                     disabled={!canEdit}
                     value={draft.aiTimeoutMs}
                     onChange={(e) =>
                       setDraft((prev) => ({
                         ...prev,
-                        aiTimeoutMs: Number(e.target.value) || 10000
+                        aiTimeoutMs: Number(e.target.value) || 12000
                       }))
                     }
                     onBlur={handleBlur}

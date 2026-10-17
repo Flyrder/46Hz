@@ -13,7 +13,7 @@ import { prisma } from "@/lib/db";
 import { canTransitionLetter, canTransitionReply } from "@/lib/moderation/status";
 import { getClientIp } from "@/lib/ip";
 import { checkRateLimit, resetRateLimit } from "@/lib/safety/rate-limit";
-import { securitySettings } from "@/settings";
+import { aiSettings, securitySettings } from "@/settings";
 import {
   adminLetterSchema,
   adminReplySchema,
@@ -303,15 +303,22 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
     enableAiReplyCoach: formData.get("enableAiReplyCoach") === "on" || formData.get("enableAiReplyCoach") === "true",
     enableAiWritingSparks: formData.get("enableAiWritingSparks") === "on" || formData.get("enableAiWritingSparks") === "true",
     enableAiResonanceMatch: formData.get("enableAiResonanceMatch") === "on" || formData.get("enableAiResonanceMatch") === "true",
-    aiDefaultProvider: formValue(formData, "aiDefaultProvider"),
-    aiTimeoutMs: formValue(formData, "aiTimeoutMs"),
-    aiMockDelayMs: formValue(formData, "aiMockDelayMs"),
-    aiTemperature: formValue(formData, "aiTemperature"),
-    aiMaxTokens: formValue(formData, "aiMaxTokens"),
-    aiModel: formValue(formData, "aiModel"),
-    aiApiKey: formValue(formData, "aiApiKey"),
-    aiBaseUrl: formValue(formData, "aiBaseUrl"),
-    aiSystemPrompt: formValue(formData, "aiSystemPrompt"),
+    aiDefaultProvider: formValue(formData, "aiDefaultProvider") || aiSettings.defaultProvider,
+    aiTimeoutMs: formValue(formData, "aiTimeoutMs") || String(aiSettings.timeoutMs),
+    aiMockDelayMs: formValue(formData, "aiMockDelayMs") || String(aiSettings.mockDelayMs),
+    aiTemperature: formValue(formData, "aiTemperature") || String(aiSettings.temperature),
+    aiMaxTokens: formValue(formData, "aiMaxTokens") || String(aiSettings.maxTokens),
+    aiThinkingLevel: formValue(formData, "aiThinkingLevel") || aiSettings.thinkingLevel,
+    aiStoreInteractions: formData.get("aiStoreInteractions") === "on" || formData.get("aiStoreInteractions") === "true",
+    aiModel: formValue(formData, "aiModel") || aiSettings.model,
+    aiApiKey: formData.has("aiApiKey") ? formValue(formData, "aiApiKey") : aiSettings.apiKey,
+    aiBaseUrl: formData.has("aiBaseUrl") ? formValue(formData, "aiBaseUrl") : aiSettings.baseUrl,
+    aiSystemPrompt: formData.has("aiSystemPrompt") ? formValue(formData, "aiSystemPrompt") : aiSettings.systemPrompt,
+    aiPromptRiskSafety: formData.has("aiPromptRiskSafety") ? formValue(formData, "aiPromptRiskSafety") : aiSettings.promptRiskSafety,
+    aiPromptAnonymization: formData.has("aiPromptAnonymization") ? formValue(formData, "aiPromptAnonymization") : aiSettings.promptAnonymization,
+    aiPromptReplyCoach: formData.has("aiPromptReplyCoach") ? formValue(formData, "aiPromptReplyCoach") : aiSettings.promptReplyCoach,
+    aiPromptWritingSparks: formData.has("aiPromptWritingSparks") ? formValue(formData, "aiPromptWritingSparks") : aiSettings.promptWritingSparks,
+    aiPromptResonanceMatch: formData.has("aiPromptResonanceMatch") ? formValue(formData, "aiPromptResonanceMatch") : aiSettings.promptResonanceMatch,
     enableChinaSupportInfo: formData.get("enableChinaSupportInfo") === "on" || formData.get("enableChinaSupportInfo") === "true"
   });
 
@@ -328,7 +335,7 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
       targetType: "SUPPORT_RESOURCE",
       targetId: "settings.ts",
       action: "SYSTEM_SETTINGS_UPDATED",
-      reason: `Updated settings.ts (Replies: ${updated.defaultMaxReplies}->${updated.expandedMaxReplies}, Lease: ${updated.leaseDurationMinutes}m, AI: ${updated.aiDefaultProvider}, CN Support: ${updated.enableChinaSupportInfo ? "ON" : "OFF"})`,
+      reason: `Updated settings.ts (Replies: ${updated.defaultMaxReplies}->${updated.expandedMaxReplies}, Lease: ${updated.leaseDurationMinutes}m, AI: ${updated.aiDefaultProvider}/${updated.aiModel}, CN Support: ${updated.enableChinaSupportInfo ? "ON" : "OFF"})`,
       previousStatus: "LIVE",
       newStatus: syncedSettingsTs ? "SYNCED_TO_SETTINGS_TS" : "RUNTIME_OVERRIDDEN"
     }
