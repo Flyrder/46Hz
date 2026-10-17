@@ -6,12 +6,17 @@ WORKDIR /app
 # Install OpenSSL for Prisma multi-arch binary engines
 RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
 
-FROM --platform=$BUILDPLATFORM base AS dependencies
+# Native build base stage executing on host platform ($BUILDPLATFORM) to avoid emulation overhead and Rust crashes under QEMU
+FROM --platform=$BUILDPLATFORM node:26-bookworm-slim AS build-base
+WORKDIR /app
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+FROM build-base AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM --platform=$BUILDPLATFORM base AS builder
+FROM build-base AS builder
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
