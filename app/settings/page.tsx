@@ -4,6 +4,7 @@ import { PreferenceForm } from "@/components/preference-form";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { CopyButton } from "@/components/copy-button";
 import { RegenerateMigrationCodeButton } from "@/components/regenerate-migration-code-button";
+import { ReplyPreferenceSelect } from "@/components/reply-preference-select";
 import { createTranslator, localeOptions } from "@/lib/i18n";
 import { getLocalePreference, getThemePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
@@ -47,7 +48,13 @@ export default async function SettingsPage() {
           <div className="flex items-center justify-between">
             <dt className="text-muted-foreground">{t("settings.replyPreference")}</dt>
             <dd className="font-medium text-foreground">
-              {t(`replyType.${user.preferredReplyType}`)}
+              <ReplyPreferenceSelect
+                value={user.preferredReplyType}
+                label={t("settings.replyPreference")}
+                options={(["COMFORT", "ADVICE", "SIMILAR_EXPERIENCES", "JUST_BEING_HEARD"] as const).map(
+                  (type) => ({ value: type, label: t(`replyType.${type}`) })
+                )}
+              />
             </dd>
           </div>
 
