@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
-import { GET, POST } from "@/app/api/mcp/route";
+import { GET, POST, DELETE, OPTIONS } from "@/app/api/mcp/route";
 
 describe("MCP (Model Context Protocol) API Endpoint (/api/mcp)", () => {
   it("GET returns server discovery catalog with protocolVersion, tools, and resources", async () => {
@@ -213,5 +213,84 @@ describe("MCP (Model Context Protocol) API Endpoint (/api/mcp)", () => {
     expect(readRes.status).toBe(200);
     const readData = await readRes.json();
     expect(readData.result.contents[0].uri).toBe("46hz://system/resonance");
+  });
+
+  it("POST handles Streamable HTTP 'notifications/initialized' returning 202 Accepted", async () => {
+    const initReq = new NextRequest("http://localhost:3000/api/mcp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 10,
+        method: "initialize",
+        params: { protocolVersion: "2024-11-05" }
+      })
+    });
+    const initRes = await POST(initReq);
+    expect(initRes.status).toBe(200);
+    const sessionId = initRes.headers.get("mcp-session-id");
+    expect(sessionId).toBeTruthy();
+
+    const notifReq = new NextRequest("http://localhost:3000/api/mcp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Mcp-Session-Id": sessionId!
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "notifications/initialized"
+      })
+    });
+    const notifRes = await POST(notifReq);
+    expect(notifRes.status).toBe(202);
+    expect(notifRes.headers.get("mcp-session-id")).toBe(sessionId);
+  });
+
+  it("POST handles 'prompts/list' method", async () => {
+    const req = new NextRequest("http://localhost:3000/api/mcp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 11,
+        method: "prompts/list"
+      })
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.result.prompts).toEqual([]);
+  });
+
+  it("DELETE terminates MCP session with 204", async () => {
+    const req = new NextRequest("http://localhost:3000/api/mcp", {
+      method: "DELETE",
+      headers: { "Mcp-Session-Id": "test-session-id" }
+    });
+
+    const res = await DELETE(req);
+    expect(res.status).toBe(204);
+    expect(res.headers.get("mcp-session-id")).toBe("test-session-id");
+  });
+
+  it("OPTIONS returns CORS preflight headers with 204", async () => {
+    const res = await OPTIONS();
+    expect(res.status).toBe(204);
+    expect(res.headers.get("Access-Control-Allow-Methods")).toContain("POST");
+    expect(res.headers.get("Access-Control-Expose-Headers")).toContain("Mcp-Session-Id");
+  });
+
+  it("GET supports SSE streaming when text/event-stream is accepted", async () => {
+    const req = new NextRequest("http://localhost:3000/api/mcp", {
+      method: "GET",
+      headers: { Accept: "text/event-stream" }
+    });
+
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Type")).toBe("text/event-stream");
+    expect(res.headers.get("mcp-session-id")).toBeTruthy();
   });
 });

@@ -356,34 +356,161 @@ async function handleResourceRead(uri: string) {
   }
 }
 
+const activeSessions = new Set<string>();
+
+function resolveSessionId(req?: NextRequest): string {
+  const fromHeader = req?.headers?.get("mcp-session-id");
+  if (fromHeader && fromHeader.trim().length > 0) {
+    const id = fromHeader.trim();
+    activeSessions.add(id);
+    return id;
+  }
+  const newId = crypto.randomUUID();
+  activeSessions.add(newId);
+  return newId;
+}
+
+function getMcpHeaders(sessionId: string): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    "Mcp-Session-Id": sessionId,
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS, HEAD",
+    "Access-Control-Allow-Headers": "Content-Type, Mcp-Session-Id, Authorization, Accept",
+    "Access-Control-Expose-Headers": "Mcp-Session-Id"
+  };
+}
+
+function getNotificationHeaders(sessionId: string): Record<string, string> {
+  return {
+    "Mcp-Session-Id": sessionId,
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS, HEAD",
+    "Access-Control-Allow-Headers": "Content-Type, Mcp-Session-Id, Authorization, Accept",
+    "Access-Control-Expose-Headers": "Mcp-Session-Id"
+  };
+}
+
 /**
- * GET /api/mcp - Discovery & Capability endpoint
+ * OPTIONS /api/mcp - CORS Preflight
  */
-export async function GET() {
-  return NextResponse.json({
-    jsonrpc: "2.0",
-    server: MCP_SERVER_INFO,
-    capabilities: {
-      tools: {
-        listChanged: false
-      },
-      resources: {
-        subscribe: false,
-        listChanged: false
-      }
-    },
-    tools: MCP_TOOLS,
-    resources: MCP_RESOURCES
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS, HEAD",
+      "Access-Control-Allow-Headers": "Content-Type, Mcp-Session-Id, Authorization, Accept",
+      "Access-Control-Expose-Headers": "Mcp-Session-Id",
+      "Access-Control-Max-Age": "86400"
+    }
   });
 }
 
 /**
- * POST /api/mcp - JSON-RPC 2.0 Request Handler
+ * DELETE /api/mcp - Session Termination
+ */
+export async function DELETE(req: NextRequest) {
+  const sessionId = resolveSessionId(req);
+  activeSessions.delete(sessionId);
+  return new Response(null, {
+    status: 204,
+    headers: getNotificationHeaders(sessionId)
+  });
+}
+
+/**
+ * GET /api/mcp - Discovery, Capability & SSE Streaming endpoint
+ */
+export async function GET(req?: NextRequest) {
+  const sessionId = resolveSessionId(req);
+  const accept = req?.headers?.get("accept") || "";
+
+  // Handle Server-Sent Events (SSE) stream if requested by Streamable HTTP client
+  if (accept.includes("text/event-stream") && req) {
+    const encoder = new TextEncoder();
+    let isClosed = false;
+
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(": connection established\n\n"));
+        const interval = setInterval(() => {
+          if (isClosed) {
+            clearInterval(interval);
+            return;
+          }
+          try {
+            controller.enqueue(encoder.encode(": ping\n\n"));
+          } catch {
+            isClosed = true;
+            clearInterval(interval);
+          }
+        }, 15000);
+
+        req.signal?.addEventListener("abort", () => {
+          isClosed = true;
+          clearInterval(interval);
+          try {
+            controller.close();
+          } catch {
+            // ignore
+          }
+        });
+      },
+      cancel() {
+        isClosed = true;
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        "Connection": "keep-alive",
+        "Mcp-Session-Id": sessionId,
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Expose-Headers": "Mcp-Session-Id"
+      }
+    });
+  }
+
+  // Standard JSON discovery response
+  return NextResponse.json(
+    {
+      jsonrpc: "2.0",
+      server: MCP_SERVER_INFO,
+      capabilities: {
+        tools: {
+          listChanged: false
+        },
+        resources: {
+          subscribe: false,
+          listChanged: false
+        },
+        prompts: {
+          listChanged: false
+        },
+        logging: {}
+      },
+      tools: MCP_TOOLS,
+      resources: MCP_RESOURCES,
+      prompts: []
+    },
+    {
+      headers: getMcpHeaders(sessionId)
+    }
+  );
+}
+
+/**
+ * POST /api/mcp - JSON-RPC 2.0 Request & Notification Handler
  */
 export async function POST(req: NextRequest) {
-  let body: Record<string, unknown>;
+  const sessionId = resolveSessionId(req);
+  let rawBody: unknown;
+
   try {
-    body = (await req.json()) as Record<string, unknown>;
+    rawBody = await req.json();
   } catch {
     return NextResponse.json(
       {
@@ -394,17 +521,20 @@ export async function POST(req: NextRequest) {
           message: "Parse error: Invalid JSON was received by the server."
         }
       },
-      { status: 400 }
+      {
+        status: 400,
+        headers: getMcpHeaders(sessionId)
+      }
     );
   }
 
-  const { id = null, method, params = {} } = body as {
-    id?: string | number | null;
-    method?: string;
-    params?: Record<string, unknown>;
-  };
+  const body = (rawBody && typeof rawBody === "object" ? rawBody : {}) as Record<string, unknown>;
+  const hasId = "id" in body && body.id !== undefined;
+  const id = hasId ? (body.id as string | number | null) : null;
+  const method = typeof body.method === "string" ? body.method : "";
+  const params = (body.params && typeof body.params === "object" ? body.params : {}) as Record<string, unknown>;
 
-  if (!method || typeof method !== "string") {
+  if (!method) {
     return NextResponse.json(
       {
         jsonrpc: "2.0",
@@ -414,43 +544,96 @@ export async function POST(req: NextRequest) {
           message: "Invalid Request: 'method' field is required."
         }
       },
-      { status: 400 }
+      {
+        status: 400,
+        headers: getMcpHeaders(sessionId)
+      }
     );
+  }
+
+  // Check if this is a notification (no id property provided, or explicit notification method)
+  const isNotification =
+    !hasId ||
+    method === "notifications/initialized" ||
+    method.startsWith("notifications/") ||
+    method.startsWith("$/");
+
+  // Notifications MUST receive 202 Accepted and no response body in Streamable HTTP
+  if (isNotification && (method === "notifications/initialized" || method.startsWith("notifications/") || method.startsWith("$/"))) {
+    return new Response(null, {
+      status: 202,
+      headers: getNotificationHeaders(sessionId)
+    });
   }
 
   try {
     switch (method) {
       case "ping": {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: {}
-        });
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {}
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
       }
 
       case "initialize": {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: {
-            protocolVersion: MCP_SERVER_INFO.protocolVersion,
-            serverInfo: MCP_SERVER_INFO,
-            capabilities: {
-              tools: {},
-              resources: {}
+        const clientProtocolVersion =
+          typeof params.protocolVersion === "string" && params.protocolVersion.trim()
+            ? params.protocolVersion.trim()
+            : MCP_SERVER_INFO.protocolVersion;
+
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {
+              protocolVersion: clientProtocolVersion,
+              serverInfo: {
+                name: MCP_SERVER_INFO.name,
+                version: MCP_SERVER_INFO.version
+              },
+              capabilities: {
+                tools: {
+                  listChanged: false
+                },
+                resources: {
+                  subscribe: false,
+                  listChanged: false
+                },
+                prompts: {
+                  listChanged: false
+                },
+                logging: {}
+              }
             }
+          },
+          {
+            headers: getMcpHeaders(sessionId)
           }
+        );
+      }
+
+      case "notifications/initialized": {
+        return new Response(null, {
+          status: 202,
+          headers: getNotificationHeaders(sessionId)
         });
       }
 
       case "tools/list": {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: {
-            tools: MCP_TOOLS
-          }
-        });
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {
+              tools: MCP_TOOLS
+            }
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
       }
 
       case "tools/call": {
@@ -469,26 +652,54 @@ export async function POST(req: NextRequest) {
                 message: "Invalid params: 'name' is required for tools/call."
               }
             },
-            { status: 400 }
+            {
+              status: 400,
+              headers: getMcpHeaders(sessionId)
+            }
           );
         }
 
-        const toolResult = await handleToolCall(name, args);
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: toolResult
-        });
+        try {
+          const toolResult = await handleToolCall(name, args);
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: toolResult
+            },
+            { headers: getMcpHeaders(sessionId) }
+          );
+        } catch (callErr) {
+          return NextResponse.json(
+            {
+              jsonrpc: "2.0",
+              id,
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text: callErr instanceof Error ? callErr.message : String(callErr)
+                  }
+                ],
+                isError: true
+              }
+            },
+            { headers: getMcpHeaders(sessionId) }
+          );
+        }
       }
 
       case "resources/list": {
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: {
-            resources: MCP_RESOURCES
-          }
-        });
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {
+              resources: MCP_RESOURCES
+            }
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
       }
 
       case "resources/read": {
@@ -503,19 +714,109 @@ export async function POST(req: NextRequest) {
                 message: "Invalid params: 'uri' is required for resources/read."
               }
             },
-            { status: 400 }
+            {
+              status: 400,
+              headers: getMcpHeaders(sessionId)
+            }
           );
         }
 
         const resourceResult = await handleResourceRead(uri);
-        return NextResponse.json({
-          jsonrpc: "2.0",
-          id,
-          result: resourceResult
-        });
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: resourceResult
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
+      }
+
+      case "resources/templates/list": {
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {
+              resourceTemplates: []
+            }
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
+      }
+
+      case "prompts/list": {
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {
+              prompts: []
+            }
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
+      }
+
+      case "prompts/get": {
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            error: {
+              code: -32602,
+              message: "Prompt not found"
+            }
+          },
+          {
+            status: 200,
+            headers: getMcpHeaders(sessionId)
+          }
+        );
+      }
+
+      case "logging/setLevel": {
+        if (isNotification) {
+          return new Response(null, {
+            status: 202,
+            headers: getNotificationHeaders(sessionId)
+          });
+        }
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {}
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
+      }
+
+      case "completion/complete": {
+        return NextResponse.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            result: {
+              completion: {
+                values: []
+              }
+            }
+          },
+          { headers: getMcpHeaders(sessionId) }
+        );
       }
 
       default: {
+        // If it was a notification, accept it quietly with 202
+        if (isNotification) {
+          return new Response(null, {
+            status: 202,
+            headers: getNotificationHeaders(sessionId)
+          });
+        }
+
+        // For unknown request method with ID:
         return NextResponse.json(
           {
             jsonrpc: "2.0",
@@ -525,18 +826,27 @@ export async function POST(req: NextRequest) {
               message: `Method not found: '${method}' is not supported.`
             }
           },
-          { status: 404 }
+          {
+            status: 404,
+            headers: getMcpHeaders(sessionId)
+          }
         );
       }
     }
   } catch (err) {
-    return NextResponse.json({
-      jsonrpc: "2.0",
-      id,
-      error: {
-        code: -32000,
-        message: err instanceof Error ? err.message : String(err)
+    return NextResponse.json(
+      {
+        jsonrpc: "2.0",
+        id,
+        error: {
+          code: -32000,
+          message: err instanceof Error ? err.message : String(err)
+        }
+      },
+      {
+        status: 200,
+        headers: getMcpHeaders(sessionId)
       }
-    });
+    );
   }
 }
