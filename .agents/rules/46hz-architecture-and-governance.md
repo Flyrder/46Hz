@@ -20,6 +20,7 @@ description: 46Hz Engineering, Pure Prisma 8 Architecture, Standalone Purge, and
 
 ## 4. Crisis Resource & Privacy Boundaries
 - Hotlines are strictly restricted to Republic of Korea (109, 1393, 1577-0199, 1388, 1588-9191) and Mainland China (400-161-9995, 12355, 010-82951332).
+- **External Documentation Location & Privacy**: To preserve IP confidentiality and project privacy, all official architectural manuals, feature specifications, UI design systems, AI intelligence specs, and SaaS business strategies are kept strictly OUTSIDE this repository under `C:\Users\voide\OneDrive\Documents\docs`. Agents must read documentation directly from this directory and NEVER copy or commit these documents into the Git repository.
 
 ## 5. Git Commit Signing
 - Always commit with `106471753+Flyrder@users.noreply.github.com` and SSH signature (`git commit -S`).
