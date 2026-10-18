@@ -627,6 +627,7 @@ export const koKR: Translations = {
   "admin.settingsAiSystemPromptDesc": "모든 Gemini Interactions 요청의 최상위 system_instruction에 주입되는 46Hz 핵심 페르소나 및 원칙 프롬프트입니다.",
   "admin.settingsAiResetPrompt": "기본 프롬프트로 복원",
   "admin.settingsAiProviderGemini": "Google Gemini (Native Interactions API · v1beta)",
+  "admin.settingsAiProviderOpenAi": "OpenAI API 호환 (Chat Completions · 커스텀 엔드포인트는 Base URL 설정)",
   "admin.settingsAiShowKey": "키 보기",
   "admin.settingsAiHideKey": "키 숨기기",
   "admin.settingsAiModelPresets": "추천 Gemini 모델 프리셋",

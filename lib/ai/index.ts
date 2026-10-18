@@ -4,27 +4,27 @@ import { LlmAiMiddleware, type LlmConfig } from "@/lib/ai/llm";
 import { ensureSettingsLoadedFromDisk } from "@/lib/settings-store";
 import { aiSettings } from "@/settings";
 
-export type AiProviderName = "mock" | "gemini";
+export type AiProviderName = "mock" | "gemini" | "openai";
 
 /**
- * 46Hz supports exactly two AI providers: the local heuristic `mock` engine and
- * native Google Gemini. Any other provider string resolves to `mock`.
+ * 46Hz supports three AI providers: the local heuristic `mock` engine, native Google
+ * Gemini, and any OpenAI API-compatible endpoint. Any other provider string resolves to `mock`.
  */
 export function getAiProviderName(): AiProviderName {
   ensureSettingsLoadedFromDisk();
   const provider = (process.env.AI_PROVIDER || aiSettings.defaultProvider || "mock")
     .toLowerCase()
     .trim();
-  return provider === "gemini" ? "gemini" : "mock";
+  return provider === "gemini" || provider === "openai" ? provider : "mock";
 }
 
 export function getAiMiddleware(override?: Partial<LlmConfig>): AiMiddleware {
   ensureSettingsLoadedFromDisk();
   const provider = override?.provider ?? getAiProviderName();
 
-  if (provider === "gemini") {
+  if (provider === "gemini" || provider === "openai") {
     return new LlmAiMiddleware({
-      provider: "gemini",
+      provider,
       model: aiSettings.model || undefined,
       apiKey: aiSettings.apiKey || undefined,
       baseURL: aiSettings.baseUrl || undefined,

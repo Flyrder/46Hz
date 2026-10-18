@@ -627,6 +627,7 @@ export const zhCN: Translations = {
   "admin.settingsAiSystemPromptDesc": "注入所有 Gemini Interactions 请求顶层 system_instruction 的 46Hz 核心人格与准则提示词。",
   "admin.settingsAiResetPrompt": "恢复默认提示词",
   "admin.settingsAiProviderGemini": "Google Gemini（Native Interactions API · v1beta）",
+  "admin.settingsAiProviderOpenAi": "OpenAI API 兼容（Chat Completions · 自定义端点请设置 Base URL）",
   "admin.settingsAiShowKey": "显示密钥",
   "admin.settingsAiHideKey": "隐藏密钥",
   "admin.settingsAiModelPresets": "推荐 Gemini 模型预设",

@@ -29,6 +29,22 @@ export const GEMINI_DEFAULT_BASE_URL = "https://generativelanguage.googleapis.co
 export const GEMINI_API_REVISION = "2026-05-20";
 export const GEMINI_DEFAULT_MODEL = "gemini-3.8-flash";
 
+export const OPENAI_DEFAULT_BASE_URL = "https://api.openai.com/v1";
+export const OPENAI_DEFAULT_MODEL = "gpt-4o-mini";
+
+/**
+ * Normalizes an OpenAI-compatible base URL (e.g. `http://localhost:11434/v1`),
+ * stripping any trailing `/chat/completions` suffix.
+ */
+export function normalizeOpenAiBaseUrl(rawUrl?: string): string {
+  const trimmed = (rawUrl ?? "").trim().replace(/\/+$/, "").replace(/\/chat\/completions$/i, "");
+  // A Gemini endpoint left over from switching providers is not a valid OpenAI base URL.
+  if (!trimmed || /generativelanguage\.googleapis\.com\/v1beta$/i.test(trimmed)) {
+    return OPENAI_DEFAULT_BASE_URL;
+  }
+  return trimmed;
+}
+
 export const SUPPORTED_GEMINI_MODELS = [
   "gemini-3.8-flash",
   "gemini-4-argon",
@@ -38,7 +54,7 @@ export const SUPPORTED_GEMINI_MODELS = [
 ] as const;
 
 export interface LlmConfig {
-  provider: "gemini" | "mock";
+  provider: "gemini" | "openai" | "mock";
   apiKey?: string;
   baseURL?: string;
   model?: string;
@@ -96,7 +112,7 @@ export interface GeminiInteractionResponse {
 
 export interface AiConnectionTestResult {
   ok: boolean;
-  provider: "mock" | "gemini";
+  provider: "mock" | "gemini" | "openai";
   model: string;
   endpoint: string;
   thinkingLevel: SupportedAiThinkingLevel;
@@ -398,30 +414,36 @@ export class LlmAiMiddleware implements AiMiddleware {
       delayMs: aiSettings.mockDelayMs
     });
 
+    const isOpenAi = customConfig?.provider === "openai";
+
     const apiKey =
       customConfig?.apiKey ??
       (aiSettings.apiKey?.trim() || undefined) ??
-      process.env.GEMINI_API_KEY ??
+      (isOpenAi ? process.env.OPENAI_API_KEY : process.env.GEMINI_API_KEY) ??
       process.env.AI_API_KEY;
 
     const rawBaseUrl =
       customConfig?.baseURL ??
       (aiSettings.baseUrl?.trim() || undefined) ??
-      process.env.GEMINI_BASE_URL ??
+      (isOpenAi ? process.env.OPENAI_BASE_URL : process.env.GEMINI_BASE_URL) ??
       process.env.AI_BASE_URL;
 
     const rawModel =
       customConfig?.model ??
       (aiSettings.model?.trim() || undefined) ??
-      process.env.GEMINI_MODEL ??
+      (isOpenAi ? process.env.OPENAI_MODEL : process.env.GEMINI_MODEL) ??
       process.env.AI_MODEL ??
-      GEMINI_DEFAULT_MODEL;
+      (isOpenAi ? OPENAI_DEFAULT_MODEL : GEMINI_DEFAULT_MODEL);
 
     this.config = {
-      provider: "gemini",
+      provider: isOpenAi ? "openai" : "gemini",
       apiKey,
-      baseURL: normalizeGeminiBaseUrl(rawBaseUrl),
-      model: resolveGeminiModel(rawModel),
+      baseURL: isOpenAi ? normalizeOpenAiBaseUrl(rawBaseUrl) : normalizeGeminiBaseUrl(rawBaseUrl),
+      model: isOpenAi
+        ? /^gemini|^gemma/i.test(rawModel.trim())
+          ? OPENAI_DEFAULT_MODEL
+          : rawModel.trim()
+        : resolveGeminiModel(rawModel),
       systemPrompt:
         customConfig?.systemPrompt ??
         (aiSettings.systemPrompt?.trim() || DEFAULT_AI_SYSTEM_PROMPT),
@@ -474,13 +496,75 @@ export class LlmAiMiddleware implements AiMiddleware {
   }
 
   /**
-   * Calls the Native Google Gemini Interactions API (`POST /v1beta/interactions`).
+   * Calls any OpenAI API-compatible endpoint (`POST {baseURL}/chat/completions`) with JSON output.
+   */
+  private async callOpenAiChat(
+    systemInstruction: string,
+    userInput: string,
+    schema: Record<string, unknown>
+  ): Promise<string> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.config.timeoutMs);
+
+    const body: Record<string, unknown> = {
+      model: this.config.model,
+      messages: [
+        {
+          role: "system",
+          content: `${systemInstruction}\n\nRespond with a single JSON object matching this JSON Schema:\n${JSON.stringify(schema)}`
+        },
+        { role: "user", content: userInput }
+      ],
+      temperature: this.config.temperature,
+      max_tokens: this.config.maxTokens,
+      response_format: { type: "json_object" }
+    };
+
+    try {
+      const response = await fetch(`${this.config.baseURL}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.config.apiKey ?? ""}`
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`OpenAI-compatible API responded with ${response.status}: ${errorText}`);
+      }
+
+      const data = (await response.json()) as {
+        choices?: Array<{ message?: { content?: string | null } }>;
+      };
+      const content = data.choices?.[0]?.message?.content;
+      if (typeof content !== "string" || !content.trim()) {
+        throw new Error("No output text returned from OpenAI-compatible API.");
+      }
+      return content.trim();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  /**
+   * Calls the configured provider: OpenAI-compatible chat completions, or the Native Google
+   * Gemini Interactions API (`POST /v1beta/interactions`).
    */
   private async callGeminiInteraction(
     systemInstruction: string,
     userInput: string,
     schema: Record<string, unknown>
   ): Promise<string> {
+    if (this.config.provider === "openai") {
+      if (!this.isConfigured) {
+        throw new Error("OpenAI-compatible API key (OPENAI_API_KEY) is not configured.");
+      }
+      return this.callOpenAiChat(systemInstruction, userInput, schema);
+    }
+
     if (!this.isConfigured) {
       throw new Error("Gemini API key (GEMINI_API_KEY) is not configured.");
     }
@@ -536,8 +620,11 @@ export class LlmAiMiddleware implements AiMiddleware {
    */
   async testConnection(): Promise<AiConnectionTestResult> {
     const startTime = Date.now();
-    const model = resolveGeminiModel(this.config.model);
-    const endpoint = `${this.config.baseURL}/interactions`;
+    const isOpenAi = this.config.provider === "openai";
+    const provider = isOpenAi ? "openai" : "gemini";
+    const label = isOpenAi ? "OpenAI-compatible API" : "Native Gemini Interactions API";
+    const model = isOpenAi ? (this.config.model ?? OPENAI_DEFAULT_MODEL) : resolveGeminiModel(this.config.model);
+    const endpoint = `${this.config.baseURL}/${isOpenAi ? "chat/completions" : "interactions"}`;
     const genCfg = resolveGeminiGenerationConfig(
       model,
       this.config.thinkingLevel ?? "low",
@@ -547,14 +634,14 @@ export class LlmAiMiddleware implements AiMiddleware {
     if (!this.isConfigured) {
       return {
         ok: false,
-        provider: "gemini",
+        provider,
         model,
         endpoint,
         thinkingLevel: genCfg.thinking_level,
         storeInteractions: Boolean(this.config.storeInteractions),
         latencyMs: 0,
-        message: "Gemini API key is missing.",
-        error: "GEMINI_API_KEY is not configured. Provide an API key in System Settings or environment variables."
+        message: `${isOpenAi ? "OpenAI-compatible" : "Gemini"} API key is missing.`,
+        error: `${isOpenAi ? "OPENAI_API_KEY" : "GEMINI_API_KEY"} is not configured. Provide an API key in System Settings or environment variables.`
       };
     }
 
@@ -562,9 +649,9 @@ export class LlmAiMiddleware implements AiMiddleware {
       const rawJson = await this.callGeminiInteraction(
         this.buildSystemInstruction(
           "Verify connectivity for 46Hz emotional support middleware.",
-          'Return JSON: {"status": "ok", "message": "46Hz Gemini Interactions API ready"}'
+          `Return JSON: {"status": "ok", "message": "46Hz ${label} ready"}`
         ),
-        "Ping 46Hz Gemini Interactions health check.",
+        `Ping 46Hz ${label} health check.`,
         {
           type: "object",
           properties: {
@@ -578,28 +665,29 @@ export class LlmAiMiddleware implements AiMiddleware {
       const parsed = extractJson(rawJson);
       return {
         ok: true,
-        provider: "gemini",
+        provider,
         model,
         endpoint,
         thinkingLevel: genCfg.thinking_level,
         storeInteractions: Boolean(this.config.storeInteractions),
         latencyMs: Math.max(1, Date.now() - startTime),
-        message: parsed.message || "Connected to Native Gemini Interactions API."
+        message: parsed.message || `Connected to ${label}.`
       };
     } catch (err) {
       return {
         ok: false,
-        provider: "gemini",
+        provider,
         model,
         endpoint,
         thinkingLevel: genCfg.thinking_level,
         storeInteractions: Boolean(this.config.storeInteractions),
         latencyMs: Math.max(1, Date.now() - startTime),
-        message: "Failed to connect to Native Gemini Interactions API.",
+        message: `Failed to connect to ${label}.`,
         error: err instanceof Error ? err.message : String(err)
       };
     }
   }
+
 
   async processLetter(input: ProcessLetterInput): Promise<ProcessedLetterResult> {
     if (!aiSettings.enabled || !this.isConfigured) {

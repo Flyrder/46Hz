@@ -558,6 +558,7 @@ export type TranslationKey =
   | "admin.settingsAiSystemPromptDesc"
   | "admin.settingsAiResetPrompt"
   | "admin.settingsAiProviderGemini"
+  | "admin.settingsAiProviderOpenAi"
   | "admin.settingsAiShowKey"
   | "admin.settingsAiHideKey"
   | "admin.settingsAiModelPresets"

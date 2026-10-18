@@ -15,7 +15,7 @@
 
 export type SupportedLocale = "ko_KR" | "en_US" | "zh_CN";
 export type SupportedTheme = "system" | "light" | "dark";
-export type SupportedAiProvider = "mock" | "gemini";
+export type SupportedAiProvider = "mock" | "gemini" | "openai";
 export type SupportedAiThinkingLevel = "minimal" | "low" | "medium" | "high";
 
 export const DEFAULT_AI_SYSTEM_PROMPT =
@@ -416,7 +416,7 @@ export function applyRuntimeSettingsUpdate(
     ...definedPartial
   };
 
-  const validProviders: SupportedAiProvider[] = ["mock", "gemini"];
+  const validProviders: SupportedAiProvider[] = ["mock", "gemini", "openai"];
   const normalizedProvider: SupportedAiProvider = validProviders.includes(
     rawNext.aiDefaultProvider as SupportedAiProvider
   )

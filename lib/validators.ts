@@ -135,7 +135,7 @@ export const systemSettingsSchema = z
     enableAiReplyCoach: z.boolean().default(true),
     enableAiWritingSparks: z.boolean().default(true),
     enableAiResonanceMatch: z.boolean().default(true),
-    aiDefaultProvider: z.enum(["mock", "gemini"]),
+    aiDefaultProvider: z.enum(["mock", "gemini", "openai"]),
     aiTimeoutMs: z.coerce.number().int().min(1000).max(120000),
     aiMockDelayMs: z.coerce.number().int().min(0).max(5000),
     aiTemperature: z.coerce.number().min(0).max(2).default(0.7),

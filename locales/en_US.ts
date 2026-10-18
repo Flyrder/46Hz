@@ -633,6 +633,7 @@ export const enUS: Translations = {
   "admin.settingsAiSystemPromptDesc": "Top-level system_instruction injected into every Gemini Interactions request across all 46Hz capabilities.",
   "admin.settingsAiResetPrompt": "Reset Prompt to Default",
   "admin.settingsAiProviderGemini": "Google Gemini (Native Interactions API · v1beta)",
+  "admin.settingsAiProviderOpenAi": "OpenAI API-compatible (Chat Completions · set Base URL for custom endpoints)",
   "admin.settingsAiShowKey": "Show Key",
   "admin.settingsAiHideKey": "Hide Key",
   "admin.settingsAiModelPresets": "Gemini Model Presets",

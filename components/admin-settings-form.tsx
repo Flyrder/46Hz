@@ -1383,6 +1383,15 @@ export function AdminSettingsForm({
                       ) {
                         suggestedModel = "gemini-3.8-flash";
                       }
+                      if (
+                        newProv === "openai" &&
+                        (!draft.aiModel ||
+                          draft.aiModel.startsWith("mock") ||
+                          draft.aiModel.startsWith("gemini") ||
+                          draft.aiModel.startsWith("gemma"))
+                      ) {
+                        suggestedModel = "gpt-4o-mini";
+                      }
                       setDraft((prev) => ({
                         ...prev,
                         aiDefaultProvider: newProv,
@@ -1393,6 +1402,7 @@ export function AdminSettingsForm({
                   >
                     <option value="mock">{t("admin.settingsAiProviderMock")}</option>
                     <option value="gemini">{t("admin.settingsAiProviderGemini")}</option>
+                    <option value="openai">{t("admin.settingsAiProviderOpenAi")}</option>
                   </select>
                 </div>
 

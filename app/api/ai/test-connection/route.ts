@@ -13,7 +13,8 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  const provider = body.provider === "gemini" ? "gemini" : "mock";
+  const provider =
+    body.provider === "gemini" || body.provider === "openai" ? body.provider : "mock";
 
   if (provider === "mock") {
     const startTime = Date.now();
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 
   const llm = new LlmAiMiddleware({
-    provider: "gemini",
+    provider,
     apiKey: nonEmpty(body.apiKey),
     baseURL: nonEmpty(body.baseUrl),
     model: nonEmpty(body.model),
