@@ -191,8 +191,7 @@ settings.compliance.maxRecentIps;       // 세션당 최대 5개 IP 이력 제�
 ├── docker-compose.yml            # 멀티 아키텍처 PostgreSQL 컨테이너 정의
 ├── Dockerfile                    # 경량화 멀티 스테이지 프로덕션 컨테이너 빌드
 ├── settings.ts                   # 중앙 집중식 시스템 설정
-├── start.ps1                     # 윈도우 PowerShell 자동화 런처 스크립트
-├── start.sh                      # macOS (Apple Silicon / Intel) 및 Linux POSIX 런처 스크립트
+├── start.ts                      # 크로스 플랫폼 통합 런처 스크립트 (Node.js 26 네이티브 TypeScript)
 └── package.json
 ```
 
@@ -214,55 +213,30 @@ docker compose up -d
 
 ---
 
-### 🥈 로컬 개발 환경 실행: PowerShell 자동 런처 (Windows)
+### 🥈 로컬 개발 환경 실행: Node.js 26 통합 자동 런처 (`start.ts`)
 
-Windows 환경에서는 PowerShell 자동 런처 스크립트를 사용하여 원클릭으로 구동할 수 있습니다:
-
-```powershell
-.\start.ps1
-```
-
-런처 스크립트는 다음 작업을 자동으로 처리합니다:
-1. Node.js 및 npm 설치 버전 확인
-2. Docker 또는 WSLC를 통한 PostgreSQL 데이터베이스 컨테이너 자동 감지 및 기동
-3. `.env` 환경 변수 구성 검증
-4. Prisma 클라이언트 생성 및 대기 중인 마이그레이션 적용
-5. Next.js 개발 서버 실행 (`http://localhost:3000`)
-
-#### 런처 고급 실행 옵션:
-```powershell
-.\start.ps1 -VerifyOnly   # 서버 실행 없이 7단계 백엔드 무결성 검증만 수행
-.\start.ps1 -Seed         # 기본 위기 자원 및 샘플 편지 데이터 시드 적용
-.\start.ps1 -Prod         # 프로덕션 빌드 컴파일 후 프로덕션 모드로 서버 구동
-.\start.ps1 -SkipChecks   # DB 연결 대기 검사를 건너뛰고 빠른 실행
-```
-
----
-
-### 🥉 로컬 개발 환경 실행: macOS & Linux 자동 런처 (`start.sh`)
-
-macOS (Apple Silicon M1/M2/M3/M4 및 Intel Mac)와 Linux 환경에서는 POSIX 런처 스크립트를 사용하여 손쉽게 구동할 수 있습니다:
+Windows, macOS (Apple Silicon M1/M2/M3/M4 및 Intel), Linux 환경 모두 Node.js 26의 네이티브 TypeScript 직접 실행을 통해 단일 `start.ts` 런처로 구동할 수 있습니다:
 
 ```bash
-chmod +x ./start.sh
-./start.sh
+node start.ts
 # 또는 npm 스크립트로 실행:
-npm run start:mac
+npm run launcher
 ```
 
-런처 스크립트 기능:
-1. macOS 아키텍처 자동 감지 (`arm64` Apple Silicon vs `x86_64` Intel Mac)
-2. Docker, OrbStack, Colima 또는 Homebrew PostgreSQL 서비스 자동 감지 및 기동
-3. `.env` 환경 변수 누락 시 자동 생성
-4. Prisma 클라이언트 생성 (`darwin`, `darwin-arm64` 바이너리 지원) 및 마이그레이션
-5. Next.js 개발 서버 실행 (`http://localhost:3000`)
+런처 스크립트(`start.ts`)는 다음 작업을 자동으로 처리합니다:
+1. 플랫폼 및 아키텍처 자동 감지 (`win32`, `darwin`, `linux` / `arm64`, `x64`)
+2. Docker, WSLC, OrbStack, Colima 또는 Homebrew PostgreSQL 서비스 자동 감지 및 기동 (`127.0.0.1:5432`)
+3. `.env` 환경 변수 누락 시 `.env.example` 기반 자동 생성
+4. Prisma 8 데이터 계약(`prisma contract emit`) 생성 및 스키마 동기화
+5. Next.js 서버 실행 (`http://localhost:3000`)
 
-#### macOS / Linux 런처 실행 옵션:
+#### 통합 런처 실행 옵션:
 ```bash
-./start.sh --verify-only  # 서버 실행 없이 백엔드 및 Vitest 무결성 검증만 수행
-./start.sh --seed         # 기본 위기 자원 및 샘플 데이터 시딩 적용
-./start.sh --prod         # 프로덕션 빌드 후 프로덕션 모드로 서버 구동
-./start.sh --port 8080    # 사용자 지정 포트로 서버 구동
+node start.ts --verify-only  # 서버 실행 없이 백엔드 및 Vitest 무결성 검증만 수행
+node start.ts --seed         # 기본 위기 자원 및 샘플 편지 데이터 시드 적용
+node start.ts --prod         # 프로덕션 빌드 컴파일 후 프로덕션 모드로 서버 구동
+node start.ts --port 8080    # 사용자 지정 포트로 서버 구동
+node start.ts --skip-checks  # DB 연결 대기 검사를 건너뛰고 빠른 실행
 ```
 
 ---

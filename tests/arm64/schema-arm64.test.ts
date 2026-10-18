@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import fs from "fs";
 import path from "path";
+import { parseLauncherArgs } from "@/start";
 
 describe("Arm64 Architecture Support", () => {
   it("includes required Arm64 and macOS binary targets in prisma schema", () => {
@@ -16,16 +17,29 @@ describe("Arm64 Architecture Support", () => {
     expect(content).toContain("native");
   });
 
-  it("validates macOS and POSIX start.sh launcher script", () => {
-    const startShPath = path.join(process.cwd(), "start.sh");
-    expect(fs.existsSync(startShPath)).toBe(true);
+  it("validates unified Node.js 26 start.ts launcher script and CLI argument parser", () => {
+    const startTsPath = path.join(process.cwd(), "start.ts");
+    expect(fs.existsSync(startTsPath)).toBe(true);
+    expect(fs.existsSync(path.join(process.cwd(), "start.ps1"))).toBe(false);
+    expect(fs.existsSync(path.join(process.cwd(), "start.sh"))).toBe(false);
 
-    const content = fs.readFileSync(startShPath, "utf-8");
-    expect(content).toMatch(/^#!\/usr\/bin\/env bash/);
-    expect(content).toContain("uname -s");
+    const content = fs.readFileSync(startTsPath, "utf-8");
+    expect(content).toMatch(/^#!\/usr\/bin\/env -S node/);
+    expect(content).toContain("os.platform()");
+    expect(content).toContain("os.arch()");
     expect(content).toContain("46hz-postgres");
     expect(content).toContain("prisma:generate");
-    expect(content).toContain("prisma:migrate");
+    expect(content).toContain("prisma:emit");
+
+    const parsedPosix = parseLauncherArgs(["--verify-only", "--seed", "--port", "4000"]);
+    expect(parsedPosix.verifyOnly).toBe(true);
+    expect(parsedPosix.seed).toBe(true);
+    expect(parsedPosix.port).toBe(4000);
+
+    const parsedPwsh = parseLauncherArgs(["-VerifyOnly", "-Prod", "-Port", "8080"]);
+    expect(parsedPwsh.verifyOnly).toBe(true);
+    expect(parsedPwsh.prod).toBe(true);
+    expect(parsedPwsh.port).toBe(8080);
   });
 
   it("package.json scripts avoid architecture-dependent binaries and use Prisma 8 contract emit", () => {
@@ -36,7 +50,8 @@ describe("Arm64 Architecture Support", () => {
     // Verification that scripts work with platform-agnostic tools and Prisma 8 contract emit
     expect(pkg.scripts.build).toContain("prisma contract emit");
     expect(pkg.scripts["prisma:emit"]).toBe("prisma contract emit");
-    expect(pkg.scripts["start:mac"]).toBe("./start.sh");
+    expect(pkg.scripts["launcher"]).toBe("node start.ts");
+    expect(pkg.scripts["start:mac"]).toBe("node start.ts");
   });
 
   it("validates multi-architecture Dockerfile syntax and Node 26 base image", () => {

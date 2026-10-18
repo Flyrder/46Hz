@@ -18,8 +18,9 @@
     "prisma:db": "prisma db",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma8:contract": "prisma contract emit",
-    "start:mac": "./start.sh",
-    "start:mac:verify": "./start.sh --verify-only",
+    "launcher": "node start.ts",
+    "start:mac": "node start.ts",
+    "start:mac:verify": "node start.ts --verify-only",
     "purge:modules": "tsx scripts/purge_standalone.ts",
     "verify:backend": "tsx scripts/verify_backend.ts",
     "contract:verify": "tsx scripts/verify_contract.ts"
