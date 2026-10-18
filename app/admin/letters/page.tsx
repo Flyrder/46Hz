@@ -3,12 +3,14 @@ import { AdminNav } from "@/components/admin-nav";
 import { LetterCard } from "@/components/letter-card";
 import { StatusBadge } from "@/components/status-badge";
 import { AdminCalendarView, type DayStats } from "@/components/admin-calendar-view";
+import { and } from "@prisma/orm-postgres/orm-client";
 import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { databaseDate, toTimestamp } from "@/lib/dates";
+import { db } from "@/lib/db";
+import { letterPreview } from "@/lib/db/queries";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import type { LetterStatus, RiskLevel } from "@/lib/domain";
-import type { Prisma } from "@/lib/db";
 import {
   Mail,
   List,
@@ -63,76 +65,89 @@ export default async function AdminLettersPage({
     }
   }
 
-  // Build where query
-  const whereClause: Prisma.LetterWhereInput = {};
-  if (statusParam && statusParam !== "ALL") {
-    whereClause.status = statusParam as LetterStatus;
-  }
-  if (riskParam && riskParam !== "ALL") {
-    whereClause.riskLevel = riskParam as RiskLevel;
-  }
-  if (filterParam === "today") {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    whereClause.createdAt = { gte: startOfToday };
-  }
-  if (tagParam) {
-    whereClause.emotionTags = { has: tagParam.toLowerCase() };
-  }
-  if (dateParam) {
-    const [dy, dm, dd] = dateParam.split("-").map(Number);
-    if (dy && dm && dd) {
-      whereClause.createdAt = {
-        gte: new Date(dy, dm - 1, dd, 0, 0, 0, 0),
-        lte: new Date(dy, dm - 1, dd, 23, 59, 59, 999)
-      };
-    }
-  }
+  const startOfToday = (() => {
+    if (filterParam !== "today") return undefined;
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return toTimestamp(d);
+  })();
 
-  // Concurrently fetch counts, letters, and month distribution
-  const [
-    allCount,
-    pendingCount,
-    approvedCount,
-    rejectedCount,
-    routedCount,
-    draftCount,
-    filteredCount,
-    letters,
-    monthLetters
-  ] = await prisma.$transaction([
-    prisma.letter.count(),
-    prisma.letter.count({ where: { status: "PENDING" } }),
-    prisma.letter.count({ where: { status: "APPROVED" } }),
-    prisma.letter.count({ where: { status: "REJECTED" } }),
-    prisma.letter.count({ where: { status: "ROUTED_TO_SUPPORT" } }),
-    prisma.letter.count({ where: { status: "DRAFT" } }),
-    prisma.letter.count({ where: whereClause }),
-    prisma.letter.findMany({
-      where: whereClause,
-      include: { _count: { select: { replies: true } } },
-      orderBy: { createdAt: sortParam },
-      take: PAGE_SIZE,
-      skip: (pageParam - 1) * PAGE_SIZE
-    }),
-    prisma.letter.findMany({
-      where: {
-        createdAt: {
-          gte: new Date(calYear, calMonth, 1),
-          lte: new Date(calYear, calMonth + 1, 0, 23, 59, 59, 999)
-        }
-      },
-      select: {
-        createdAt: true,
-        status: true
+  const selectedDateBounds = (() => {
+    if (!dateParam) return undefined;
+    const [dy, dm, dd] = dateParam.split("-").map(Number);
+    if (!dy || !dm || !dd) return undefined;
+    return {
+      start: toTimestamp(new Date(dy, dm - 1, dd, 0, 0, 0, 0)),
+      end: toTimestamp(new Date(dy, dm - 1, dd, 23, 59, 59, 999))
+    };
+  })();
+
+  const normalizedTag = tagParam?.toLowerCase();
+
+  const applyLetterFilters = <T extends { where: typeof db.orm.public.Letter.where }>(
+    collection: T
+  ): T => {
+    if (!hasActiveFilters) return collection;
+    return collection.where((letter, { fns }) => {
+      const conditions = [];
+      if (statusParam && statusParam !== "ALL") {
+        conditions.push(letter.status.eq(statusParam as LetterStatus));
       }
-    })
+      if (riskParam && riskParam !== "ALL") {
+        conditions.push(letter.riskLevel.eq(riskParam as RiskLevel));
+      }
+      if (startOfToday) {
+        conditions.push(letter.createdAt.gte(startOfToday));
+      }
+      if (normalizedTag) {
+        conditions.push(
+          fns.raw`${normalizedTag} = ANY(${letter.emotionTags})`.returns("pg/bool@1")
+        );
+      }
+      if (selectedDateBounds) {
+        conditions.push(
+          letter.createdAt.gte(selectedDateBounds.start),
+          letter.createdAt.lte(selectedDateBounds.end)
+        );
+      }
+      return conditions.length === 1 ? conditions[0]! : fns.and(...conditions);
+    }) as unknown as T;
+  };
+
+  const hasActiveFilters = Boolean(statusParam || riskParam || filterParam || tagParam || dateParam);
+
+  const monthStart = toTimestamp(new Date(calYear, calMonth, 1));
+  const monthEnd = toTimestamp(new Date(calYear, calMonth + 1, 0, 23, 59, 59, 999));
+
+  // Concurrently fetch grouped status counts, filtered count, paginated letters, and month distribution
+  const [statusGroups, filteredAgg, letters, monthLetters] = await Promise.all([
+    db.orm.public.Letter.groupBy("status").aggregate((agg) => ({ count: agg.count() })),
+    applyLetterFilters(db.orm.public.Letter).aggregate((agg) => ({ count: agg.count() })),
+    applyLetterFilters(db.orm.public.Letter.with(letterPreview))
+      .include("replies", (replies) => replies.count())
+      .orderBy((letter) => (sortParam === "asc" ? letter.createdAt.asc() : letter.createdAt.desc()))
+      .limit(PAGE_SIZE)
+      .offset((pageParam - 1) * PAGE_SIZE)
+      .all(),
+    db.orm.public.Letter
+      .select("createdAt", "status")
+      .where((letter) => and(letter.createdAt.gte(monthStart), letter.createdAt.lte(monthEnd)))
+      .all()
   ]);
+
+  const countsByStatus = Object.fromEntries(statusGroups.map((row) => [row.status, row.count]));
+  const allCount = statusGroups.reduce((sum, row) => sum + row.count, 0);
+  const pendingCount = countsByStatus.PENDING ?? 0;
+  const approvedCount = countsByStatus.APPROVED ?? 0;
+  const rejectedCount = countsByStatus.REJECTED ?? 0;
+  const routedCount = countsByStatus.ROUTED_TO_SUPPORT ?? 0;
+  const draftCount = countsByStatus.DRAFT ?? 0;
+  const filteredCount = filteredAgg.count;
 
   // Aggregate stats by date for calendar
   const statsByDate: Record<string, DayStats> = {};
   for (const l of monthLetters) {
-    const d = new Date(l.createdAt);
+    const d = databaseDate(l.createdAt);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     if (!statsByDate[key]) {
       statsByDate[key] = { total: 0, pending: 0, approved: 0, rejected: 0, routed: 0 };
@@ -178,8 +193,6 @@ export default async function AdminLettersPage({
     { key: "ROUTED_TO_SUPPORT", label: t("status.ROUTED_TO_SUPPORT"), count: routedCount },
     { key: "DRAFT", label: t("status.DRAFT"), count: draftCount }
   ];
-
-  const hasActiveFilters = Boolean(statusParam || riskParam || filterParam || tagParam || dateParam);
 
   return (
     <section className="mx-auto max-w-5xl py-2 sm:py-4">

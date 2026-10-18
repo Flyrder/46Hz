@@ -3,7 +3,8 @@ import { Inbox, Send, PenLine, CheckCircle2, ArrowRight } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { LetterCard } from "@/components/letter-card";
 import { StatusBadge } from "@/components/status-badge";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
+import { letterPreview } from "@/lib/db/queries";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
@@ -20,26 +21,21 @@ export default async function InboxPage({
   const t = createTranslator(locale);
   const { deleted, submitted } = (await searchParams) ?? {};
 
-  const letters = await prisma.letter.findMany({
-    where: { authorId: user.id },
-    include: {
-      replies: {
-        where: { status: "APPROVED" },
-        orderBy: { createdAt: "desc" }
-      },
-      _count: {
-        select: { replies: { where: { status: "APPROVED" } } }
-      }
-    },
-    orderBy: { createdAt: "desc" }
-  });
-
-  const ownReplies = await prisma.reply.findMany({
-    where: { responderId: user.id },
-    include: { letter: true },
-    orderBy: { createdAt: "desc" },
-    take: 10
-  });
+  const [letters, ownReplies] = await Promise.all([
+    db.orm.public.Letter
+      .with(letterPreview)
+      .where({ authorId: user.id })
+      .include("replies", (replies) => replies.where({ status: "APPROVED" }).count())
+      .orderBy((letter) => letter.createdAt.desc())
+      .all(),
+    db.orm.public.Reply
+      .select("id", "letterId", "status", "coachedText", "createdAt")
+      .where({ responderId: user.id })
+      .include("letter", (letter) => letter.select("desiredReplyType"))
+      .orderBy((reply) => reply.createdAt.desc())
+      .limit(10)
+      .all()
+  ]);
 
   return (
     <div className="mx-auto max-w-4xl py-2">
@@ -141,7 +137,7 @@ export default async function InboxPage({
                 </div>
                 <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                   {t("inbox.replyContext", {
-                    type: t(`replyType.${reply.letter.desiredReplyType}`).toLowerCase()
+                    type: t(`replyType.${reply.letter?.desiredReplyType ?? "COMFORT"}`).toLowerCase()
                   })}
                 </p>
                 <p className="mt-2 font-letter text-xs leading-relaxed text-foreground/80 font-normal line-clamp-2 break-words">

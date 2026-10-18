@@ -136,6 +136,35 @@ describe("MCP (Model Context Protocol) API Endpoint (/api/mcp)", () => {
     expect(parsed.models.length).toBeGreaterThanOrEqual(8);
   });
 
+  it("POST tools/call: 'inspect_moderation_queue' projects only queue metadata without leaking rawText or authorId", async () => {
+    const req = new NextRequest("http://localhost:3000/api/mcp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 40,
+        method: "tools/call",
+        params: {
+          name: "inspect_moderation_queue",
+          arguments: { limit: 5 }
+        }
+      })
+    });
+
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    const parsed = JSON.parse(data.result.content[0].text);
+    expect(Array.isArray(parsed.pendingLetters)).toBe(true);
+    for (const item of parsed.pendingLetters) {
+      expect(Object.hasOwn(item, "rawText")).toBe(false);
+      expect(Object.hasOwn(item, "processedText")).toBe(false);
+      expect(Object.hasOwn(item, "authorId")).toBe(false);
+      expect(typeof item._count?.replies).toBe("number");
+    }
+  });
+
   it("POST tools/call: 'diagnose_letter_pipeline' runs text through AI middleware", async () => {
     const req = new NextRequest("http://localhost:3000/api/mcp", {
       method: "POST",

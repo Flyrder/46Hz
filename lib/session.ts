@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { sessionSettings } from "@/settings";
 
 export const USER_COOKIE = sessionSettings.userCookie;
@@ -35,20 +35,15 @@ export async function getCurrentUser() {
     return null;
   }
 
-  let user = await prisma.user.findUnique({
-    where: { id: userId }
-  });
+  let user = await db.orm.public.User.first({ id: userId });
 
   if (user && !user.migrationCode) {
     const code = createMigrationCode();
-    user = await prisma.user.update({
-      where: { id: userId },
-      data: { migrationCode: code }
-    });
+    user = await db.orm.public.User.where({ id: userId }).update({ migrationCode: code });
   }
 
   if (user) {
-    await recordUserIp(user.id);
+    await recordUserIp(user.id, user.recentIps);
   }
 
   return user;

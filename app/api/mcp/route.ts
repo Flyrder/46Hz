@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { and, or } from "@prisma/orm-postgres/orm-client";
+import { toTimestamp } from "@/lib/dates";
+import { db } from "@/lib/db";
 import { getAiMiddleware } from "@/lib/ai";
 import { ensureSettingsLoadedFromDisk } from "@/lib/settings-store";
 import {
@@ -133,21 +135,16 @@ async function handleToolCall(name: string, args: Record<string, unknown> = {}) 
       ensureSettingsLoadedFromDisk();
       const now = new Date();
       const leaseDurationMs = claimingSettings.leaseDurationMinutes * 60 * 1000;
-      const leaseThreshold = new Date(now.getTime() - leaseDurationMs);
+      const leaseThreshold = toTimestamp(new Date(now.getTime() - leaseDurationMs));
 
       const [totalLetters, activeClaimsCount, expiredMatchesCount] = await Promise.all([
-        prisma.letter.count({ where: { status: "APPROVED" } }),
-        prisma.match.count({
-          where: {
-            status: "OFFERED",
-            createdAt: { gte: leaseThreshold }
-          }
-        }),
-        prisma.match.count({
-          where: {
-            status: { in: ["EXPIRED", "SKIPPED"] }
-          }
-        })
+        db.orm.public.Letter.where({ status: "APPROVED" }).aggregate((agg) => ({ count: agg.count() })),
+        db.orm.public.Match
+          .where((match) => and(match.status.eq("OFFERED"), match.createdAt.gte(leaseThreshold)))
+          .aggregate((agg) => ({ count: agg.count() })),
+        db.orm.public.Match
+          .where((match) => match.status.in(["EXPIRED", "SKIPPED"]))
+          .aggregate((agg) => ({ count: agg.count() }))
       ]);
 
       const data = {
@@ -159,11 +156,11 @@ async function handleToolCall(name: string, args: Record<string, unknown> = {}) 
         },
         claimingLease: {
           leaseDurationMinutes: claimingSettings.leaseDurationMinutes,
-          activeClaims: activeClaimsCount,
-          expiredOrSkippedMatches: expiredMatchesCount
+          activeClaims: activeClaimsCount.count,
+          expiredOrSkippedMatches: expiredMatchesCount.count
         },
         letterPool: {
-          totalApprovedLetters: totalLetters
+          totalApprovedLetters: totalLetters.count
         }
       };
 
@@ -180,42 +177,27 @@ async function handleToolCall(name: string, args: Record<string, unknown> = {}) 
     case "inspect_moderation_queue": {
       const limit = Math.min(Math.max(Number(args.limit) || 10, 1), 50);
 
-      const [pendingLetters, recentEvents] = await Promise.all([
-        prisma.letter.findMany({
-          where: {
-            OR: [
-              { status: "PENDING" },
-              { riskLevel: { in: ["HIGH", "BLOCKED", "SENSITIVE"] } }
-            ]
-          },
-          select: {
-            id: prisma.letter.fields.id ? true : true,
-            status: true,
-            riskLevel: true,
-            createdAt: true,
-            desiredReplyType: true,
-            _count: {
-              select: { replies: true }
-            }
-          },
-          orderBy: { createdAt: "desc" },
-          take: limit
-        }),
-        prisma.moderationEvent.findMany({
-          select: {
-            id: true,
-            targetType: true,
-            targetId: true,
-            action: true,
-            reason: true,
-            previousStatus: true,
-            newStatus: true,
-            createdAt: true
-          },
-          orderBy: { createdAt: "desc" },
-          take: limit
-        })
+      const [pendingRows, recentEvents] = await Promise.all([
+        db.orm.public.Letter
+          .select("id", "status", "riskLevel", "createdAt", "desiredReplyType")
+          .where((letter) =>
+            or(letter.status.eq("PENDING"), letter.riskLevel.in(["HIGH", "BLOCKED", "SENSITIVE"]))
+          )
+          .include("replies", (replies) => replies.count())
+          .orderBy((letter) => letter.createdAt.desc())
+          .limit(limit)
+          .all(),
+        db.orm.public.ModerationEvent
+          .select("id", "targetType", "targetId", "action", "reason", "previousStatus", "newStatus", "createdAt")
+          .orderBy((event) => event.createdAt.desc())
+          .limit(limit)
+          .all()
       ]);
+
+      const pendingLetters = pendingRows.map(({ replies, ...letter }) => ({
+        ...letter,
+        _count: { replies }
+      }));
 
       return {
         content: [

@@ -4,7 +4,7 @@ import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
@@ -20,13 +20,10 @@ export default async function AdminReplyDetailPage({
   const [role, locale] = await Promise.all([requireStaff(), getLocalePreference()]);
   const t = createTranslator(locale);
   const { id } = await params;
-  const reply = await prisma.reply.findUnique({
-    where: { id },
-    include: {
-      letter: true,
-      responder: true
-    }
-  });
+  const reply = await db.orm.public.Reply
+    .include("letter", (letter) => letter.select("processedText"))
+    .include("responder", (responder) => responder.select("anonymousHandle", "trustScore"))
+    .first({ id });
 
   if (!reply) {
     notFound();
@@ -56,9 +53,9 @@ export default async function AdminReplyDetailPage({
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <User className="h-3.5 w-3.5 text-accent" />
-              <span className="font-medium text-foreground">{reply.responder.anonymousHandle}</span>
+              <span className="font-medium text-foreground">{reply.responder?.anonymousHandle ?? "Anonymous"}</span>
               <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono">
-                {t("admin.trustScorePrefix")} {reply.responder.trustScore}
+                {t("admin.trustScorePrefix")} {reply.responder?.trustScore ?? 50}
               </span>
             </div>
           </div>
@@ -89,7 +86,7 @@ export default async function AdminReplyDetailPage({
               {t("admin.letterContextSection")}
             </h2>
             <div className="mt-2.5 font-letter rounded-xl border border-border/60 bg-muted/20 p-4 text-xs leading-relaxed text-muted-foreground whitespace-pre-wrap">
-              {reply.letter.processedText}
+              {reply.letter?.processedText ?? ""}
             </div>
           </div>
         </article>

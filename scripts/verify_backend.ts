@@ -1,4 +1,7 @@
-import { prisma } from "../lib/db";
+import { and, or } from "@prisma/orm-postgres/orm-client";
+import { toTimestamp } from "../lib/dates";
+import { db, disconnectDatabase, pingDatabase } from "../lib/db";
+import { letterPreview, orderedSupportResourcesQuery } from "../lib/db/queries";
 import { getAiMiddleware } from "../lib/ai";
 import { getLetterRouting, isPeerMatchable } from "../lib/safety/routing";
 import { canTransitionLetter, canTransitionReply, nextResponderTrustScore } from "../lib/moderation/status";
@@ -17,8 +20,8 @@ async function verifyAll() {
   console.log("English Claim Title:", translate("en_US", "reply.reservedByOtherTitle"));
 
   console.log("\n=== [2/7] Testing Database Connection & Cleanup ===");
-  await prisma.$connect();
-  const initialUsers = await prisma.user.count();
+  await pingDatabase();
+  const { count: initialUsers } = await db.orm.public.User.aggregate((agg) => ({ count: agg.count() }));
   console.log(`Connected to PostgreSQL. Current user count: ${initialUsers}`);
 
   console.log("\n=== [3/7] Testing User Creation & 46HZ Migration Code ===");
@@ -27,38 +30,32 @@ async function verifyAll() {
   console.log(`Generated Handle: ${testWriterHandle}, Migration Code: ${testWriterCode}`);
   if (!testWriterCode.startsWith("46HZ-")) throw new Error("Migration code must start with 46HZ-");
 
-  const writer = await prisma.user.create({
-    data: {
+  const [writer, responder, responder2] = await Promise.all([
+    db.orm.public.User.create({
       anonymousHandle: testWriterHandle,
       migrationCode: testWriterCode,
       language: "ko_KR",
       ageRange: "ADULT",
       preferredReplyType: "COMFORT",
       trustScore: 50
-    }
-  });
-
-  const responder = await prisma.user.create({
-    data: {
+    }),
+    db.orm.public.User.create({
       anonymousHandle: createAnonymousHandle(),
       migrationCode: createMigrationCode(),
       language: "ko_KR",
       ageRange: "ADULT",
       preferredReplyType: "JUST_BEING_HEARD",
       trustScore: 60
-    }
-  });
-
-  const responder2 = await prisma.user.create({
-    data: {
+    }),
+    db.orm.public.User.create({
       anonymousHandle: createAnonymousHandle(),
       migrationCode: createMigrationCode(),
       language: "ko_KR",
       ageRange: "ADULT",
       preferredReplyType: "COMFORT",
       trustScore: 70
-    }
-  });
+    })
+  ]);
   console.log(`Created Writer (ID: ${writer.id}), Responder 1 (ID: ${responder.id}), and Responder 2 (ID: ${responder2.id})`);
 
   console.log("\n=== [4/7] Testing AI Middleware & Letter Pipeline ===");
@@ -79,37 +76,36 @@ async function verifyAll() {
   }
 
   const routing = getLetterRouting(processed.risk.level);
-  const letter = await prisma.letter.create({
-    data: {
-      authorId: writer.id,
-      rawText: rawLetterText,
-      processedText: processed.processedText,
-      emotionTags: processed.emotionTags,
-      situationTags: processed.situationTags,
-      desiredReplyType: processed.desiredReplyType,
-      riskLevel: processed.risk.level,
-      language: writer.language,
-      status: "DRAFT"
-    }
+  const letter = await db.orm.public.Letter.create({
+    authorId: writer.id,
+    rawText: rawLetterText,
+    processedText: processed.processedText,
+    emotionTags: processed.emotionTags,
+    situationTags: processed.situationTags,
+    desiredReplyType: processed.desiredReplyType,
+    riskLevel: processed.risk.level,
+    language: writer.language,
+    status: "DRAFT"
   });
 
   // Author confirms draft -> transitions to PENDING
   if (!canTransitionLetter(letter.status, routing.submitStatus)) {
     throw new Error("Invalid transition from DRAFT to submitStatus");
   }
-  await prisma.letter.update({
-    where: { id: letter.id },
-    data: { status: routing.submitStatus }
+  await db.orm.public.Letter.where((row) => row.id.eq(letter.id)).updateAndCount({
+    status: routing.submitStatus
   });
 
   // Admin approves letter
   if (!canTransitionLetter(routing.submitStatus, "APPROVED")) {
     throw new Error("Invalid transition from PENDING to APPROVED");
   }
-  const approvedLetter = await prisma.letter.update({
-    where: { id: letter.id },
-    data: { status: "APPROVED" }
+  const approvedLetter = await db.orm.public.Letter.where({ id: letter.id }).update({
+    status: "APPROVED"
   });
+  if (!approvedLetter) {
+    throw new Error("Approved letter was not returned");
+  }
   console.log(`Letter created, transitioned to PENDING, and approved (Status: ${approvedLetter.status})`);
   if (!isPeerMatchable(approvedLetter)) throw new Error("Approved normal letter should be peer matchable");
 
@@ -160,26 +156,23 @@ async function verifyAll() {
   console.log("Coached Text:", coached.coachedText);
 
   // Submit reply
-  const reply = await prisma.reply.create({
-    data: {
-      letterId: approvedLetter.id,
-      responderId: responder.id,
-      rawText: replyDraft,
-      coachedText: coached.coachedText,
-      status: "PENDING"
-    }
+  const reply = await db.orm.public.Reply.create({
+    letterId: approvedLetter.id,
+    responderId: responder.id,
+    rawText: replyDraft,
+    coachedText: coached.coachedText,
+    status: "PENDING"
   });
 
   // Admin approves reply
   if (!canTransitionReply(reply.status, "APPROVED")) throw new Error("Invalid reply transition");
-  const approvedReply = await prisma.reply.update({
-    where: { id: reply.id },
-    data: { status: "APPROVED" }
+  const approvedReply = await db.orm.public.Reply.where({ id: reply.id }).update({
+    status: "APPROVED"
   });
-  await prisma.match.updateMany({
-    where: { letterId: letter.id, responderId: responder.id },
-    data: { status: "RESPONDED" }
-  });
+  if (!approvedReply) throw new Error("Approved reply was not returned");
+  await db.orm.public.Match
+    .where({ letterId: letter.id, responderId: responder.id })
+    .updateAndCount({ status: "RESPONDED" });
   console.log(`Reply submitted and approved (Status: ${approvedReply.status})`);
 
   // Writer provides feedback
@@ -200,35 +193,29 @@ async function verifyAll() {
   // Create additional 6 test users and replies to reach the 7-harmonic cap
   const fillerResponders = [];
   for (let i = 2; i <= 7; i++) {
-    const fillerUser = await prisma.user.create({
-      data: {
-        anonymousHandle: createAnonymousHandle(),
-        language: "ko_KR",
-        ageRange: "ADULT",
-        preferredReplyType: "COMFORT"
-      }
+    const fillerUser = await db.orm.public.User.create({
+      anonymousHandle: createAnonymousHandle(),
+      language: "ko_KR",
+      ageRange: "ADULT",
+      preferredReplyType: "COMFORT"
     });
     fillerResponders.push(fillerUser);
-    await prisma.reply.create({
-      data: {
-        letterId: letter.id,
-        responderId: fillerUser.id,
-        rawText: `Resonant reply harmonic #${i}`,
-        coachedText: `Resonant reply harmonic #${i}`,
-        status: "APPROVED"
-      }
+    await db.orm.public.Reply.create({
+      letterId: letter.id,
+      responderId: fillerUser.id,
+      rawText: `Resonant reply harmonic #${i}`,
+      coachedText: `Resonant reply harmonic #${i}`,
+      status: "APPROVED"
     });
   }
 
   // Now letter has 7 approved replies!
   // Another user tries to claim the letter -> should fail with RESONANCE_LIMIT_REACHED
-  const testUser8 = await prisma.user.create({
-    data: {
-      anonymousHandle: createAnonymousHandle(),
-      language: "ko_KR",
-      ageRange: "ADULT",
-      preferredReplyType: "COMFORT"
-    }
+  const testUser8 = await db.orm.public.User.create({
+    anonymousHandle: createAnonymousHandle(),
+    language: "ko_KR",
+    ageRange: "ADULT",
+    preferredReplyType: "COMFORT"
   });
 
   const claimAtCap = await claimLetterForReply(letter.id, testUser8.id);
@@ -238,9 +225,8 @@ async function verifyAll() {
   }
 
   // Author explicitly consents and expands resonance capacity to 15
-  await prisma.letter.update({
-    where: { id: letter.id },
-    data: { maxReplies: 15 }
+  await db.orm.public.Letter.where((row) => row.id.eq(letter.id)).updateAndCount({
+    maxReplies: 15
   });
   console.log("Author consented and expanded resonance capacity to 15");
 
@@ -252,72 +238,62 @@ async function verifyAll() {
   }
 
   // Test complex Prisma 8 relation & array filters (letter detail, inbox, admin filters, reports)
-  const detailLetter = await prisma.letter.findFirst({
-    where: {
-      id: letter.id,
-      OR: [
-        { authorId: responder.id },
-        { replies: { some: { responderId: responder.id } } }
-      ]
-    },
-    include: {
-      replies: {
-        where: {
-          OR: [{ status: "APPROVED" }, { responderId: responder.id }]
-        },
-        include: {
-          feedback: { where: { fromUserId: writer.id } }
-        },
-        orderBy: { createdAt: "desc" }
-      },
-      comments: { orderBy: { createdAt: "asc" } }
-    }
-  });
+  const detailLetter = await db.orm.public.Letter
+    .where((l) =>
+      and(
+        l.id.eq(letter.id),
+        or(l.authorId.eq(responder.id), l.replies.some((r) => r.responderId.eq(responder.id)))
+      )
+    )
+    .include("replies", (replies) =>
+      replies
+        .where((r) => or(r.status.eq("APPROVED"), r.responderId.eq(responder.id)))
+        .include("feedback", (feedback) => feedback.where({ fromUserId: writer.id }))
+        .orderBy((r) => r.createdAt.desc())
+    )
+    .include("comments", (comments) => comments.orderBy((c) => c.createdAt.asc()))
+    .first();
   if (!detailLetter || detailLetter.replies.length < 7) {
     throw new Error("Complex OR + relation some filter in letter detail failed");
   }
 
-  const taggedLetters = await prisma.letter.findMany({
-    where: {
-      id: letter.id,
-      emotionTags: { has: "lonely" },
-      createdAt: {
-        gte: new Date(Date.now() - 60_000),
-        lte: new Date(Date.now() + 60_000)
-      }
-    }
-  });
+  const taggedLetters = await db.orm.public.Letter
+    .where((l, { fns }) =>
+      and(
+        l.id.eq(letter.id),
+        fns.raw`${"lonely"} = ANY(${l.emotionTags})`.returns("pg/bool@1"),
+        l.createdAt.gte(toTimestamp(new Date(Date.now() - 60_000))),
+        l.createdAt.lte(toTimestamp(new Date(Date.now() + 60_000)))
+      )
+    )
+    .all();
   if (taggedLetters.length !== 1) {
     throw new Error("Array has + Date range (gte/lte) filter failed");
   }
 
-  const inboxLetters = await prisma.letter.findMany({
-    where: { id: letter.id, authorId: writer.id },
-    include: {
-      replies: {
-        where: { status: "APPROVED" },
-        orderBy: { createdAt: "desc" }
-      },
-      _count: {
-        select: { replies: { where: { status: "APPROVED" } } }
-      }
-    }
-  });
-  if (inboxLetters.length !== 1 || inboxLetters[0]._count.replies < 7) {
-    throw new Error("Inbox replies + _count include failed");
+  const inboxLetters = await db.orm.public.Letter
+    .with(letterPreview)
+    .where({ id: letter.id, authorId: writer.id })
+    .include("replies", (replies) => replies.where({ status: "APPROVED" }).count())
+    .all();
+  if (inboxLetters.length !== 1 || inboxLetters[0].replies < 7) {
+    throw new Error("Inbox replies count reducer failed");
   }
 
-  const reports = await prisma.feedback.findMany({
-    where: { reportReason: { not: null } },
-    include: {
-      reply: { include: { letter: true, responder: true } },
-      fromUser: true
-    },
-    orderBy: { createdAt: "desc" },
-    take: 5
-  });
+  const reports = await db.orm.public.Feedback
+    .where((feedback) => feedback.reportReason.isNotNull())
+    .include("reply", (r) => r.include("letter").include("responder"))
+    .include("fromUser")
+    .orderBy((feedback) => feedback.createdAt.desc())
+    .limit(5)
+    .all();
   if (!Array.isArray(reports)) {
     throw new Error("Admin reports query failed");
+  }
+
+  const orderedResources = await orderedSupportResourcesQuery().all();
+  if (!Array.isArray(orderedResources)) {
+    throw new Error("Admin support resources boolean orderBy query failed");
   }
 
   console.log("\n=== [7/7] Testing RBAC Permissions ===");
@@ -342,9 +318,9 @@ async function verifyAll() {
   }
 
   // Cleanup test entities safely
-  await prisma.reply.deleteMany({ where: { letterId: letter.id } });
-  await prisma.match.deleteMany({ where: { letterId: letter.id } });
-  await prisma.letter.deleteMany({ where: { id: letter.id } });
+  await db.orm.public.Reply.where({ letterId: letter.id }).deleteAndCount();
+  await db.orm.public.Match.where({ letterId: letter.id }).deleteAndCount();
+  await db.orm.public.Letter.where({ id: letter.id }).deleteAndCount();
   const allTestUserIds = [
     writer.id,
     responder.id,
@@ -352,9 +328,7 @@ async function verifyAll() {
     ...fillerResponders.map((u) => u.id),
     testUser8.id
   ];
-  await prisma.user.deleteMany({
-    where: { id: { in: allTestUserIds } }
-  });
+  await db.orm.public.User.where((user) => user.id.in(allTestUserIds)).deleteAndCount();
   console.log("\n Cleaned up test data.");
   console.log("\n ALL ARCHITECTURE & BACKEND INTEGRITY CHECKS PASSED SUCCESSFULLY!");
 }
@@ -365,6 +339,5 @@ verifyAll()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
-    process.exit(0);
+    await disconnectDatabase();
   });

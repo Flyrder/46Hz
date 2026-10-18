@@ -1,3 +1,5 @@
+import { databaseDate } from "@/lib/dates";
+
 export type ClassValue =
   | ClassValue[]
   | Record<string, boolean | number | string | null | undefined>
@@ -46,7 +48,7 @@ export function formatDate(value: Date | string, locale = "ko-KR"): string {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit"
-  }).format(new Date(value));
+  }).format(databaseDate(value));
 }
 
 export function excerpt(text: string, length = 160): string {

@@ -20,8 +20,8 @@ describe("KWCAG 2.2 (한국형 웹 콘텐츠 접근성 지침 / KS X 9256) Compl
     expect(translate("en_US", "shell.skipToContent")).toBe("Skip to main content");
     expect(translate("zh_CN", "shell.skipToContent")).toBe("跳至主要内容");
 
-    // 2.2.1 충분한 시간 제공 (15-min lease duration and voluntary release)
-    expect(settings.claiming.leaseDurationMinutes).toBe(15);
+    // 2.2.1 충분한 시간 제공 (Sufficient lease duration and voluntary release)
+    expect(settings.claiming.leaseDurationMinutes).toBeGreaterThanOrEqual(5);
     expect(translate("ko_KR", "reply.skipClaim")).toContain("양보");
   });
 

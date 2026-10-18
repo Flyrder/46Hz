@@ -227,7 +227,7 @@ export const claimingSettings: {
    */
   leaseDurationMinutes: number;
 } = {
-  leaseDurationMinutes: 15
+  leaseDurationMinutes: 11
 };
 
 export const securitySettings: {
@@ -249,15 +249,15 @@ export const securitySettings: {
   rateLimits: {
     adminLogin: {
       maxRequests: 5,
-      windowMs: 5 * 60 * 1000 // 5 attempts per 5 minutes
+      windowMs: 300000
     },
     writeLetter: {
       maxRequests: 10,
-      windowMs: 60 * 1000 // 10 drafts per minute
+      windowMs: 60000
     },
     coachReply: {
       maxRequests: 10,
-      windowMs: 60 * 1000 // 10 requests per minute
+      windowMs: 60000
     }
   }
 };
@@ -275,8 +275,8 @@ export const complianceSettings: {
   legalBasis: string;
   dataMinimizationNotice: string;
 } = {
-  ipRetentionDays: 14,
-  maxRecentIps: 5,
+  ipRetentionDays: 30,
+  maxRecentIps: 15,
   protocolVersion: "46HZ-LE-PACKET-V1" as const,
   legalBasis: "Law Enforcement Incident & Compliance Request (Data Minimization Principle)",
   dataMinimizationNotice:
@@ -313,22 +313,22 @@ export const aiSettings: {
   enableReplyCoach: true,
   enableWritingSparks: true,
   enableResonanceMatch: true,
-  defaultProvider: "mock",
-  timeoutMs: 10_000,
+  defaultProvider: "gemini",
+  timeoutMs: 7500,
   mockDelayMs: 150,
   temperature: 0.7,
-  maxTokens: 4096,
-  thinkingLevel: "low",
-  storeInteractions: false,
-  model: "gemini-3.8-flash",
+  maxTokens: 4146,
+  thinkingLevel: "medium",
+  storeInteractions: true,
+  model: "gemini-3.5-flash-lite",
   apiKey: "",
   baseUrl: "",
-  systemPrompt: DEFAULT_AI_SYSTEM_PROMPT,
-  promptRiskSafety: DEFAULT_AI_PROMPT_RISK_SAFETY,
-  promptAnonymization: DEFAULT_AI_PROMPT_ANONYMIZATION,
-  promptReplyCoach: DEFAULT_AI_PROMPT_REPLY_COACH,
-  promptWritingSparks: DEFAULT_AI_PROMPT_WRITING_SPARKS,
-  promptResonanceMatch: DEFAULT_AI_PROMPT_RESONANCE_MATCH
+  systemPrompt: "You are an empathetic, trauma-informed, and non-judgmental emotional support companion for 46Hz(Mental-Healthcare letterbox system in Korea). You protect user privacy by strictly scrubbing personal identifiers (Zero PII), evaluate safety with utmost care, and offer gentle, warm, and authentic support without clinical preachiness or generic platitudes.",
+  promptRiskSafety: "Evaluate incoming letters for acute self-harm, suicide intent, violence, or severe trauma. Classify strictly into NORMAL (peer-safe everyday distress), SENSITIVE (trauma/abuse needing moderator care), HIGH (acute self-harm/crisis), or BLOCKED (threats/violence), and provide warm crisis support guidance when risk is elevated.",
+  promptAnonymization: "Strictly scrub all Personally Identifiable Information (Zero PII) including legal names, phone numbers, emails, resident registration numbers, bank accounts, messenger IDs, and exact addresses while preserving the writer's authentic emotional voice.",
+  promptReplyCoach: "Review the peer responder's draft reply to ensure it is warm, non-judgmental, and aligned with the writer's desired reply type. Flag judgmental, invalidating, advice-heavy, or self-centering phrasing, and offer 3 compassionate reframings (warm empathy, deep listening, calm grounding).",
+  promptWritingSparks: "Generate 3 gentle, poetic, low-pressure opening sentences tailored to the writer's current mood so they can begin expressing their feelings safely without writer's block.",
+  promptResonanceMatch: "Match available anonymous letters with the responder's preferred support style and emotional resonance, explaining gently why each letter connects with their capacity to care."
 };
 
 export const supportResourcesSettings: {

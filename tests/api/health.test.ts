@@ -1,11 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
 import { GET } from "@/app/api/health/route";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { brandSettings } from "@/settings";
 
 describe("Health API Route (/api/health)", () => {
   it("returns 200 and healthy status when database probe succeeds", async () => {
-    const rawSpy = vi.spyOn(prisma, "$queryRaw").mockResolvedValueOnce([{ "?column?": 1 }] as never);
+    const runtimeSpy = vi.spyOn(db, "runtime").mockReturnValueOnce({
+      query: vi.fn().mockResolvedValueOnce([{ ok: 1 }])
+    } as never);
 
     const res = await GET();
     const data = await res.json();
@@ -21,11 +23,13 @@ describe("Health API Route (/api/health)", () => {
     expect(data.aiProvider).toBeDefined();
     expect(data.timestamp).toBeDefined();
 
-    rawSpy.mockRestore();
+    runtimeSpy.mockRestore();
   });
 
   it("returns 503 and degraded status when database probe throws error", async () => {
-    const rawSpy = vi.spyOn(prisma, "$queryRaw").mockRejectedValueOnce(new Error("Connection refused"));
+    const runtimeSpy = vi.spyOn(db, "runtime").mockReturnValueOnce({
+      query: vi.fn().mockRejectedValueOnce(new Error("Connection refused"))
+    } as never);
 
     const res = await GET();
     const data = await res.json();
@@ -38,7 +42,7 @@ describe("Health API Route (/api/health)", () => {
     expect(data.database.error).toBe("Connection refused");
     expect(typeof data.database.latencyMs).toBe("number");
 
-    rawSpy.mockRestore();
+    runtimeSpy.mockRestore();
   });
 
   it("probes live database and returns healthy response", async () => {

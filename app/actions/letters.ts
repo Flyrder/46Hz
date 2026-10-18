@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAiMiddleware } from "@/lib/ai";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
+import { resonanceSettings } from "@/settings";
 import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
 import { getLetterRouting } from "@/lib/safety/routing";
@@ -28,8 +29,7 @@ export async function processLetterAction(formData: FormData): Promise<void> {
     preferredReplyType: user.preferredReplyType
   });
 
-  const letter = await prisma.letter.create({
-    data: {
+  const letter = await db.orm.public.Letter.select("id").create({
       authorId: user.id,
       rawText: input.rawText,
       processedText: result.processedText,
@@ -38,8 +38,8 @@ export async function processLetterAction(formData: FormData): Promise<void> {
       desiredReplyType: result.desiredReplyType,
       riskLevel: result.risk.level,
       language: locale,
-      status: "DRAFT"
-    }
+      status: "DRAFT",
+      maxReplies: resonanceSettings.defaultMaxReplies
   });
 
   redirect(`/write/review?id=${letter.id}`);
@@ -58,13 +58,11 @@ export async function confirmLetterAction(formData: FormData): Promise<void> {
 
   const input = parsed.data;
 
-  const letter = await prisma.letter.findFirst({
-    where: {
+  const letter = await db.orm.public.Letter.select("id", "riskLevel", "status").where({
       id: input.letterId,
       authorId: user.id,
       status: "DRAFT"
-    }
-  });
+  }).first();
 
   if (!letter) {
     throw new Error("Draft letter was not found.");
@@ -72,16 +70,12 @@ export async function confirmLetterAction(formData: FormData): Promise<void> {
 
   const routing = getLetterRouting(letter.riskLevel);
 
-  await prisma.$transaction([
-    prisma.letter.update({
-      where: { id: letter.id },
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Letter.where((row) => row.id.eq(letter.id)).updateAndCount({
         processedText: input.processedText,
         status: routing.submitStatus
-      }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+    });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "LETTER",
         targetId: letter.id,
         action: routing.showSupportResources ? "SAFETY_ROUTED" : "SUBMITTED",
@@ -90,9 +84,8 @@ export async function confirmLetterAction(formData: FormData): Promise<void> {
           : "Writer confirmed the AI-processed letter.",
         previousStatus: letter.status,
         newStatus: routing.submitStatus
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath("/inbox");
 
@@ -107,13 +100,11 @@ export async function cancelDraftLetterAction(formData: FormData): Promise<void>
   const user = await requireUser();
   const letterId = formValue(formData, "letterId");
 
-  await prisma.letter.deleteMany({
-    where: {
+  await db.orm.public.Letter.where({
       id: letterId,
       authorId: user.id,
       status: "DRAFT"
-    }
-  });
+  }).deleteAndCount();
 
   redirect("/write");
 }
@@ -126,39 +117,31 @@ export async function expandLetterResonanceAction(formData: FormData): Promise<v
     throw new Error("Letter ID is required.");
   }
 
-  const letter = await prisma.letter.findFirst({
-    where: {
+  const letter = await db.orm.public.Letter.select("id", "maxReplies", "status").where({
       id: letterId,
       authorId: user.id
-    }
-  });
+  }).first();
 
   if (!letter) {
     throw new Error("Letter not found or you are not the author.");
   }
 
-  if (letter.maxReplies >= 15) {
+  if (letter.maxReplies >= resonanceSettings.expandedMaxReplies) {
     return;
   }
 
-  await prisma.$transaction([
-    prisma.letter.update({
-      where: { id: letter.id },
-      data: {
-        maxReplies: 15
-      }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Letter.where((row) => row.id.eq(letter.id))
+      .updateAndCount({ maxReplies: resonanceSettings.expandedMaxReplies });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "LETTER",
         targetId: letter.id,
         action: "RESONANCE_EXPANDED",
-        reason: "Author explicitly consented to expand resonance capacity from 7 to 15 replies.",
+        reason: `Author explicitly consented to expand resonance capacity to ${resonanceSettings.expandedMaxReplies} replies.`,
         previousStatus: letter.status,
         newStatus: letter.status
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath(`/letters/${letter.id}`);
   revalidatePath("/inbox");
@@ -173,32 +156,26 @@ export async function deleteLetterAction(formData: FormData): Promise<void> {
     throw new Error("Letter ID is required.");
   }
 
-  const letter = await prisma.letter.findFirst({
-    where: {
+  const letter = await db.orm.public.Letter.select("id", "status").where({
       id: letterId,
       authorId: user.id
-    }
-  });
+  }).first();
 
   if (!letter) {
     throw new Error("Letter not found or you are not authorized to delete it.");
   }
 
-  await prisma.$transaction([
-    prisma.letter.delete({
-      where: { id: letter.id }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Letter.where((row) => row.id.eq(letter.id)).deleteAndCount();
+    await tx.orm.public.ModerationEvent.create({
         targetType: "LETTER",
         targetId: letter.id,
         action: "DELETED_BY_AUTHOR",
         reason: "Author chose to permanently delete their letter.",
         previousStatus: letter.status,
         newStatus: "DELETED"
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath("/inbox");
   revalidatePath("/reply");
@@ -215,33 +192,27 @@ export async function updateDesiredReplyTypeAction(formData: FormData): Promise<
     throw new Error("Invalid desired reply type.");
   }
 
-  const letter = await prisma.letter.findFirst({
-    where: {
+  const letter = await db.orm.public.Letter.select("id", "desiredReplyType", "status").where({
       id: letterId,
       authorId: user.id
-    }
-  });
+  }).first();
 
   if (!letter) {
     throw new Error("Letter not found or you are not authorized to update it.");
   }
 
-  await prisma.$transaction([
-    prisma.letter.update({
-      where: { id: letter.id },
-      data: { desiredReplyType: parsed.data }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Letter.where((row) => row.id.eq(letter.id))
+      .updateAndCount({ desiredReplyType: parsed.data });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "LETTER",
         targetId: letter.id,
         action: "DESIRED_REPLY_TYPE_UPDATED",
         reason: `Author updated desired reply type from ${letter.desiredReplyType} to ${parsed.data}.`,
         previousStatus: letter.status,
         newStatus: letter.status
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath(`/letters/${letter.id}`);
   revalidatePath("/inbox");

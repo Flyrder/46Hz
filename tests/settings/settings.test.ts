@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import settings, {
   brandSettings,
   i18nSettings,
@@ -18,6 +18,10 @@ import { formatSettingsTsPreview } from "@/lib/settings-store";
 import { systemSettingsSchema } from "@/lib/validators";
 
 describe("Unified Settings (settings.ts)", () => {
+  beforeEach(() => {
+    resetRuntimeSettingsToDefault();
+  });
+
   afterEach(() => {
     resetRuntimeSettingsToDefault();
   });

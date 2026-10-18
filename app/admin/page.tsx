@@ -4,7 +4,8 @@ import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getAdminRole } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { toTimestamp } from "@/lib/dates";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import {
@@ -70,36 +71,51 @@ export default async function AdminPage({
 
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
+  const startOfTodayTimestamp = toTimestamp(startOfToday);
 
   const [
-    lettersToday,
-    repliesToday,
-    pendingLetters,
-    pendingReplies,
-    highRisk,
-    reports,
-    feedbackCount,
-    understoodCount,
-    replyCount,
-    rejectedReplyCount,
+    lettersTodayAgg,
+    repliesTodayAgg,
+    pendingLettersAgg,
+    highRiskAgg,
+    reportsAgg,
+    feedbackAgg,
+    understoodAgg,
+    replyStatusGroups,
     recentLetters
-  ] = await prisma.$transaction([
-    prisma.letter.count({ where: { createdAt: { gte: startOfToday } } }),
-    prisma.reply.count({ where: { createdAt: { gte: startOfToday } } }),
-    prisma.letter.count({ where: { status: "PENDING" } }),
-    prisma.reply.count({ where: { status: "PENDING" } }),
-    prisma.letter.count({ where: { riskLevel: "HIGH" } }),
-    prisma.feedback.count({ where: { reportReason: { not: null } } }),
-    prisma.feedback.count(),
-    prisma.feedback.count({ where: { feltUnderstood: true } }),
-    prisma.reply.count(),
-    prisma.reply.count({ where: { status: "REJECTED" } }),
-    prisma.letter.findMany({
-      select: { emotionTags: true, riskLevel: true },
-      take: 100,
-      orderBy: { createdAt: "desc" }
-    })
+  ] = await Promise.all([
+    db.orm.public.Letter
+      .where((letter) => letter.createdAt.gte(startOfTodayTimestamp))
+      .aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Reply
+      .where((reply) => reply.createdAt.gte(startOfTodayTimestamp))
+      .aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Letter.where({ status: "PENDING" }).aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Letter.where({ riskLevel: "HIGH" }).aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Feedback
+      .where((feedback) => feedback.reportReason.isNotNull())
+      .aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Feedback.aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Feedback.where({ feltUnderstood: true }).aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Reply.groupBy("status").aggregate((agg) => ({ count: agg.count() })),
+    db.orm.public.Letter
+      .select("emotionTags", "riskLevel")
+      .orderBy((letter) => letter.createdAt.desc())
+      .limit(100)
+      .all()
   ]);
+
+  const lettersToday = lettersTodayAgg.count;
+  const repliesToday = repliesTodayAgg.count;
+  const pendingLetters = pendingLettersAgg.count;
+  const highRisk = highRiskAgg.count;
+  const reports = reportsAgg.count;
+  const feedbackCount = feedbackAgg.count;
+  const understoodCount = understoodAgg.count;
+  const replyCountByStatus = Object.fromEntries(replyStatusGroups.map((row) => [row.status, row.count]));
+  const pendingReplies = replyCountByStatus.PENDING ?? 0;
+  const rejectedReplyCount = replyCountByStatus.REJECTED ?? 0;
+  const replyCount = replyStatusGroups.reduce((sum, row) => sum + row.count, 0);
 
   const emotionCounts: Record<string, number> = {
     lonely: 0,
@@ -109,7 +125,7 @@ export default async function AdminPage({
   };
 
   for (const letter of recentLetters) {
-    for (const tag of letter.emotionTags) {
+    for (const tag of letter.emotionTags ?? []) {
       const lower = tag.toLowerCase();
       if (lower in emotionCounts) {
         emotionCounts[lower]++;

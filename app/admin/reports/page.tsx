@@ -2,7 +2,7 @@ import Link from "next/link";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
@@ -14,20 +14,18 @@ export default async function AdminReportsPage() {
   const [role, locale] = await Promise.all([requireStaff(), getLocalePreference()]);
   const t = createTranslator(locale);
 
-  const reports = await prisma.feedback.findMany({
-    where: { reportReason: { not: null } },
-    include: {
-      reply: {
-        include: {
-          letter: true,
-          responder: true
-        }
-      },
-      fromUser: true
-    },
-    orderBy: { createdAt: "desc" },
-    take: 50
-  });
+  const reports = await db.orm.public.Feedback
+    .select("id", "replyId", "reportReason", "createdAt")
+    .where((feedback) => feedback.reportReason.isNotNull())
+    .include("reply", (reply) =>
+      reply
+        .select("id")
+        .include("responder", (responder) => responder.select("anonymousHandle", "trustScore"))
+    )
+    .include("fromUser", (fromUser) => fromUser.select("anonymousHandle"))
+    .orderBy((feedback) => feedback.createdAt.desc())
+    .limit(50)
+    .all();
 
   return (
     <section className="mx-auto max-w-4xl py-2 sm:py-4">
@@ -68,7 +66,7 @@ export default async function AdminReportsPage() {
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <User className="h-3.5 w-3.5 text-accent" />
-                <span>{t("admin.reporterPrefix")} {report.fromUser.anonymousHandle}</span>
+                <span>{t("admin.reporterPrefix")} {report.fromUser?.anonymousHandle ?? "Anonymous"}</span>
               </div>
             </div>
 
@@ -79,7 +77,7 @@ export default async function AdminReportsPage() {
 
             <div className="mt-3 flex items-center justify-between text-xs pt-1">
               <span className="text-muted-foreground">
-                {t("admin.replyAuthorPrefix")} {report.reply.responder.anonymousHandle} {t("admin.trustScoreSuffix", { score: String(report.reply.responder.trustScore) })}
+                {t("admin.replyAuthorPrefix")} {report.reply?.responder?.anonymousHandle ?? "Anonymous"} {t("admin.trustScoreSuffix", { score: String(report.reply?.responder?.trustScore ?? 50) })}
               </span>
               <Link
                 href={`/admin/replies/${report.replyId}`}

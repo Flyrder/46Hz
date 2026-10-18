@@ -2,8 +2,9 @@ import Link from "next/link";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { requireStaff } from "@/lib/admin";
+import { or } from "@prisma/orm-postgres/orm-client";
 import { generateIncidentPacket } from "@/lib/compliance/incident-packet";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { maskIp, type IpRecord } from "@/lib/ip";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
@@ -32,27 +33,26 @@ export default async function AdminCompliancePage({
 
   // Retrieve flagged or high-risk incidents for inspection
   const [flaggedLetters, flaggedReplies] = await Promise.all([
-    prisma.letter.findMany({
-      where: {
-        OR: [{ riskLevel: "HIGH" }, { riskLevel: "BLOCKED" }, { status: "ROUTED_TO_SUPPORT" }]
-      },
-      include: {
-        author: { select: { anonymousHandle: true, recentIps: true } }
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10
-    }),
-    prisma.reply.findMany({
-      where: {
-        status: "REJECTED"
-      },
-      include: {
-        responder: { select: { anonymousHandle: true, recentIps: true } },
-        letter: { select: { id: true } }
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10
-    })
+    db.orm.public.Letter
+      .select("id", "rawText", "riskLevel", "status", "createdAt")
+      .where((letter) =>
+        or(
+          letter.riskLevel.in(["HIGH", "BLOCKED"]),
+          letter.status.eq("ROUTED_TO_SUPPORT")
+        )
+      )
+      .include("author", (author) => author.select("anonymousHandle", "recentIps"))
+      .orderBy((letter) => letter.createdAt.desc())
+      .limit(10)
+      .all(),
+    db.orm.public.Reply
+      .select("id", "rawText", "status", "createdAt")
+      .where({ status: "REJECTED" })
+      .include("responder", (responder) => responder.select("anonymousHandle", "recentIps"))
+      .include("letter", (letter) => letter.select("id"))
+      .orderBy((reply) => reply.createdAt.desc())
+      .limit(10)
+      .all()
   ]);
 
   return (
@@ -205,7 +205,7 @@ export default async function AdminCompliancePage({
           </h2>
           <div className="mt-3 space-y-3">
             {flaggedLetters.map((letter) => {
-              const ips = Array.isArray(letter.author.recentIps)
+              const ips = Array.isArray(letter.author?.recentIps)
                 ? (letter.author.recentIps as unknown as IpRecord[])
                 : [];
               const latest = ips.length > 0 ? ips[ips.length - 1] : undefined;
@@ -229,7 +229,7 @@ export default async function AdminCompliancePage({
                       {letter.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      {t("admin.authorLabel")}: <span className="font-medium text-foreground">{letter.author.anonymousHandle}</span> | {t("admin.complianceMaskedOrigin")} {latestIp} {clientInfo ? `(${clientInfo})` : ""}
+                      {t("admin.authorLabel")}: <span className="font-medium text-foreground">{letter.author?.anonymousHandle ?? "Anonymous"}</span> | {t("admin.complianceMaskedOrigin")} {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 
@@ -266,7 +266,7 @@ export default async function AdminCompliancePage({
           </h2>
           <div className="mt-3 space-y-3">
             {flaggedReplies.map((reply) => {
-              const ips = Array.isArray(reply.responder.recentIps)
+              const ips = Array.isArray(reply.responder?.recentIps)
                 ? (reply.responder.recentIps as unknown as IpRecord[])
                 : [];
               const latest = ips.length > 0 ? ips[ips.length - 1] : undefined;
@@ -289,7 +289,7 @@ export default async function AdminCompliancePage({
                       {reply.rawText}
                     </p>
                     <div className="mt-1 text-[11px] text-muted-foreground">
-                      {t("admin.complianceResponderPrefix")} <span className="font-medium text-foreground">{reply.responder.anonymousHandle}</span> | {t("admin.complianceMaskedOrigin")} {latestIp} {clientInfo ? `(${clientInfo})` : ""}
+                      {t("admin.complianceResponderPrefix")} <span className="font-medium text-foreground">{reply.responder?.anonymousHandle ?? "Anonymous"}</span> | {t("admin.complianceMaskedOrigin")} {latestIp} {clientInfo ? `(${clientInfo})` : ""}
                     </div>
                   </div>
 

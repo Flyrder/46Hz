@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { setLocalePreference } from "@/lib/preferences";
 import { createAnonymousHandle, setCurrentUserId, createMigrationCode } from "@/lib/session";
 import { recordUserIp } from "@/lib/ip";
@@ -14,14 +14,12 @@ export async function createAnonymousSessionAction(formData: FormData): Promise<
     preferredReplyType: formValue(formData, "preferredReplyType")
   });
 
-  const user = await prisma.user.create({
-    data: {
+  const user = await db.orm.public.User.select("id", "language").create({
       anonymousHandle: createAnonymousHandle(),
       migrationCode: createMigrationCode(),
       language: input.language,
       ageRange: input.ageRange,
       preferredReplyType: input.preferredReplyType
-    }
   });
 
   await recordUserIp(user.id);
@@ -36,9 +34,8 @@ export async function restoreSessionAction(formData: FormData): Promise<void> {
     redirect("/onboarding?error=invalid_code");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { migrationCode: migrationCode.trim() }
-  });
+  const user = await db.orm.public.User.select("id", "language", "suspendedAt")
+    .where({ migrationCode: migrationCode.trim() }).first();
 
   if (!user || user.suspendedAt) {
     redirect("/onboarding?error=invalid_code");

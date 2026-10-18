@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
+import { conflictKey } from "@/lib/db/queries";
 import { nextResponderTrustScore } from "@/lib/moderation/status";
 import { requireUser } from "@/lib/session";
 import { feedbackSchema, formBoolean, formValue } from "@/lib/validators";
@@ -17,15 +18,13 @@ export async function submitFeedbackAction(formData: FormData): Promise<void> {
     reportReason: formValue(formData, "reportReason") || undefined
   });
 
-  const reply = await prisma.reply.findUnique({
-    where: { id: input.replyId },
-    include: {
-      letter: true,
-      responder: true
-    }
-  });
+  const reply = await db.orm.public.Reply
+    .select("id", "status", "letterId", "responderId")
+    .include("letter", (letter) => letter.select("authorId"))
+    .include("responder", (responder) => responder.select("trustScore"))
+    .first({ id: input.replyId });
 
-  if (!reply || reply.status !== "APPROVED" || reply.letter.authorId !== user.id) {
+  if (!reply || reply.status !== "APPROVED" || !reply.letter || !reply.responder || reply.letter.authorId !== user.id) {
     throw new Error("Feedback can only be left by the writer on approved replies.");
   }
 
@@ -38,14 +37,9 @@ export async function submitFeedbackAction(formData: FormData): Promise<void> {
     reported
   });
 
-  await prisma.$transaction([
-    prisma.feedback.upsert({
-      where: {
-        replyId_fromUserId: {
-          replyId: reply.id,
-          fromUserId: user.id
-        }
-      },
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Feedback.select("id").upsert({
+      conflictOn: conflictKey<"Feedback">({ replyId: reply.id, fromUserId: user.id }),
       create: {
         replyId: reply.id,
         fromUserId: user.id,
@@ -62,26 +56,20 @@ export async function submitFeedbackAction(formData: FormData): Promise<void> {
         tooMuchAdvice: input.tooMuchAdvice,
         reportReason: input.reportReason
       }
-    }),
-    prisma.user.update({
-      where: { id: reply.responderId },
-      data: { trustScore: newTrustScore }
-    }),
-    ...(reported
-      ? [
-          prisma.moderationEvent.create({
-            data: {
-              targetType: "REPLY" as const,
-              targetId: reply.id,
-              action: "REPORTED",
-              reason: input.reportReason,
-              previousStatus: reply.status,
-              newStatus: reply.status
-            }
-          })
-        ]
-      : [])
-  ]);
+    });
+    await tx.orm.public.User.where((row) => row.id.eq(reply.responderId))
+      .updateAndCount({ trustScore: newTrustScore });
+    if (reported) {
+      await tx.orm.public.ModerationEvent.create({
+        targetType: "REPLY" as const,
+        targetId: reply.id,
+        action: "REPORTED",
+        reason: input.reportReason,
+        previousStatus: reply.status,
+        newStatus: reply.status
+      });
+    }
+  });
 
   revalidatePath(`/letters/${reply.letterId}`);
 }

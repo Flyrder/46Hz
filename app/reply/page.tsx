@@ -25,8 +25,8 @@ export default async function ReplyOpportunitiesPage() {
         language: locale,
         availableLetters: letters.map((l) => ({
           id: l.id,
-          emotionTags: l.emotionTags,
-          situationTags: l.situationTags,
+          emotionTags: [...(l.emotionTags ?? [])],
+          situationTags: [...(l.situationTags ?? [])],
           desiredReplyType: l.desiredReplyType
         }))
       });

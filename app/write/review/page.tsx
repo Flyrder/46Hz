@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { ReviewComparisonViewer } from "@/components/review-comparison-viewer";
 import { buttonVariants } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator, formatTag } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { shouldShowSupportResources } from "@/lib/safety/routing";
@@ -22,13 +22,23 @@ export default async function ReviewLetterPage({
   const t = createTranslator(locale);
   const { id } = await searchParams;
   const letter = id
-    ? await prisma.letter.findFirst({
-        where: {
+    ? await db.orm.public.Letter
+        .select(
+          "id",
+          "rawText",
+          "processedText",
+          "emotionTags",
+          "situationTags",
+          "desiredReplyType",
+          "riskLevel",
+          "status"
+        )
+        .where({
           id,
           authorId: user.id,
           status: "DRAFT"
-        }
-      })
+        })
+        .first()
     : null;
 
   if (!letter) {
@@ -64,14 +74,14 @@ export default async function ReviewLetterPage({
           </StatusBadge>
           <StatusBadge>{t(`status.${letter.status}`)}</StatusBadge>
           <StatusBadge tone="neutral">{t(`replyType.${letter.desiredReplyType}`)}</StatusBadge>
-          {letter.emotionTags.map((tag) => (
+          {(letter.emotionTags ?? []).map((tag) => (
             <span key={tag} className="text-xs text-muted-foreground/80 font-medium">
               #{formatTag(tag, t)}
             </span>
           ))}
-          {letter.situationTags.length > 0 && (
+          {(letter.situationTags ?? []).length > 0 && (
             <span className="text-xs text-muted-foreground/60">
-              · {letter.situationTags.map((tag) => formatTag(tag, t)).join(", ")}
+              · {(letter.situationTags ?? []).map((tag) => formatTag(tag, t)).join(", ")}
             </span>
           )}
         </div>

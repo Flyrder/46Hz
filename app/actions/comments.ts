@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { createCommentSchema, formValue } from "@/lib/validators";
 
@@ -13,21 +13,17 @@ export async function createLetterCommentAction(formData: FormData): Promise<voi
     content: formValue(formData, "content")
   });
 
-  const letter = await prisma.letter.findUnique({
-    where: { id: input.letterId }
-  });
+  const letter = await db.orm.public.Letter.select("id").first({ id: input.letterId });
 
   if (!letter) {
     throw new Error("Letter not found.");
   }
 
-  await prisma.letterComment.create({
-    data: {
+  await db.orm.public.LetterComment.create({
       letterId: letter.id,
       authorId: user.id,
       selectedText: input.selectedText,
       content: input.content
-    }
   });
 
   revalidatePath(`/letters/${letter.id}`);
@@ -42,23 +38,20 @@ export async function deleteLetterCommentAction(formData: FormData): Promise<voi
     throw new Error("Comment ID is required.");
   }
 
-  const comment = await prisma.letterComment.findUnique({
-    where: { id: commentId },
-    include: { letter: true }
-  });
+  const comment = await db.orm.public.LetterComment.select("id", "authorId")
+    .include("letter", (letter) => letter.select("authorId"))
+    .first({ id: commentId });
 
   if (!comment) {
     throw new Error("Comment not found.");
   }
 
   // Can be deleted by the comment author OR the letter author
-  if (comment.authorId !== user.id && comment.letter.authorId !== user.id) {
+  if (comment.authorId !== user.id && comment.letter?.authorId !== user.id) {
     throw new Error("You are not authorized to delete this comment.");
   }
 
-  await prisma.letterComment.delete({
-    where: { id: commentId }
-  });
+  await db.orm.public.LetterComment.where((row) => row.id.eq(commentId)).deleteAndCount();
 
   if (letterId) {
     revalidatePath(`/letters/${letterId}`);

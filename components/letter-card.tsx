@@ -17,14 +17,15 @@ export function LetterCard({
   letter: {
     id: string;
     processedText: string;
-    emotionTags: string[];
-    situationTags: string[];
+    emotionTags: readonly string[] | null;
+    situationTags: readonly string[] | null;
     desiredReplyType: ReplyType;
     riskLevel: RiskLevel;
     status: LetterStatus;
     maxReplies?: number;
+    replies?: number | ReadonlyArray<unknown>;
     _count?: { replies: number };
-    createdAt: Date;
+    createdAt: Date | string;
   };
   href: string;
   mode?: "writer" | "responder" | "admin";
@@ -37,7 +38,9 @@ export function LetterCard({
     ? t("letter.masked")
     : excerpt(letter.processedText);
 
-  const replyCount = letter._count?.replies;
+  const emotionTags = letter.emotionTags ?? [];
+  const situationTags = letter.situationTags ?? [];
+  const replyCount = typeof letter.replies === "number" ? letter.replies : letter._count?.replies;
 
   return (
     <Link
@@ -96,14 +99,14 @@ export function LetterCard({
           <span className="inline-flex items-center rounded-md bg-muted/60 px-2 py-0.5 font-medium text-foreground/80">
             {t(`replyType.${letter.desiredReplyType}`)}
           </span>
-          {letter.emotionTags.length > 0 && (
+          {emotionTags.length > 0 && (
             <span className="text-muted-foreground/80">
-              {letter.emotionTags.map((tag) => `#${formatTag(tag, t)}`).join(" ")}
+              {emotionTags.map((tag) => `#${formatTag(tag, t)}`).join(" ")}
             </span>
           )}
-          {mode !== "writer" && letter.situationTags.length > 0 && (
+          {mode !== "writer" && situationTags.length > 0 && (
             <span className="text-muted-foreground/60 hidden sm:inline">
-              · {letter.situationTags.map((tag) => formatTag(tag, t)).join(", ")}
+              · {situationTags.map((tag) => formatTag(tag, t)).join(", ")}
             </span>
           )}
         </div>

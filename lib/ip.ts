@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { complianceSettings } from "@/settings";
 
 export type IpRecord = {
@@ -194,23 +194,21 @@ export async function getClientUserAgent(): Promise<string> {
 /**
  * Records the current client IP and browser User Agent to the user's recentIps in the database.
  */
-export async function recordUserIp(userId: string): Promise<void> {
+export async function recordUserIp(userId: string, knownQueue?: unknown): Promise<void> {
   if (!userId) return;
 
   const [clientIp, userAgent] = await Promise.all([getClientIp(), getClientUserAgent()]);
   if (!clientIp) return;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { recentIps: true }
-    });
-
-    if (!user) return;
+    const queue = knownQueue === undefined
+      ? (await db.orm.public.User.select("recentIps").first({ id: userId }))?.recentIps
+      : knownQueue;
+    if (queue === undefined) return;
 
     let currentQueue: IpRecord[] = [];
-    if (Array.isArray(user.recentIps)) {
-      currentQueue = user.recentIps as unknown as IpRecord[];
+    if (Array.isArray(queue)) {
+      currentQueue = queue as IpRecord[];
     }
 
     const nextQueue = updateIpQueue(
@@ -222,12 +220,8 @@ export async function recordUserIp(userId: string): Promise<void> {
       userAgent
     );
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        recentIps: nextQueue
-      }
-    });
+    await db.orm.public.User.where((user) => user.id.eq(userId))
+      .updateAndCount({ recentIps: nextQueue });
   } catch (error) {
     console.error("Failed to record client audit (IP + User Agent):", error);
   }

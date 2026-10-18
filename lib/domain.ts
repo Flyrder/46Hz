@@ -1,23 +1,11 @@
-export type AgeRange = "UNDER_18" | "ADULT";
+import type { Models } from "@/prisma/contract";
 
-export type ReplyType =
-  | "COMFORT"
-  | "ADVICE"
-  | "SIMILAR_EXPERIENCES"
-  | "JUST_BEING_HEARD";
-
-export type RiskLevel = "NORMAL" | "SENSITIVE" | "HIGH" | "BLOCKED";
-
-export type LetterStatus =
-  | "DRAFT"
-  | "PENDING"
-  | "APPROVED"
-  | "REJECTED"
-  | "ROUTED_TO_SUPPORT";
-
-export type ReplyStatus = "PENDING" | "APPROVED" | "REJECTED";
-
-export type MatchStatus = "OFFERED" | "RESPONDED" | "SKIPPED" | "EXPIRED";
+export type AgeRange = Models.public_User["ageRange"];
+export type ReplyType = Models.public_Letter["desiredReplyType"];
+export type RiskLevel = Models.public_Letter["riskLevel"];
+export type LetterStatus = Models.public_Letter["status"];
+export type ReplyStatus = Models.public_Reply["status"];
+export type MatchStatus = Models.public_Match["status"];
 
 export const replyTypeLabels: Record<ReplyType, string> = {
   COMFORT: "Comfort",

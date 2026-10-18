@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PenLine, Inbox, Clock, Waves, Sparkles, HeartHandshake, ArrowLeft } from "lucide-react";
 import { ReplyComposer } from "@/components/reply-composer";
 import { StatusBadge } from "@/components/status-badge";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator, formatTag } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { isPeerMatchable } from "@/lib/safety/routing";
@@ -22,9 +22,18 @@ export default async function ReplyLetterPage({
   const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
   const t = createTranslator(locale);
   const { letterId } = await params;
-  const letter = await prisma.letter.findUnique({
-    where: { id: letterId }
-  });
+  const letter = await db.orm.public.Letter
+    .select(
+      "id",
+      "authorId",
+      "processedText",
+      "emotionTags",
+      "situationTags",
+      "desiredReplyType",
+      "riskLevel",
+      "status"
+    )
+    .first({ id: letterId });
 
   if (
     !letter ||
@@ -33,6 +42,9 @@ export default async function ReplyLetterPage({
   ) {
     notFound();
   }
+
+  const emotionTags = letter.emotionTags ?? [];
+  const situationTags = letter.situationTags ?? [];
 
   const claimResult = await claimLetterForReply(letter.id, user.id);
 
@@ -157,14 +169,14 @@ export default async function ReplyLetterPage({
       <article className="mt-6 stationery-paper p-6 sm:p-8">
         <div className="flex flex-wrap items-center gap-2 border-b border-border/60 pb-3">
           <StatusBadge tone="neutral">{t(`replyType.${letter.desiredReplyType}`)}</StatusBadge>
-          {letter.emotionTags.map((tag) => (
+          {emotionTags.map((tag) => (
             <span key={tag} className="text-xs font-medium text-muted-foreground/80">
               #{formatTag(tag, t)}
             </span>
           ))}
-          {letter.situationTags.length > 0 && (
+          {situationTags.length > 0 && (
             <span className="text-xs text-muted-foreground/60 hidden sm:inline">
-              · {letter.situationTags.map((tag) => formatTag(tag, t)).join(", ")}
+              · {situationTags.map((tag) => formatTag(tag, t)).join(", ")}
             </span>
           )}
         </div>

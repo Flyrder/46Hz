@@ -1,5 +1,5 @@
 import { Phone } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { DEFAULT_CRISIS_HOTLINES } from "@/lib/resources";
@@ -18,10 +18,10 @@ export default async function SupportResourcesPage({
   const t = createTranslator(locale);
   const { enableChinaSupportInfo } = ensureSettingsLoadedFromDisk();
 
-  const resources = await prisma.supportResource.findMany({
-    where: { active: true },
-    orderBy: [{ region: "asc" }, { language: "asc" }, { title: "asc" }]
-  });
+  const resources = await db.orm.public.SupportResource
+    .where({ active: true })
+    .orderBy([(r) => r.region.asc(), (r) => r.language.asc(), (r) => r.title.asc()])
+    .all();
 
   const isRouted = Boolean(params.routed || params.suspended);
 

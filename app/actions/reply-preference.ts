@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { formValue, replyTypeSchema } from "@/lib/validators";
 
@@ -12,10 +12,8 @@ export async function updateReplyPreferenceAction(formData: FormData): Promise<v
   }
 
   const user = await requireUser();
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { preferredReplyType: parsed.data }
-  });
+  await db.orm.public.User.where((row) => row.id.eq(user.id))
+    .updateAndCount({ preferredReplyType: parsed.data });
 
   revalidatePath("/settings");
   revalidatePath("/reply");

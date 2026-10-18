@@ -9,7 +9,8 @@ import {
   requireStaff,
   setAdminSession
 } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { toTimestamp } from "@/lib/dates";
+import { db } from "@/lib/db";
 import { canTransitionLetter, canTransitionReply } from "@/lib/moderation/status";
 import { getClientIp } from "@/lib/ip";
 import { checkRateLimit, resetRateLimit } from "@/lib/safety/rate-limit";
@@ -59,9 +60,8 @@ export async function moderateLetterAction(formData: FormData): Promise<void> {
     reason: formValue(formData, "reason") || undefined
   });
 
-  const letter = await prisma.letter.findUnique({
-    where: { id: input.letterId }
-  });
+  const letter = await db.orm.public.Letter.select("id", "status", "riskLevel")
+    .first({ id: input.letterId });
 
   if (!letter) {
     throw new Error("Letter not found.");
@@ -71,25 +71,20 @@ export async function moderateLetterAction(formData: FormData): Promise<void> {
     throw new Error("Invalid letter moderation transition.");
   }
 
-  await prisma.$transaction([
-    prisma.letter.update({
-      where: { id: letter.id },
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Letter.where((row) => row.id.eq(letter.id)).updateAndCount({
         status: input.status,
         riskLevel: input.riskLevel
-      }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+    });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "LETTER",
         targetId: letter.id,
         action: role === "ADMIN" ? "ADMIN_MODERATED" : "MODERATOR_MODERATED",
         reason: input.reason,
         previousStatus: `${letter.status}/${letter.riskLevel}`,
         newStatus: `${input.status}/${input.riskLevel}`
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath("/admin");
   revalidatePath("/admin/letters");
@@ -103,27 +98,22 @@ export async function overrideLetterRiskAction(formData: FormData): Promise<void
   const riskLevel = riskLevelSchema.parse(formValue(formData, "riskLevel"));
   const reason = formValue(formData, "reason") || "Risk override";
 
-  const letter = await prisma.letter.findUnique({ where: { id: letterId } });
+  const letter = await db.orm.public.Letter.select("id", "riskLevel").first({ id: letterId });
   if (!letter) {
     throw new Error("Letter not found.");
   }
 
-  await prisma.$transaction([
-    prisma.letter.update({
-      where: { id: letter.id },
-      data: { riskLevel }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Letter.where((row) => row.id.eq(letter.id)).updateAndCount({ riskLevel });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "LETTER",
         targetId: letter.id,
         action: role === "ADMIN" ? "RISK_OVERRIDDEN" : "MODERATOR_RISK_OVERRIDDEN",
         reason,
         previousStatus: letter.riskLevel,
         newStatus: riskLevel
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath(`/admin/letters/${letter.id}`);
   revalidatePath("/reply");
@@ -137,9 +127,8 @@ export async function moderateReplyAction(formData: FormData): Promise<void> {
     reason: formValue(formData, "reason") || undefined
   });
 
-  const reply = await prisma.reply.findUnique({
-    where: { id: input.replyId }
-  });
+  const reply = await db.orm.public.Reply.select("id", "status", "letterId")
+    .first({ id: input.replyId });
 
   if (!reply) {
     throw new Error("Reply not found.");
@@ -149,22 +138,18 @@ export async function moderateReplyAction(formData: FormData): Promise<void> {
     throw new Error("Invalid reply moderation transition.");
   }
 
-  await prisma.$transaction([
-    prisma.reply.update({
-      where: { id: reply.id },
-      data: { status: input.status }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.Reply.where((row) => row.id.eq(reply.id))
+      .updateAndCount({ status: input.status });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "REPLY",
         targetId: reply.id,
         action: role === "ADMIN" ? "ADMIN_MODERATED" : "MODERATOR_MODERATED",
         reason: input.reason,
         previousStatus: reply.status,
         newStatus: input.status
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath("/admin");
   revalidatePath("/admin/replies");
@@ -177,22 +162,18 @@ export async function suspendUserAction(formData: FormData): Promise<void> {
   const userId = formValue(formData, "userId");
   const reason = formValue(formData, "reason") || "Admin suspension";
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
-      data: { suspendedAt: new Date() }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.User.where((row) => row.id.eq(userId))
+      .updateAndCount({ suspendedAt: toTimestamp() });
+    await tx.orm.public.ModerationEvent.create({
         targetType: "USER",
         targetId: userId,
         action: "SUSPENDED",
         reason,
         previousStatus: "ACTIVE",
         newStatus: "SUSPENDED"
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath("/admin/users");
 }
@@ -210,9 +191,9 @@ export async function saveSupportResourceAction(formData: FormData): Promise<voi
     active: formData.get("active") !== null
   });
 
-  const resource = await prisma.supportResource.upsert({
-    where: { id: input.id ?? "__new__" },
+  const resource = await db.orm.public.SupportResource.select("id", "active").upsert({
     create: {
+      ...(input.id ? { id: input.id } : {}),
       title: input.title,
       description: input.description,
       region: input.region,
@@ -232,14 +213,12 @@ export async function saveSupportResourceAction(formData: FormData): Promise<voi
     }
   });
 
-  await prisma.moderationEvent.create({
-    data: {
+  await db.orm.public.ModerationEvent.create({
       targetType: "SUPPORT_RESOURCE",
       targetId: resource.id,
       action: "RESOURCE_SAVED",
       previousStatus: null,
       newStatus: resource.active ? "ACTIVE" : "INACTIVE"
-    }
   });
 
   revalidatePath("/admin/resources");
@@ -253,20 +232,16 @@ export async function deleteSupportResourceAction(formData: FormData): Promise<v
     throw new Error("Resource ID is required for deletion.");
   }
 
-  await prisma.$transaction([
-    prisma.supportResource.delete({
-      where: { id }
-    }),
-    prisma.moderationEvent.create({
-      data: {
+  await db.transaction(async (tx) => {
+    await tx.orm.public.SupportResource.where((row) => row.id.eq(id)).deleteAndCount();
+    await tx.orm.public.ModerationEvent.create({
         targetType: "SUPPORT_RESOURCE",
         targetId: id,
         action: "RESOURCE_DELETED",
         previousStatus: "ACTIVE",
         newStatus: "DELETED"
-      }
-    })
-  ]);
+    });
+  });
 
   revalidatePath("/admin/resources");
   revalidatePath("/support-resources");
@@ -330,15 +305,13 @@ export async function saveSystemSettingsAction(formData: FormData): Promise<void
     syncSourceFile: true
   });
 
-  await prisma.moderationEvent.create({
-    data: {
+  await db.orm.public.ModerationEvent.create({
       targetType: "SUPPORT_RESOURCE",
       targetId: "settings.ts",
       action: "SYSTEM_SETTINGS_UPDATED",
       reason: `Updated settings.ts (Replies: ${updated.defaultMaxReplies}->${updated.expandedMaxReplies}, Lease: ${updated.leaseDurationMinutes}m, AI: ${updated.aiDefaultProvider}/${updated.aiModel}, CN Support: ${updated.enableChinaSupportInfo ? "ON" : "OFF"})`,
       previousStatus: "LIVE",
       newStatus: syncedSettingsTs ? "SYNCED_TO_SETTINGS_TS" : "RUNTIME_OVERRIDDEN"
-    }
   });
 
   revalidatePath("/");
@@ -355,15 +328,13 @@ export async function resetSystemSettingsAction(): Promise<void> {
 
   resetSystemSettings({ syncSourceFile: true });
 
-  await prisma.moderationEvent.create({
-    data: {
+  await db.orm.public.ModerationEvent.create({
       targetType: "SUPPORT_RESOURCE",
       targetId: "settings.ts",
       action: "SYSTEM_SETTINGS_RESET",
       reason: "Restored settings.ts to factory default values",
       previousStatus: "CUSTOM",
       newStatus: "FACTORY_DEFAULT"
-    }
   });
 
   revalidatePath("/");

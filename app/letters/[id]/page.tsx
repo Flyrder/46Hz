@@ -6,7 +6,8 @@ import { EmptyState } from "@/components/empty-state";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { ResonanceMeter } from "@/components/resonance-meter";
-import { prisma } from "@/lib/db";
+import { and, or } from "@prisma/orm-postgres/orm-client";
+import { db } from "@/lib/db";
 import { createTranslator, formatTag } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { shouldMaskLetterContent } from "@/lib/safety/routing";
@@ -27,39 +28,30 @@ export default async function LetterDetailPage({
   const [user, locale] = await Promise.all([requireUser(), getLocalePreference()]);
   const t = createTranslator(locale);
   const { id } = await params;
-  const letter = await prisma.letter.findFirst({
-    where: {
-      id,
-      OR: [
-        { authorId: user.id },
-        { replies: { some: { responderId: user.id } } }
-      ]
-    },
-    include: {
-      replies: {
-        where: {
-          OR: [
-            { status: "APPROVED" },
-            { responderId: user.id }
-          ]
-        },
-        include: {
-          feedback: {
-            where: { fromUserId: user.id }
-          }
-        },
-        orderBy: { createdAt: "desc" }
-      },
-      comments: {
-        orderBy: { createdAt: "asc" }
-      }
-    }
-  });
+  const letter = await db.orm.public.Letter
+    .where((l) =>
+      and(
+        l.id.eq(id),
+        or(l.authorId.eq(user.id), l.replies.some((r) => r.responderId.eq(user.id)))
+      )
+    )
+    .include("replies", (replies) =>
+      replies
+        .select("id", "responderId", "coachedText", "createdAt", "status")
+        .where((r) => or(r.status.eq("APPROVED"), r.responderId.eq(user.id)))
+        .include("feedback", (feedback) => feedback.select("id").where({ fromUserId: user.id }))
+        .orderBy((r) => r.createdAt.desc())
+    )
+    .include("comments", (comments) => comments.orderBy((c) => c.createdAt.asc()))
+    .first();
 
   if (!letter) {
     notFound();
   }
 
+  const isAuthor = letter.authorId === user.id;
+  const emotionTags = letter.emotionTags ?? [];
+  const situationTags = letter.situationTags ?? [];
   const maskContent = shouldMaskLetterContent(letter);
 
   return (
@@ -99,16 +91,16 @@ export default async function LetterDetailPage({
           <DesiredReplyTypeEditor
             letterId={letter.id}
             currentType={letter.desiredReplyType}
-            isAuthor={letter.authorId === user.id}
+            isAuthor={isAuthor}
           />
-          {letter.emotionTags.map((tag) => (
+          {emotionTags.map((tag) => (
             <span key={tag} className="text-xs font-medium text-muted-foreground/80">
               #{formatTag(tag, t)}
             </span>
           ))}
-          {letter.situationTags.length > 0 && (
+          {situationTags.length > 0 && (
             <span className="text-xs text-muted-foreground/60">
-              · {letter.situationTags.map((tag) => formatTag(tag, t)).join(", ")}
+              · {situationTags.map((tag) => formatTag(tag, t)).join(", ")}
             </span>
           )}
         </div>
@@ -118,8 +110,8 @@ export default async function LetterDetailPage({
       <LetterInteractiveReader
         letterId={letter.id}
         processedText={letter.processedText}
-        rawText={letter.rawText}
-        isAuthor={letter.authorId === user.id}
+        rawText={isAuthor ? letter.rawText : ""}
+        isAuthor={isAuthor}
         maskContent={maskContent}
         comments={letter.comments}
         currentUserId={user.id}

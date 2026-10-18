@@ -1,4 +1,7 @@
-import { prisma } from "@/lib/db";
+import { and } from "@prisma/orm-postgres/orm-client";
+import { databaseDate, toTimestamp } from "@/lib/dates";
+import { db } from "@/lib/db";
+import { conflictKey, letterPreview } from "@/lib/db/queries";
 import type { MatchStatus } from "@/lib/domain";
 import { claimingSettings, resonanceSettings } from "@/settings";
 
@@ -55,8 +58,9 @@ export function canExpandResonance(
  * Pure check: Is the claim expired based on its createdAt timestamp and lease duration?
  */
 export function isClaimExpired(claimCreatedAt: Date | string, now = new Date()): boolean {
-  const created = new Date(claimCreatedAt).getTime();
-  return now.getTime() - created >= CLAIM_LEASE_MS;
+  const created = databaseDate(claimCreatedAt).getTime();
+  const leaseMs = claimingSettings.leaseDurationMinutes * 60 * 1000;
+  return now.getTime() - created >= leaseMs;
 }
 
 /**
@@ -76,9 +80,10 @@ export function calculateRemainingLeaseSeconds(
   claimCreatedAt: Date | string,
   now = new Date()
 ): number {
-  const created = new Date(claimCreatedAt).getTime();
+  const created = databaseDate(claimCreatedAt).getTime();
   const elapsed = now.getTime() - created;
-  const remaining = Math.max(0, Math.floor((CLAIM_LEASE_MS - elapsed) / 1000));
+  const leaseMs = claimingSettings.leaseDurationMinutes * 60 * 1000;
+  const remaining = Math.max(0, Math.floor((leaseMs - elapsed) / 1000));
   return remaining;
 }
 
@@ -90,111 +95,97 @@ export async function claimLetterForReply(
   responderId: string,
   now = new Date()
 ): Promise<ClaimResult> {
-  const letter = await prisma.letter.findUnique({
-    where: { id: letterId },
-    include: {
-      replies: {
-        select: { id: true, responderId: true, status: true }
-      },
-      matches: {
-        where: {
-          status: "OFFERED"
-        }
-      }
+  const leaseMinutes = claimingSettings.leaseDurationMinutes;
+  const leaseMs = leaseMinutes * 60 * 1000;
+
+  return db.transaction(async (tx): Promise<ClaimResult> => {
+    const letter = await tx.orm.public.Letter
+      .select("id", "authorId", "status", "riskLevel", "maxReplies")
+      .where({ id: letterId })
+      .forNoKeyUpdate()
+      .first();
+
+    if (!letter) {
+      return { ok: false, reason: "NOT_FOUND" };
     }
-  });
 
-  if (!letter) {
-    return { ok: false, reason: "NOT_FOUND" };
-  }
+    if (letter.authorId === responderId) {
+      return { ok: false, reason: "CANNOT_REPLY_OWN_LETTER" };
+    }
 
-  if (letter.authorId === responderId) {
-    return { ok: false, reason: "CANNOT_REPLY_OWN_LETTER" };
-  }
+    if (letter.status !== "APPROVED" || letter.riskLevel !== "NORMAL") {
+      return { ok: false, reason: "INELIGIBLE_LETTER" };
+    }
 
-  if (letter.status !== "APPROVED" || letter.riskLevel !== "NORMAL") {
-    return { ok: false, reason: "INELIGIBLE_LETTER" };
-  }
+    const [existingReply, activeReplies, offeredMatches] = await Promise.all([
+      tx.orm.public.Reply.select("id").where({ letterId, responderId }).first(),
+      tx.orm.public.Reply
+        .where((reply) => and(reply.letterId.eq(letterId), reply.status.neq("REJECTED")))
+        .aggregate((agg) => ({ count: agg.count() })),
+      tx.orm.public.Match
+        .select("id", "responderId", "status", "createdAt")
+        .where({ letterId, status: "OFFERED" })
+        .all()
+    ]);
 
-  // Check if responder has already replied to this letter
-  if (letter.replies.some((r) => r.responderId === responderId)) {
-    return { ok: false, reason: "ALREADY_REPLIED" };
-  }
+    if (existingReply) {
+      return { ok: false, reason: "ALREADY_REPLIED" };
+    }
 
-  // Count active non-rejected replies towards the Schumann resonance cap (7 default, 15 expanded)
-  const activeRepliesCount = letter.replies.filter((r) => r.status !== "REJECTED").length;
-  const maxReplies = letter.maxReplies ?? DEFAULT_RESONANCE_CAP;
+    const maxReplies = letter.maxReplies ?? resonanceSettings.defaultMaxReplies;
+    if (activeReplies.count >= maxReplies) {
+      return { ok: false, reason: "RESONANCE_LIMIT_REACHED" };
+    }
 
-  if (activeRepliesCount >= maxReplies) {
-    return { ok: false, reason: "RESONANCE_LIMIT_REACHED" };
-  }
+    const conflictingClaim = offeredMatches.find(
+      (m) => m.responderId !== responderId && isMatchActiveClaim(m, now)
+    );
+    if (conflictingClaim) {
+      return { ok: false, reason: "LOCKED_BY_ANOTHER" };
+    }
 
-  // Check if another user holds an active, unexpired claim
-  const conflictingClaim = letter.matches.find(
-    (m) => m.responderId !== responderId && isMatchActiveClaim(m, now)
-  );
+    const expiredOtherIds = offeredMatches
+      .filter((m) => m.responderId !== responderId && isClaimExpired(m.createdAt, now))
+      .map((m) => m.id);
 
-  if (conflictingClaim) {
-    return { ok: false, reason: "LOCKED_BY_ANOTHER" };
-  }
+    if (expiredOtherIds.length > 0) {
+      await tx.orm.public.Match
+        .where((match) => match.id.in(expiredOtherIds))
+        .updateAndCount({ status: "EXPIRED" });
+    }
 
-  // Clean up any stale expired claims for other users asynchronously or in the same step
-  const expiredOtherClaims = letter.matches.filter(
-    (m) => m.responderId !== responderId && isClaimExpired(m.createdAt, now)
-  );
-
-  if (expiredOtherClaims.length > 0) {
-    await prisma.match.updateMany({
-      where: {
-        id: { in: expiredOtherClaims.map((m) => m.id) }
-      },
-      data: { status: "EXPIRED" }
-    });
-  }
-
-  // Reserve or refresh the claim for the current responder
-  await prisma.match.upsert({
-    where: {
-      letterId_responderId: {
+    const nowTimestamp = toTimestamp(now);
+    await tx.orm.public.Match.select("id").upsert({
+      conflictOn: conflictKey<"Match">({ letterId, responderId }),
+      create: {
         letterId,
-        responderId
+        responderId,
+        status: "OFFERED",
+        matchReason: `Reserved for reply (${leaseMinutes}m lease)`,
+        createdAt: nowTimestamp
+      },
+      update: {
+        status: "OFFERED",
+        createdAt: nowTimestamp,
+        matchReason: `Refreshed reply lease (${leaseMinutes}m lease)`
       }
-    },
-    create: {
-      letterId,
-      responderId,
-      status: "OFFERED",
-      matchReason: `Reserved for reply (${CLAIM_LEASE_MINUTES}m lease)`,
-      createdAt: now
-    },
-    update: {
-      status: "OFFERED",
-      createdAt: now,
-      matchReason: `Refreshed reply lease (${CLAIM_LEASE_MINUTES}m lease)`
-    }
-  });
+    });
 
-  return {
-    ok: true,
-    leaseExpiresAt: new Date(now.getTime() + CLAIM_LEASE_MS),
-    remainingSeconds: CLAIM_LEASE_MINUTES * 60
-  };
+    return {
+      ok: true,
+      leaseExpiresAt: new Date(now.getTime() + leaseMs),
+      remainingSeconds: leaseMinutes * 60
+    };
+  });
 }
 
 /**
  * Release an active claim (e.g., when the user leaves or clicks Skip).
  */
 export async function releaseLetterClaim(letterId: string, responderId: string): Promise<void> {
-  await prisma.match.updateMany({
-    where: {
-      letterId,
-      responderId,
-      status: "OFFERED"
-    },
-    data: {
-      status: "SKIPPED"
-    }
-  });
+  await db.orm.public.Match
+    .where({ letterId, responderId, status: "OFFERED" })
+    .updateAndCount({ status: "SKIPPED" });
 }
 
 /**
@@ -202,51 +193,35 @@ export async function releaseLetterClaim(letterId: string, responderId: string):
  * and letters that have reached their Schumann resonance capacity (7 or 15).
  */
 export async function findAvailableReplyLetters(responderId: string, limit = 6) {
-  const leaseCutoff = new Date(Date.now() - CLAIM_LEASE_MS);
+  const leaseCutoff = toTimestamp(new Date(Date.now() - claimingSettings.leaseDurationMinutes * 60 * 1000));
 
   // Opportunistic auto-cleanup of stale OFFERED locks
-  await prisma.match.updateMany({
-    where: {
-      status: "OFFERED",
-      createdAt: { lt: leaseCutoff }
-    },
-    data: {
-      status: "EXPIRED"
-    }
-  });
+  await db.orm.public.Match
+    .where((match) => and(match.status.eq("OFFERED"), match.createdAt.lt(leaseCutoff)))
+    .updateAndCount({ status: "EXPIRED" });
 
-  const candidates = await prisma.letter.findMany({
-    where: {
-      authorId: { not: responderId },
-      status: "APPROVED",
-      riskLevel: "NORMAL",
-      replies: {
-        none: {
-          responderId
-        }
-      },
-      matches: {
-        none: {
-          responderId: { not: responderId },
-          status: "OFFERED",
-          createdAt: { gte: leaseCutoff }
-        }
-      }
-    },
-    include: {
-      _count: {
-        select: {
-          replies: {
-            where: { status: { not: "REJECTED" } }
-          }
-        }
-      }
-    },
-    orderBy: { createdAt: "asc" },
-    take: limit * 2
-  });
+  const candidates = await db.orm.public.Letter
+    .with(letterPreview)
+    .where((letter, { fns }) =>
+      fns.and(
+        letter.authorId.neq(responderId),
+        letter.status.eq("APPROVED"),
+        letter.riskLevel.eq("NORMAL"),
+        letter.replies.none((reply) => reply.responderId.eq(responderId)),
+        letter.matches.none((match) =>
+          and(
+            match.responderId.neq(responderId),
+            match.status.eq("OFFERED"),
+            match.createdAt.gte(leaseCutoff)
+          )
+        ),
+        fns.raw`(SELECT COUNT(*)::int FROM "public"."Reply" r WHERE r."letterId" = ${letter.id} AND r."status" <> 'REJECTED') < ${letter.maxReplies}`.returns("pg/bool@1")
+      )
+    )
+    .include("replies", (replies) => replies.where((reply) => reply.status.neq("REJECTED")).count())
+    .orderBy((letter) => letter.createdAt.asc())
+    .limit(limit)
+    .all();
 
-  return candidates
-    .filter((l) => l._count.replies < (l.maxReplies ?? DEFAULT_RESONANCE_CAP))
-    .slice(0, limit);
+  return candidates;
 }

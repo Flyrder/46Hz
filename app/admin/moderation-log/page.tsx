@@ -1,7 +1,7 @@
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
@@ -13,10 +13,10 @@ export default async function ModerationLogPage() {
   const [role, locale] = await Promise.all([requireStaff(), getLocalePreference()]);
   const t = createTranslator(locale);
 
-  const events = await prisma.moderationEvent.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100
-  });
+  const events = await db.orm.public.ModerationEvent
+    .orderBy((event) => event.createdAt.desc())
+    .limit(100)
+    .all();
 
   return (
     <section className="mx-auto max-w-5xl py-2 sm:py-4">

@@ -4,7 +4,7 @@ import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator, formatTag } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
@@ -20,13 +20,9 @@ export default async function AdminLetterDetailPage({
   const [role, locale] = await Promise.all([requireStaff(), getLocalePreference()]);
   const t = createTranslator(locale);
   const { id } = await params;
-  const letter = await prisma.letter.findUnique({
-    where: { id },
-    include: {
-      author: true,
-      replies: true
-    }
-  });
+  const letter = await db.orm.public.Letter
+    .include("author", (author) => author.select("anonymousHandle", "trustScore"))
+    .first({ id });
 
   if (!letter) {
     notFound();
@@ -61,7 +57,7 @@ export default async function AdminLetterDetailPage({
                 {t("admin.authorLabel")}
               </dt>
               <dd className="mt-1 font-medium text-foreground">
-                {letter.author.anonymousHandle} {t("admin.trustScoreSuffix", { score: String(letter.author.trustScore) })}
+                {letter.author?.anonymousHandle ?? "Anonymous"} {t("admin.trustScoreSuffix", { score: String(letter.author?.trustScore ?? 50) })}
               </dd>
             </div>
             <div>
@@ -77,7 +73,7 @@ export default async function AdminLetterDetailPage({
                 {t("admin.tagsLabel")}
               </dt>
               <dd className="mt-1 font-medium text-foreground">
-                {[...letter.emotionTags, ...letter.situationTags]
+                {[...(letter.emotionTags ?? []), ...(letter.situationTags ?? [])]
                   .map((tag) => formatTag(tag, t))
                   .join(", ") || t("admin.noTags")}
               </dd>

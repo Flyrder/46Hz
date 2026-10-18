@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { pingDatabase } from "@/lib/db";
 import { brandSettings, aiSettings } from "@/settings";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +8,7 @@ export async function GET() {
   const startTime = performance.now();
   try {
     // Probe database connectivity and latency
-    await prisma.$queryRaw`SELECT 1`;
+    await pingDatabase();
     const latencyMs = Math.round(performance.now() - startTime);
 
     return NextResponse.json(

@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getAdminRole } from "@/lib/admin";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate } from "@/lib/utils";
@@ -35,18 +35,13 @@ export default async function AdminUsersPage() {
     );
   }
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 80,
-    include: {
-      _count: {
-        select: {
-          letters: true,
-          replies: true
-        }
-      }
-    }
-  });
+  const users = await db.orm.public.User
+    .select("id", "anonymousHandle", "trustScore", "suspendedAt", "createdAt")
+    .include("letters", (letters) => letters.count())
+    .include("replies", (replies) => replies.count())
+    .orderBy((user) => user.createdAt.desc())
+    .limit(80)
+    .all();
 
   return (
     <section className="mx-auto max-w-5xl py-2 sm:py-4">
@@ -101,9 +96,9 @@ export default async function AdminUsersPage() {
                   <Calendar className="h-3 w-3" /> {formatDate(user.createdAt)}
                 </span>
                 <span>•</span>
-                <span>{t("admin.userLettersCount", { count: String(user._count.letters) })}</span>
+                <span>{t("admin.userLettersCount", { count: String(user.letters) })}</span>
                 <span>•</span>
-                <span>{t("admin.userRepliesCount", { count: String(user._count.replies) })}</span>
+                <span>{t("admin.userRepliesCount", { count: String(user.replies) })}</span>
                 <span>•</span>
                 <span className="font-mono text-[11px] opacity-70">ID: {user.id.slice(0, 10)}...</span>
               </div>

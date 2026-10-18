@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
+import { databaseDate } from "@/lib/dates";
 import { maskIp, type IpRecord } from "@/lib/ip";
 import { complianceSettings } from "@/settings";
 
@@ -58,31 +59,25 @@ export async function generateIncidentPacket(
   const generatedAt = new Date().toISOString();
   const packetId = `46HZ-INCIDENT-${Date.now().toString(36).toUpperCase()}-${targetId.slice(-6).toUpperCase()}`;
 
-  const moderationEvents = await prisma.moderationEvent.findMany({
-    where: { targetType, targetId },
-    orderBy: { createdAt: "asc" }
-  });
+  const moderationEvents = await db.orm.public.ModerationEvent
+    .select("action", "reason", "createdAt")
+    .where({ targetType, targetId })
+    .orderBy((event) => event.createdAt.asc())
+    .all();
 
   const moderationTrail = moderationEvents.map((evt) => ({
     action: evt.action,
     reason: evt.reason ?? null,
-    timestamp: evt.createdAt.toISOString()
+    timestamp: databaseDate(evt.createdAt).toISOString()
   }));
 
   if (targetType === "LETTER") {
-    const letter = await prisma.letter.findUnique({
-      where: { id: targetId },
-      include: {
-        author: {
-          select: {
-            anonymousHandle: true,
-            recentIps: true
-          }
-        }
-      }
-    });
+    const letter = await db.orm.public.Letter
+      .select("id", "rawText", "createdAt", "riskLevel")
+      .include("author", (author) => author.select("anonymousHandle", "recentIps"))
+      .first({ id: targetId });
 
-    if (!letter) return null;
+    if (!letter || !letter.author) return null;
 
     const ips = Array.isArray(letter.author.recentIps)
       ? (letter.author.recentIps as unknown as IpRecord[])
@@ -102,7 +97,7 @@ export async function generateIncidentPacket(
         targetType: "LETTER",
         targetId: letter.id,
         authorPseudonym: letter.author.anonymousHandle,
-        createdAt: letter.createdAt.toISOString(),
+        createdAt: databaseDate(letter.createdAt).toISOString(),
         riskClassification: letter.riskLevel,
         contentHashSha256: contentHash,
         rawContent: letter.rawText,
@@ -123,19 +118,12 @@ export async function generateIncidentPacket(
   }
 
   if (targetType === "REPLY") {
-    const reply = await prisma.reply.findUnique({
-      where: { id: targetId },
-      include: {
-        responder: {
-          select: {
-            anonymousHandle: true,
-            recentIps: true
-          }
-        }
-      }
-    });
+    const reply = await db.orm.public.Reply
+      .select("id", "rawText", "createdAt", "status")
+      .include("responder", (responder) => responder.select("anonymousHandle", "recentIps"))
+      .first({ id: targetId });
 
-    if (!reply) return null;
+    if (!reply || !reply.responder) return null;
 
     const ips = Array.isArray(reply.responder.recentIps)
       ? (reply.responder.recentIps as unknown as IpRecord[])
@@ -155,7 +143,7 @@ export async function generateIncidentPacket(
         targetType: "REPLY",
         targetId: reply.id,
         authorPseudonym: reply.responder.anonymousHandle,
-        createdAt: reply.createdAt.toISOString(),
+        createdAt: databaseDate(reply.createdAt).toISOString(),
         riskClassification: reply.status,
         contentHashSha256: contentHash,
         rawContent: reply.rawText,

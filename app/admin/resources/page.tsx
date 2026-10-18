@@ -4,7 +4,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getAdminRole } from "@/lib/admin";
 import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { orderedSupportResourcesQuery } from "@/lib/db/queries";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { HeartHandshake, PlusCircle, Shield, Phone, Globe, Trash2 } from "lucide-react";
@@ -34,9 +34,7 @@ export default async function AdminResourcesPage() {
     );
   }
 
-  const resources = await prisma.supportResource.findMany({
-    orderBy: [{ active: "desc" }, { region: "asc" }, { title: "asc" }]
-  });
+  const resources = await orderedSupportResourcesQuery().all();
 
   return (
     <section className="mx-auto max-w-5xl py-2 sm:py-4">

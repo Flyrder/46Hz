@@ -30,7 +30,7 @@ describe("IP queue recording logic", () => {
     ];
 
     for (const ip of ips) {
-      queue = updateIpQueue(queue, ip, new Date().toISOString());
+      queue = updateIpQueue(queue, ip, new Date().toISOString(), 5);
     }
 
     expect(queue.length).toBe(5);

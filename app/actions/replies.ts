@@ -3,7 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAiMiddleware } from "@/lib/ai";
-import { prisma } from "@/lib/db";
+import { db } from "@/lib/db";
+import { conflictKey, replyEligibilityQuery } from "@/lib/db/queries";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { requireUser } from "@/lib/session";
@@ -48,19 +49,7 @@ export async function coachReplyAction(
     };
   }
 
-  const letter = await prisma.letter.findUnique({
-    where: { id: input.data.letterId },
-    include: {
-      replies: {
-        select: { id: true, responderId: true, status: true }
-      },
-      matches: {
-        where: {
-          status: "OFFERED"
-        }
-      }
-    }
-  });
+  const letter = await replyEligibilityQuery(user.id).first({ id: input.data.letterId });
 
   if (
     !letter ||
@@ -73,15 +62,14 @@ export async function coachReplyAction(
     };
   }
 
-  if (letter.replies.some((r) => r.responderId === user.id)) {
+  if (letter.replies.existing.length > 0) {
     return {
       ok: false,
       error: t("reply.errorAlreadyReplied")
     };
   }
 
-  const activeRepliesCount = letter.replies.filter((r) => r.status !== "REJECTED").length;
-  if (activeRepliesCount >= (letter.maxReplies ?? 7)) {
+  if (letter.replies.activeCount >= (letter.maxReplies ?? 7)) {
     return {
       ok: false,
       error: t("reply.errorResonanceFull")
@@ -128,64 +116,51 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
     coachedText: formValue(formData, "coachedText")
   });
 
-  const letter = await prisma.letter.findUnique({
-    where: { id: input.letterId },
-    include: {
-      replies: {
-        select: { id: true, responderId: true, status: true }
-      },
-      matches: {
-        where: {
-          status: "OFFERED"
-        }
-      }
+  await db.transaction(async (tx) => {
+    const lockedLetter = await tx.orm.public.Letter
+      .select("id")
+      .where({ id: input.letterId })
+      .forNoKeyUpdate()
+      .first();
+    const letter = lockedLetter
+      ? await replyEligibilityQuery(user.id, tx).first({ id: input.letterId })
+      : null;
+
+    if (
+      !letter ||
+      letter.authorId === user.id ||
+      !isPeerMatchable({ status: letter.status, riskLevel: letter.riskLevel })
+    ) {
+      throw new Error("This letter is not available for peer response.");
     }
-  });
 
-  if (
-    !letter ||
-    letter.authorId === user.id ||
-    !isPeerMatchable({ status: letter.status, riskLevel: letter.riskLevel })
-  ) {
-    throw new Error("This letter is not available for peer response.");
-  }
+    if (letter.replies.existing.length > 0) {
+      throw new Error("You have already submitted a reply to this letter.");
+    }
 
-  if (letter.replies.some((r) => r.responderId === user.id)) {
-    throw new Error("You have already submitted a reply to this letter.");
-  }
+    if (letter.replies.activeCount >= (letter.maxReplies ?? 7)) {
+      throw new Error("This letter has reached its maximum resonance replies.");
+    }
 
-  const activeRepliesCount = letter.replies.filter((r) => r.status !== "REJECTED").length;
-  if (activeRepliesCount >= (letter.maxReplies ?? 7)) {
-    throw new Error("This letter has reached its maximum resonance replies.");
-  }
+    const now = new Date();
+    const lockedByOther = letter.matches.some(
+      (m) => m.responderId !== user.id && isMatchActiveClaim(m, now)
+    );
 
-  const now = new Date();
-  const lockedByOther = letter.matches.some(
-    (m) => m.responderId !== user.id && isMatchActiveClaim(m, now)
-  );
+    if (lockedByOther) {
+      throw new Error("This letter is currently locked by another peer's reply session.");
+    }
 
-  if (lockedByOther) {
-    throw new Error("This letter is currently locked by another peer's reply session.");
-  }
-
-  const reply = await prisma.reply.create({
-    data: {
+    const reply = await tx.orm.public.Reply.select("id").create({
       letterId: letter.id,
       responderId: user.id,
       rawText: input.rawText,
       coachedText: input.coachedText,
       status: "PENDING"
-    }
-  });
+    });
 
-  await prisma.$transaction([
-    prisma.match.upsert({
-      where: {
-        letterId_responderId: {
-          letterId: letter.id,
-          responderId: user.id
-        }
-      },
+    await tx.orm.public.Match.select("id").upsert({
+      conflictOn: conflictKey<"Match">({ letterId: letter.id, responderId: user.id }),
       create: {
         letterId: letter.id,
         responderId: user.id,
@@ -195,18 +170,17 @@ export async function submitReplyAction(formData: FormData): Promise<void> {
       update: {
         status: "RESPONDED"
       }
-    }),
-    prisma.moderationEvent.create({
-      data: {
-        targetType: "REPLY",
-        targetId: reply.id,
-        action: "SUBMITTED",
-        reason: "Responder confirmed AI-coached reply.",
-        previousStatus: null,
-        newStatus: "PENDING"
-      }
-    })
-  ]);
+    });
+
+    await tx.orm.public.ModerationEvent.create({
+      targetType: "REPLY",
+      targetId: reply.id,
+      action: "SUBMITTED",
+      reason: "Responder confirmed AI-coached reply.",
+      previousStatus: null,
+      newStatus: "PENDING"
+    });
+  });
 
   revalidatePath("/admin/replies");
   redirect("/inbox?replySubmitted=1");

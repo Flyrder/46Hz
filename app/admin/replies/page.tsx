@@ -2,13 +2,14 @@ import Link from "next/link";
 import { AdminNav } from "@/components/admin-nav";
 import { StatusBadge } from "@/components/status-badge";
 import { AdminCalendarView, type DayStats } from "@/components/admin-calendar-view";
+import { and } from "@prisma/orm-postgres/orm-client";
 import { requireStaff } from "@/lib/admin";
-import { prisma } from "@/lib/db";
+import { databaseDate, toTimestamp } from "@/lib/dates";
+import { db } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate, excerpt } from "@/lib/utils";
 import type { ReplyStatus } from "@/lib/domain";
-import type { Prisma } from "@/lib/db";
 import {
   MessageSquare,
   ArrowRight,
@@ -59,66 +60,78 @@ export default async function AdminRepliesPage({
     }
   }
 
-  // Build where query
-  const whereClause: Prisma.ReplyWhereInput = {};
-  if (statusParam && statusParam !== "ALL") {
-    whereClause.status = statusParam as ReplyStatus;
-  }
-  if (filterParam === "today") {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    whereClause.createdAt = { gte: startOfToday };
-  }
-  if (dateParam) {
-    const [dy, dm, dd] = dateParam.split("-").map(Number);
-    if (dy && dm && dd) {
-      whereClause.createdAt = {
-        gte: new Date(dy, dm - 1, dd, 0, 0, 0, 0),
-        lte: new Date(dy, dm - 1, dd, 23, 59, 59, 999)
-      };
-    }
-  }
+  const startOfToday = (() => {
+    if (filterParam !== "today") return undefined;
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return toTimestamp(d);
+  })();
 
-  // Concurrently fetch counts, replies, and month distribution
-  const [
-    allCount,
-    pendingCount,
-    approvedCount,
-    rejectedCount,
-    filteredCount,
-    replies,
-    monthReplies
-  ] = await prisma.$transaction([
-    prisma.reply.count(),
-    prisma.reply.count({ where: { status: "PENDING" } }),
-    prisma.reply.count({ where: { status: "APPROVED" } }),
-    prisma.reply.count({ where: { status: "REJECTED" } }),
-    prisma.reply.count({ where: whereClause }),
-    prisma.reply.findMany({
-      where: whereClause,
-      include: { letter: true, responder: true },
-      orderBy: { createdAt: sortParam },
-      take: PAGE_SIZE,
-      skip: (pageParam - 1) * PAGE_SIZE
-    }),
-    prisma.reply.findMany({
-      where: {
-        createdAt: {
-          gte: new Date(calYear, calMonth, 1),
-          lte: new Date(calYear, calMonth + 1, 0, 23, 59, 59, 999)
-        }
-      },
-      select: {
-        createdAt: true,
-        status: true
+  const selectedDateBounds = (() => {
+    if (!dateParam) return undefined;
+    const [dy, dm, dd] = dateParam.split("-").map(Number);
+    if (!dy || !dm || !dd) return undefined;
+    return {
+      start: toTimestamp(new Date(dy, dm - 1, dd, 0, 0, 0, 0)),
+      end: toTimestamp(new Date(dy, dm - 1, dd, 23, 59, 59, 999))
+    };
+  })();
+
+  const hasActiveFilters = Boolean(statusParam || filterParam || dateParam);
+
+  const applyReplyFilters = <T extends { where: typeof db.orm.public.Reply.where }>(
+    collection: T
+  ): T => {
+    if (!hasActiveFilters) return collection;
+    return collection.where((reply, { fns }) => {
+      const conditions = [];
+      if (statusParam && statusParam !== "ALL") {
+        conditions.push(reply.status.eq(statusParam as ReplyStatus));
       }
-    })
+      if (startOfToday) {
+        conditions.push(reply.createdAt.gte(startOfToday));
+      }
+      if (selectedDateBounds) {
+        conditions.push(
+          reply.createdAt.gte(selectedDateBounds.start),
+          reply.createdAt.lte(selectedDateBounds.end)
+        );
+      }
+      return conditions.length === 1 ? conditions[0]! : fns.and(...conditions);
+    }) as unknown as T;
+  };
+
+  const monthStart = toTimestamp(new Date(calYear, calMonth, 1));
+  const monthEnd = toTimestamp(new Date(calYear, calMonth + 1, 0, 23, 59, 59, 999));
+
+  // Concurrently fetch grouped status counts, filtered count, paginated replies, and month distribution
+  const [statusGroups, filteredAgg, replies, monthReplies] = await Promise.all([
+    db.orm.public.Reply.groupBy("status").aggregate((agg) => ({ count: agg.count() })),
+    applyReplyFilters(db.orm.public.Reply).aggregate((agg) => ({ count: agg.count() })),
+    applyReplyFilters(db.orm.public.Reply.select("id", "status", "coachedText", "createdAt"))
+      .include("letter", (letter) => letter.select("processedText"))
+      .include("responder", (responder) => responder.select("anonymousHandle", "trustScore"))
+      .orderBy((reply) => (sortParam === "asc" ? reply.createdAt.asc() : reply.createdAt.desc()))
+      .limit(PAGE_SIZE)
+      .offset((pageParam - 1) * PAGE_SIZE)
+      .all(),
+    db.orm.public.Reply
+      .select("createdAt", "status")
+      .where((reply) => and(reply.createdAt.gte(monthStart), reply.createdAt.lte(monthEnd)))
+      .all()
   ]);
+
+  const countsByStatus = Object.fromEntries(statusGroups.map((row) => [row.status, row.count]));
+  const allCount = statusGroups.reduce((sum, row) => sum + row.count, 0);
+  const pendingCount = countsByStatus.PENDING ?? 0;
+  const approvedCount = countsByStatus.APPROVED ?? 0;
+  const rejectedCount = countsByStatus.REJECTED ?? 0;
+  const filteredCount = filteredAgg.count;
 
   // Aggregate stats by date for calendar
   const statsByDate: Record<string, DayStats> = {};
   for (const r of monthReplies) {
-    const d = new Date(r.createdAt);
+    const d = databaseDate(r.createdAt);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
     if (!statsByDate[key]) {
       statsByDate[key] = { total: 0, pending: 0, approved: 0, rejected: 0 };
@@ -159,8 +172,6 @@ export default async function AdminRepliesPage({
     { key: "APPROVED", label: t("status.APPROVED"), count: approvedCount },
     { key: "REJECTED", label: t("status.REJECTED"), count: rejectedCount }
   ];
-
-  const hasActiveFilters = Boolean(statusParam || filterParam || dateParam);
 
   const getStatusTone = (status: ReplyStatus) => {
     switch (status) {
@@ -369,9 +380,9 @@ export default async function AdminRepliesPage({
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <User className="h-3.5 w-3.5 text-accent" />
-                <span>{reply.responder.anonymousHandle}</span>
+                <span>{reply.responder?.anonymousHandle ?? "Anonymous"}</span>
                 <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono">
-                  {t("admin.trustScorePrefix")} {reply.responder.trustScore}
+                  {t("admin.trustScorePrefix")} {reply.responder?.trustScore ?? 50}
                 </span>
               </div>
             </div>
@@ -382,7 +393,7 @@ export default async function AdminRepliesPage({
 
             <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <span className="font-letter line-clamp-1 italic text-muted-foreground/80">
-                {t("admin.originalLetterPrefix")} &quot;{excerpt(reply.letter.processedText, 60)}&quot;
+                {t("admin.originalLetterPrefix")} &quot;{excerpt(reply.letter?.processedText ?? "", 60)}&quot;
               </span>
               <span className="inline-flex items-center gap-1 font-semibold text-accent group-hover:translate-x-0.5 transition-transform">
                 {t("admin.reviewReplyAction")} <ArrowRight className="h-3.5 w-3.5" />
