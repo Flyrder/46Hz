@@ -1,5 +1,6 @@
 import { saveSupportResourceAction, deleteSupportResourceAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
+import { ModerationSelect, type ModerationOption } from "@/components/moderation-select";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { getAdminRole } from "@/lib/admin";
@@ -7,7 +8,7 @@ import { redirect } from "next/navigation";
 import { orderedSupportResourcesQuery } from "@/lib/db/queries";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
-import { HeartHandshake, PlusCircle, Shield, Phone, Globe, Trash2 } from "lucide-react";
+import { HeartHandshake, PlusCircle, Shield, Trash2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,17 @@ export default async function AdminResourcesPage() {
   }
 
   const resources = await orderedSupportResourcesQuery().all();
+
+  const regionOptions: ModerationOption[] = [
+    { value: "KR", label: t("admin.resourceRegionKR") },
+    { value: "CN", label: t("admin.resourceRegionCN") }
+  ];
+
+  const languageOptions: ModerationOption[] = [
+    { value: "ko", label: t("admin.resourceLangKo") },
+    { value: "zh", label: t("admin.resourceLangZh") },
+    { value: "en", label: t("admin.resourceLangEn") }
+  ];
 
   return (
     <section className="mx-auto max-w-5xl py-2 sm:py-4">
@@ -66,66 +78,67 @@ export default async function AdminResourcesPage() {
 
         <div className="mt-4 grid gap-3.5 sm:grid-cols-2">
           <div>
-            <label className="text-xs font-semibold text-foreground">{t("admin.resourceTitleLabel")}</label>
+            <label className="text-xs font-semibold text-foreground block mb-1.5">{t("admin.resourceTitleLabel")}</label>
             <input
               name="title"
               placeholder={t("admin.resourceTitlePlaceholder")}
-              className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3.5 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3.5 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
               required
             />
           </div>
           <div>
-            <label className="text-xs font-semibold text-foreground">{t("admin.resourceRegionLabel")}</label>
-            <select
+            <label className="text-xs font-semibold text-foreground block mb-1.5" htmlFor="resource-region">
+              {t("admin.resourceRegionLabel")}
+            </label>
+            <ModerationSelect
+              id="resource-region"
               name="region"
               defaultValue="KR"
-              className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+              options={regionOptions}
+              ariaLabel={t("admin.resourceRegionLabel")}
               required
-            >
-              <option value="KR">{t("admin.resourceRegionKR")}</option>
-              <option value="CN">{t("admin.resourceRegionCN")}</option>
-            </select>
+            />
           </div>
           <div>
-            <label className="text-xs font-semibold text-foreground">{t("admin.resourceLangLabel")}</label>
-            <select
+            <label className="text-xs font-semibold text-foreground block mb-1.5" htmlFor="resource-language">
+              {t("admin.resourceLangLabel")}
+            </label>
+            <ModerationSelect
+              id="resource-language"
               name="language"
               defaultValue="ko"
-              className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+              options={languageOptions}
+              ariaLabel={t("admin.resourceLangLabel")}
               required
-            >
-              <option value="ko">{t("admin.resourceLangKo")}</option>
-              <option value="zh">{t("admin.resourceLangZh")}</option>
-              <option value="en">{t("admin.resourceLangEn")}</option>
-            </select>
+            />
           </div>
           <div>
-            <label className="text-xs font-semibold text-foreground">{t("admin.resourcePhoneLabel")}</label>
+            <label className="text-xs font-semibold text-foreground block mb-1.5">{t("admin.resourcePhoneLabel")}</label>
             <input
               name="phone"
               placeholder={t("admin.resourcePhonePlaceholder")}
-              className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+              className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
             />
           </div>
         </div>
 
         <div className="mt-3.5">
-          <label className="text-xs font-semibold text-foreground">{t("admin.resourceUrlLabel")}</label>
+          <label className="text-xs font-semibold text-foreground block mb-1.5">{t("admin.resourceUrlLabel")}</label>
           <input
             name="url"
             type="url"
             placeholder="https://..."
-            className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3.5 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3.5 py-2 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
           />
         </div>
 
         <div className="mt-3.5">
-          <label className="text-xs font-semibold text-foreground">{t("admin.resourceDescLabel")}</label>
+          <label className="text-xs font-semibold text-foreground block mb-1.5">{t("admin.resourceDescLabel")}</label>
           <textarea
             name="description"
             rows={3}
             placeholder={t("admin.resourceDescPlaceholder")}
-            className="mt-1.5 w-full rounded-xl border border-border bg-background p-3 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
+            className="w-full rounded-xl border border-border bg-background p-3 text-xs outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
             required
           />
         </div>

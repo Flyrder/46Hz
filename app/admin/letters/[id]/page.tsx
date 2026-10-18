@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { moderateLetterAction, overrideLetterRiskAction } from "@/app/actions/admin";
 import { AdminNav } from "@/components/admin-nav";
+import { ModerationSelect, type ModerationOption } from "@/components/moderation-select";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { requireStaff } from "@/lib/admin";
@@ -27,6 +28,20 @@ export default async function AdminLetterDetailPage({
   if (!letter) {
     notFound();
   }
+
+  const statusOptions: ModerationOption[] = [
+    { value: "PENDING", label: t("admin.statusPending"), tone: "warning" },
+    { value: "APPROVED", label: t("admin.statusApproved"), tone: "good" },
+    { value: "REJECTED", label: t("admin.statusRejected"), tone: "danger" },
+    { value: "ROUTED_TO_SUPPORT", label: t("admin.statusRoutedSupport"), tone: "neutral" }
+  ];
+
+  const riskOptions: ModerationOption[] = [
+    { value: "NORMAL", label: t("admin.riskNormal"), tone: "good" },
+    { value: "SENSITIVE", label: t("admin.riskSensitive"), tone: "warning" },
+    { value: "HIGH", label: t("admin.riskHigh"), tone: "danger" },
+    { value: "BLOCKED", label: t("admin.riskBlocked"), tone: "danger" }
+  ];
 
   return (
     <section className="mx-auto max-w-5xl py-2 sm:py-4">
@@ -113,37 +128,29 @@ export default async function AdminLetterDetailPage({
 
             <div className="mt-4 space-y-3.5">
               <div>
-                <label className="text-xs font-semibold text-foreground" htmlFor="status">
+                <label className="text-xs font-semibold text-foreground block mb-1.5" htmlFor="status">
                   {t("admin.statusSelectLabel")}
                 </label>
-                <select
+                <ModerationSelect
                   id="status"
                   name="status"
                   defaultValue={letter.status}
-                  className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
-                >
-                  <option value="PENDING">{t("admin.statusPending")}</option>
-                  <option value="APPROVED">{t("admin.statusApproved")}</option>
-                  <option value="REJECTED">{t("admin.statusRejected")}</option>
-                  <option value="ROUTED_TO_SUPPORT">{t("admin.statusRoutedSupport")}</option>
-                </select>
+                  options={statusOptions}
+                  ariaLabel={t("admin.statusSelectLabel")}
+                />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-foreground" htmlFor="riskLevel">
+                <label className="text-xs font-semibold text-foreground block mb-1.5" htmlFor="riskLevel">
                   {t("admin.riskLevelSelectLabel")}
                 </label>
-                <select
+                <ModerationSelect
                   id="riskLevel"
                   name="riskLevel"
                   defaultValue={letter.riskLevel}
-                  className="mt-1.5 w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
-                >
-                  <option value="NORMAL">{t("admin.riskNormal")}</option>
-                  <option value="SENSITIVE">{t("admin.riskSensitive")}</option>
-                  <option value="HIGH">{t("admin.riskHigh")}</option>
-                  <option value="BLOCKED">{t("admin.riskBlocked")}</option>
-                </select>
+                  options={riskOptions}
+                  ariaLabel={t("admin.riskLevelSelectLabel")}
+                />
               </div>
 
               <div>
@@ -178,18 +185,13 @@ export default async function AdminLetterDetailPage({
             <input type="hidden" name="letterId" value={letter.id} />
 
             <div className="mt-3">
-              <select
+              <ModerationSelect
                 id="risk-override"
                 name="riskLevel"
                 defaultValue={letter.riskLevel}
-                aria-label={t("admin.quickRiskOverrideAria")}
-                className="w-full min-h-[44px] rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent/20"
-              >
-                <option value="NORMAL">{t("admin.riskNormal")}</option>
-                <option value="SENSITIVE">{t("admin.riskSensitive")}</option>
-                <option value="HIGH">{t("admin.riskHigh")}</option>
-                <option value="BLOCKED">{t("admin.riskBlocked")}</option>
-              </select>
+                options={riskOptions}
+                ariaLabel={t("admin.quickRiskOverrideAria")}
+              />
             </div>
             <input type="hidden" name="reason" value="Admin risk override from detail page" />
             <div className="mt-4">

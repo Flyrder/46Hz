@@ -2,10 +2,12 @@ import { cn } from "@/lib/utils";
 
 export function StatusBadge({
   children,
-  tone = "neutral"
+  tone = "neutral",
+  className
 }: {
   children: React.ReactNode;
   tone?: "neutral" | "good" | "warning" | "danger";
+  className?: string;
 }) {
   return (
     <span
@@ -18,7 +20,8 @@ export function StatusBadge({
         tone === "warning" &&
           "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
         tone === "danger" &&
-          "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300"
+          "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+        className
       )}
     >
       {children}
