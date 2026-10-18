@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
+import { db, type User } from "@/lib/db";
+import { getPreparedGetUser } from "@/lib/db/prepared";
 import { sessionSettings } from "@/settings";
 
 export const USER_COOKIE = sessionSettings.userCookie;
@@ -35,7 +36,9 @@ export async function getCurrentUser() {
     return null;
   }
 
-  let user = await db.orm.public.User.first({ id: userId });
+  const ps = await getPreparedGetUser();
+  const [userRow] = await ps.query(db.runtime(), { id: userId });
+  let user: User | null = (userRow as unknown as User) ?? null;
 
   if (user && !user.migrationCode) {
     const code = createMigrationCode();

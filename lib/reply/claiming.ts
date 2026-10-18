@@ -197,26 +197,26 @@ export async function findAvailableReplyLetters(responderId: string, limit = 6) 
 
   // Opportunistic auto-cleanup of stale OFFERED locks
   await db.orm.public.Match
-    .where((match) => and(match.status.eq("OFFERED"), match.createdAt.lt(leaseCutoff)))
+    .where({ status: "OFFERED" })
+    .where((match) => match.createdAt.lt(leaseCutoff))
     .updateAndCount({ status: "EXPIRED" });
 
   const candidates = await db.orm.public.Letter
     .with(letterPreview)
-    .where((letter, { fns }) =>
-      fns.and(
-        letter.authorId.neq(responderId),
-        letter.status.eq("APPROVED"),
-        letter.riskLevel.eq("NORMAL"),
-        letter.replies.none((reply) => reply.responderId.eq(responderId)),
-        letter.matches.none((match) =>
-          and(
-            match.responderId.neq(responderId),
-            match.status.eq("OFFERED"),
-            match.createdAt.gte(leaseCutoff)
-          )
-        ),
-        fns.raw`(SELECT COUNT(*)::int FROM "public"."Reply" r WHERE r."letterId" = ${letter.id} AND r."status" <> 'REJECTED') < ${letter.maxReplies}`.returns("pg/bool@1")
+    .where({ status: "APPROVED", riskLevel: "NORMAL" })
+    .where((letter) => letter.authorId.neq(responderId))
+    .where((letter) => letter.replies.none((reply) => reply.responderId.eq(responderId)))
+    .where((letter) =>
+      letter.matches.none((match) =>
+        and(
+          match.responderId.neq(responderId),
+          match.status.eq("OFFERED"),
+          match.createdAt.gte(leaseCutoff)
+        )
       )
+    )
+    .where((letter, { fns }) =>
+      fns.raw`(SELECT COUNT(*)::int FROM "public"."Reply" r WHERE r."letterId" = ${letter.id} AND r."status" <> 'REJECTED') < ${letter.maxReplies}`.returns("pg/bool@1")
     )
     .include("replies", (replies) => replies.where((reply) => reply.status.neq("REJECTED")).count())
     .orderBy((letter) => letter.createdAt.asc())

@@ -73,31 +73,53 @@ export default async function AdminPage({
   startOfToday.setHours(0, 0, 0, 0);
   const startOfTodayTimestamp = toTimestamp(startOfToday);
 
+  const letterMetricsPlan = db.raw.sql`
+    SELECT
+      COUNT(*) FILTER (WHERE "createdAt" >= ${startOfTodayTimestamp})::int AS "lettersToday",
+      COUNT(*) FILTER (WHERE "status" = 'PENDING')::int AS "pendingLetters",
+      COUNT(*) FILTER (WHERE "riskLevel" = 'HIGH')::int AS "highRisk"
+    FROM "public"."Letter"
+  `.returnsRow({
+    lettersToday: "pg/int4@1",
+    pendingLetters: "pg/int4@1",
+    highRisk: "pg/int4@1"
+  }).build();
+
+  const feedbackMetricsPlan = db.raw.sql`
+    SELECT
+      COUNT(*)::int AS "feedbackCount",
+      COUNT(*) FILTER (WHERE "reportReason" IS NOT NULL)::int AS "reports",
+      COUNT(*) FILTER (WHERE "feltUnderstood" = true)::int AS "understoodCount"
+    FROM "public"."Feedback"
+  `.returnsRow({
+    feedbackCount: "pg/int4@1",
+    reports: "pg/int4@1",
+    understoodCount: "pg/int4@1"
+  }).build();
+
+  const replyMetricsPlan = db.raw.sql`
+    SELECT
+      COUNT(*)::int AS "replyCount",
+      COUNT(*) FILTER (WHERE "createdAt" >= ${startOfTodayTimestamp})::int AS "repliesToday",
+      COUNT(*) FILTER (WHERE "status" = 'PENDING')::int AS "pendingReplies",
+      COUNT(*) FILTER (WHERE "status" = 'REJECTED')::int AS "rejectedReplyCount"
+    FROM "public"."Reply"
+  `.returnsRow({
+    replyCount: "pg/int4@1",
+    repliesToday: "pg/int4@1",
+    pendingReplies: "pg/int4@1",
+    rejectedReplyCount: "pg/int4@1"
+  }).build();
+
   const [
-    lettersTodayAgg,
-    repliesTodayAgg,
-    pendingLettersAgg,
-    highRiskAgg,
-    reportsAgg,
-    feedbackAgg,
-    understoodAgg,
-    replyStatusGroups,
+    [letterStats],
+    [feedbackStats],
+    [replyStats],
     recentLetters
   ] = await Promise.all([
-    db.orm.public.Letter
-      .where((letter) => letter.createdAt.gte(startOfTodayTimestamp))
-      .aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Reply
-      .where((reply) => reply.createdAt.gte(startOfTodayTimestamp))
-      .aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Letter.where({ status: "PENDING" }).aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Letter.where({ riskLevel: "HIGH" }).aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Feedback
-      .where((feedback) => feedback.reportReason.isNotNull())
-      .aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Feedback.aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Feedback.where({ feltUnderstood: true }).aggregate((agg) => ({ count: agg.count() })),
-    db.orm.public.Reply.groupBy("status").aggregate((agg) => ({ count: agg.count() })),
+    db.runtime().query(letterMetricsPlan),
+    db.runtime().query(feedbackMetricsPlan),
+    db.runtime().query(replyMetricsPlan),
     db.orm.public.Letter
       .select("emotionTags", "riskLevel")
       .orderBy((letter) => letter.createdAt.desc())
@@ -105,17 +127,16 @@ export default async function AdminPage({
       .all()
   ]);
 
-  const lettersToday = lettersTodayAgg.count;
-  const repliesToday = repliesTodayAgg.count;
-  const pendingLetters = pendingLettersAgg.count;
-  const highRisk = highRiskAgg.count;
-  const reports = reportsAgg.count;
-  const feedbackCount = feedbackAgg.count;
-  const understoodCount = understoodAgg.count;
-  const replyCountByStatus = Object.fromEntries(replyStatusGroups.map((row) => [row.status, row.count]));
-  const pendingReplies = replyCountByStatus.PENDING ?? 0;
-  const rejectedReplyCount = replyCountByStatus.REJECTED ?? 0;
-  const replyCount = replyStatusGroups.reduce((sum, row) => sum + row.count, 0);
+  const lettersToday = letterStats?.lettersToday ?? 0;
+  const repliesToday = replyStats?.repliesToday ?? 0;
+  const pendingLetters = letterStats?.pendingLetters ?? 0;
+  const highRisk = letterStats?.highRisk ?? 0;
+  const reports = feedbackStats?.reports ?? 0;
+  const feedbackCount = feedbackStats?.feedbackCount ?? 0;
+  const understoodCount = feedbackStats?.understoodCount ?? 0;
+  const pendingReplies = replyStats?.pendingReplies ?? 0;
+  const rejectedReplyCount = replyStats?.rejectedReplyCount ?? 0;
+  const replyCount = replyStats?.replyCount ?? 0;
 
   const emotionCounts: Record<string, number> = {
     lonely: 0,
