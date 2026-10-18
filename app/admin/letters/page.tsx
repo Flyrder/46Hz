@@ -8,7 +8,7 @@ import { prisma } from "@/lib/db";
 import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import type { LetterStatus, RiskLevel } from "@/lib/domain";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/lib/db";
 import {
   Mail,
   List,

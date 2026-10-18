@@ -2,7 +2,7 @@ import { prisma } from "../lib/db";
 import { getAiMiddleware } from "../lib/ai";
 import { getLetterRouting, isPeerMatchable } from "../lib/safety/routing";
 import { canTransitionLetter, canTransitionReply, nextResponderTrustScore } from "../lib/moderation/status";
-import { claimLetterForReply, releaseLetterClaim } from "../lib/reply/claiming";
+import { claimLetterForReply, releaseLetterClaim, findAvailableReplyLetters } from "../lib/reply/claiming";
 import { createAnonymousHandle, createMigrationCode } from "../lib/session";
 import { translate, defaultLocale } from "../lib/i18n";
 import { canManageUsers, canManageResources, canModerateContent, authenticatePasscode } from "../lib/admin";
@@ -115,6 +115,12 @@ async function verifyAll() {
 
   console.log("\n=== [5/7] Testing 15-Minute Concurrency Claiming & Release Protocol ===");
   // Author claiming own letter -> should be CANNOT_REPLY_OWN_LETTER
+  const availableBeforeClaim = await findAvailableReplyLetters(responder.id, 8);
+  console.log(`Available reply letters for Responder 1: ${availableBeforeClaim.length}`);
+  if (!availableBeforeClaim.some((l) => l.id === letter.id)) {
+    throw new Error("Approved letter should be in findAvailableReplyLetters for Responder 1");
+  }
+
   const ownClaim = await claimLetterForReply(letter.id, writer.id);
   console.log("Author claiming own letter result:", ownClaim);
   if (ownClaim.ok || ownClaim.reason !== "CANNOT_REPLY_OWN_LETTER") {
@@ -243,6 +249,75 @@ async function verifyAll() {
   console.log("Claim result after expanding to 15:", claimExpanded);
   if (!claimExpanded.ok) {
     throw new Error("Claim after expanding to 15 should succeed");
+  }
+
+  // Test complex Prisma 8 relation & array filters (letter detail, inbox, admin filters, reports)
+  const detailLetter = await prisma.letter.findFirst({
+    where: {
+      id: letter.id,
+      OR: [
+        { authorId: responder.id },
+        { replies: { some: { responderId: responder.id } } }
+      ]
+    },
+    include: {
+      replies: {
+        where: {
+          OR: [{ status: "APPROVED" }, { responderId: responder.id }]
+        },
+        include: {
+          feedback: { where: { fromUserId: writer.id } }
+        },
+        orderBy: { createdAt: "desc" }
+      },
+      comments: { orderBy: { createdAt: "asc" } }
+    }
+  });
+  if (!detailLetter || detailLetter.replies.length < 7) {
+    throw new Error("Complex OR + relation some filter in letter detail failed");
+  }
+
+  const taggedLetters = await prisma.letter.findMany({
+    where: {
+      id: letter.id,
+      emotionTags: { has: "lonely" },
+      createdAt: {
+        gte: new Date(Date.now() - 60_000),
+        lte: new Date(Date.now() + 60_000)
+      }
+    }
+  });
+  if (taggedLetters.length !== 1) {
+    throw new Error("Array has + Date range (gte/lte) filter failed");
+  }
+
+  const inboxLetters = await prisma.letter.findMany({
+    where: { id: letter.id, authorId: writer.id },
+    include: {
+      replies: {
+        where: { status: "APPROVED" },
+        orderBy: { createdAt: "desc" }
+      },
+      _count: {
+        select: { replies: { where: { status: "APPROVED" } } }
+      }
+    }
+  });
+  if (inboxLetters.length !== 1 || inboxLetters[0]._count.replies < 7) {
+    throw new Error("Inbox replies + _count include failed");
+  }
+
+  const reports = await prisma.feedback.findMany({
+    where: { reportReason: { not: null } },
+    include: {
+      reply: { include: { letter: true, responder: true } },
+      fromUser: true
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5
+  });
+  if (!Array.isArray(reports)) {
+    throw new Error("Admin reports query failed");
   }
 
   console.log("\n=== [7/7] Testing RBAC Permissions ===");

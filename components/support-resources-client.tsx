@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { ExitIsoIcon } from "@/components/exit-sign-emblem";
-import type { SupportResource } from "@prisma/client";
+import type { SupportResource } from "@/lib/db";
 import type { CrisisHotline } from "@/lib/resources";
 import { useI18n, createTranslator, type Locale } from "@/lib/i18n";
 

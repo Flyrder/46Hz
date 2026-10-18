@@ -40,9 +40,9 @@ describe("POST /api/ai/test-connection", () => {
     expect(data.provider).toBe("mock");
   });
 
-  it("treats any non-gemini provider string as mock", async () => {
+  it("treats any non-supported provider string as mock", async () => {
     getAdminRole.mockResolvedValue("ADMIN");
-    const res = await post({ provider: "openai", mockDelayMs: 0 });
+    const res = await post({ provider: "anthropic", mockDelayMs: 0 });
     expect((await res.json()).provider).toBe("mock");
   });
 

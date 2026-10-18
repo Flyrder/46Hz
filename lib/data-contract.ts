@@ -26,11 +26,11 @@ export function verifyDataContract(): ContractVerificationResult {
   const errors: string[] = [];
 
   if (!fs.existsSync(contractJsonPath)) {
-    errors.push("Missing prisma/contract.json. Run 'npm run prisma8:contract' to generate.");
+    errors.push("Missing prisma/contract.json. Run 'npm run prisma:emit' to generate.");
   }
 
   if (!fs.existsSync(contractDtsPath)) {
-    errors.push("Missing prisma/contract.d.ts. Run 'npm run prisma8:contract' to generate.");
+    errors.push("Missing prisma/contract.d.ts. Run 'npm run prisma:emit' to generate.");
   }
 
   if (!fs.existsSync(schemaPrismaPath)) {
@@ -88,9 +88,19 @@ export function verifyDataContract(): ContractVerificationResult {
 
   for (const check of enumChecks) {
     enumsSummary[check.name] = check.zodValues;
+    const nativeEnum = contract.storage?.namespaces?.public?.entries?.native_enum?.[check.name];
+    const valueSet = contract.storage?.namespaces?.public?.entries?.valueSet?.[check.name];
     const contractEnum = contract.domain?.types?.[check.name];
-    if (contractEnum && contractEnum.kind === "enum") {
-      const contractValues = Object.keys(contractEnum.values || {});
+
+    const contractValues: string[] | undefined = Array.isArray(nativeEnum?.members)
+      ? nativeEnum.members
+      : Array.isArray(valueSet?.values)
+        ? valueSet.values
+        : contractEnum && contractEnum.kind === "enum"
+          ? Object.keys(contractEnum.values || {})
+          : undefined;
+
+    if (contractValues) {
       for (const val of check.zodValues) {
         if (!contractValues.includes(val)) {
           errors.push(
@@ -98,6 +108,8 @@ export function verifyDataContract(): ContractVerificationResult {
           );
         }
       }
+    } else {
+      errors.push(`Enum '${check.name}' is missing from Prisma 8 contract.`);
     }
   }
 

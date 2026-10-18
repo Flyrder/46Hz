@@ -27,11 +27,11 @@ describe("Native Google Gemini Interactions API & Mock Fallback", () => {
     applyRuntimeSettingsUpdate(FACTORY_DEFAULT_SETTINGS);
   });
 
-  it("identifies mock provider by default and ignores non-gemini provider strings", () => {
+  it("identifies mock provider by default and ignores non-supported provider strings", () => {
     delete process.env.AI_PROVIDER;
     expect(getAiProviderName()).toBe("mock");
 
-    process.env.AI_PROVIDER = "openai";
+    process.env.AI_PROVIDER = "anthropic";
     expect(getAiProviderName()).toBe("mock");
   });
 

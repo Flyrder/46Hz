@@ -8,7 +8,7 @@ import { createTranslator } from "@/lib/i18n";
 import { getLocalePreference } from "@/lib/preferences";
 import { formatDate, excerpt } from "@/lib/utils";
 import type { ReplyStatus } from "@/lib/domain";
-import type { Prisma } from "@prisma/client";
+import type { Prisma } from "@/lib/db";
 import {
   MessageSquare,
   ArrowRight,

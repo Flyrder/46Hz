@@ -28,13 +28,14 @@ describe("Arm64 Architecture Support", () => {
     expect(content).toContain("prisma:migrate");
   });
 
-  it("package.json scripts avoid architecture-dependent binaries", () => {
+  it("package.json scripts avoid architecture-dependent binaries and use Prisma 8 contract emit", () => {
     const pkgPath = path.join(process.cwd(), "package.json");
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
     expect(pkg.name).toBe("46hz");
-    // Verification that scripts work with platform-agnostic tools and Prisma generation
-    expect(pkg.scripts.build).toMatch(/prisma(7)? generate/);
+    // Verification that scripts work with platform-agnostic tools and Prisma 8 contract emit
+    expect(pkg.scripts.build).toContain("prisma contract emit");
+    expect(pkg.scripts["prisma:emit"]).toBe("prisma contract emit");
     expect(pkg.scripts["start:mac"]).toBe("./start.sh");
   });
 
@@ -44,7 +45,7 @@ describe("Arm64 Architecture Support", () => {
 
     expect(content).toMatch(/FROM node:(20|26)-bookworm-slim/);
     expect(content).toContain("openssl");
-    expect(content).toMatch(/npx prisma(7)? generate/);
+    expect(content).toMatch(/npx prisma contract emit/);
     // Ensure no invalid shell redirection / pipe syntax in COPY instructions
     const copyLines = content.split("\n").filter((l) => l.trim().startsWith("COPY"));
     for (const line of copyLines) {
@@ -61,25 +62,25 @@ describe("Arm64 Architecture Support", () => {
     expect(content).toContain("46hz-letterbox-postgres");
   });
 
-  it("validates Prisma configuration and Prisma 8 RC contract", () => {
+  it("validates pure Prisma 8 configuration and emitted contract", () => {
     const configPath = path.join(process.cwd(), "prisma.config.ts");
     expect(fs.existsSync(configPath)).toBe(true);
     const content = fs.readFileSync(configPath, "utf-8");
-    expect(content).toContain("defineConfig");
+    expect(content).toContain("definePrismaConfig");
+    expect(content).toContain("@prisma/orm-postgres/config");
 
+    // Ensure legacy side-by-side config files have been purged
+    const prisma7Config = path.join(process.cwd(), "prisma7.config.ts");
     const prisma8Config = path.join(process.cwd(), "prisma8.config.ts");
-    expect(fs.existsSync(prisma8Config)).toBe(true);
-    const prisma8Content = fs.readFileSync(prisma8Config, "utf-8");
-    expect(prisma8Content).toContain('from "prisma/config"');
-    expect(prisma8Content).toContain('from "@prisma/orm-postgres/config"');
+    expect(fs.existsSync(prisma7Config)).toBe(false);
+    expect(fs.existsSync(prisma8Config)).toBe(false);
 
     const pkgPath = path.join(process.cwd(), "package.json");
     const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
     expect(pkg.devDependencies["prisma"]).toBe("8.0.0-rc.23");
     expect(pkg.devDependencies["@prisma/orm-postgres"]).toBe("8.0.0-rc.18");
 
-    const contractPath = path.join(process.cwd(), "prisma", "contract.prisma");
-    expect(fs.existsSync(contractPath)).toBe(true);
+    const contractJson = path.join(process.cwd(), "prisma", "contract.json");
+    expect(fs.existsSync(contractJson)).toBe(true);
   });
 });
-

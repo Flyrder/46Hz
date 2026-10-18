@@ -155,14 +155,14 @@ else
   echo -e "${GREEN}[OK] PostgreSQL is active on port 5432.${NC}"
 fi
 
-# 3. Generate Prisma Client & Migrate Schema
-echo -e "\n[2/4] Generating Prisma Client and verifying schema..."
-npm run prisma:generate
+# 3. Generate Prisma 8 Contract & Schema Sync
+echo -e "\n[2/4] Generating Prisma 8 Contract and verifying schema..."
+npm run prisma:generate || npm run prisma:emit
 
 echo -e "\n[3/4] Ensuring database migrations are applied..."
 npm run prisma:migrate || {
-  echo -e "${YELLOW}[WARN] prisma:migrate encountered an issue, trying deploy fallback...${NC}"
-  npx prisma7 migrate deploy || true
+  echo -e "${YELLOW}[WARN] prisma:migrate encountered an issue, trying plan fallback...${NC}"
+  npm run prisma:plan || true
 }
 
 if [[ "$DO_SEED" == "true" ]]; then

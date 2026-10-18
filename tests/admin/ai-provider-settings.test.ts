@@ -58,10 +58,10 @@ describe("Native Gemini Provider Configuration & Per-Function Prompt Studio", ()
       expect(parsed.data.aiPromptResonanceMatch).toBe("Custom resonance match prompt");
     }
 
-    // Legacy non-Gemini providers are rejected by schema
+    // Unsupported providers are rejected by schema
     const invalidLegacy = systemSettingsSchema.safeParse({
       ...FACTORY_DEFAULT_SETTINGS,
-      aiDefaultProvider: "openai"
+      aiDefaultProvider: "anthropic"
     });
     expect(invalidLegacy.success).toBe(false);
   });

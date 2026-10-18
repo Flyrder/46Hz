@@ -116,11 +116,11 @@ if (-not $isPortOpen) {
     Write-Host "[OK] PostgreSQL is online and listening on 127.0.0.1:5432." -ForegroundColor Green
 }
 
-# 3. Synchronize Prisma Schema
-Write-Host "`n[2/4] Verifying Prisma Client and Schema sync..." -ForegroundColor White
-& npx prisma7 generate
+# 3. Synchronize Prisma 8 Contract
+Write-Host "`n[2/4] Verifying Prisma 8 Contract and Schema sync..." -ForegroundColor White
+& npx prisma contract emit
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "[ERROR] Prisma generate failed." -ForegroundColor Red
+    Write-Host "[ERROR] Prisma contract emit failed." -ForegroundColor Red
     exit 1
 }
 

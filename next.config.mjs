@@ -6,7 +6,6 @@ const nextConfig = {
       "node_modules/@prisma/composer/**",
       "node_modules/@prisma/composer-cli/**",
       "node_modules/@prisma/studio-core/**",
-      "node_modules/@prisma/prisma7/**",
       "node_modules/@prisma/engines/**",
       "node_modules/prisma/**",
       "node_modules/workerd/**",

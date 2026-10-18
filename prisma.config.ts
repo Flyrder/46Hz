@@ -1,9 +1,15 @@
 import "dotenv/config";
-import { defineConfig } from "@prisma/prisma7/config";
+import { definePrismaConfig } from "prisma/config";
+import { defineConfig, prisma7Schema } from "@prisma/orm-postgres/config";
 
-export default defineConfig({
-  schema: "prisma/schema.prisma",
-  datasource: {
-    url: process.env.DATABASE_URL
-  }
+export default definePrismaConfig({
+  skills: {
+    agents: []
+  },
+  orm: defineConfig({
+    contract: prisma7Schema("prisma/schema.prisma"),
+    db: {
+      connection: process.env.DATABASE_URL
+    }
+  })
 });

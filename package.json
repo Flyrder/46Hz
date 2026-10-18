@@ -6,17 +6,18 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "prisma7 generate && next build",
+    "build": "prisma contract emit && next build",
     "start": "next start",
     "lint": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
-    "prisma:generate": "prisma7 generate",
-    "prisma:migrate": "prisma7 migrate dev",
+    "prisma:emit": "prisma contract emit",
+    "prisma:generate": "prisma contract emit",
+    "prisma:migrate": "prisma migration plan",
+    "prisma:plan": "prisma migration plan",
+    "prisma:db": "prisma db",
     "prisma:seed": "tsx prisma/seed.ts",
-    "prisma8:contract": "prisma contract emit --config ./prisma8.config.ts",
-    "prisma8:plan": "prisma migration plan --config ./prisma8.config.ts",
-    "prisma8:db": "prisma db --config ./prisma8.config.ts",
+    "prisma8:contract": "prisma contract emit",
     "start:mac": "./start.sh",
     "start:mac:verify": "./start.sh --verify-only",
     "purge:modules": "tsx scripts/purge_standalone.ts",
@@ -24,8 +25,6 @@
     "contract:verify": "tsx scripts/verify_contract.ts"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "7.10.0",
-    "@prisma/client": "7.10.0",
     "lucide-react": "1.55.0",
     "next": "16.4.0",
     "pg": "8.23.1",
@@ -35,7 +34,6 @@
   },
   "devDependencies": {
     "@prisma/orm-postgres": "8.0.0-rc.18",
-    "@prisma/prisma7": "^7.10.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.6.5",
     "@types/pg": "8.23.1",
@@ -55,11 +53,6 @@
     "esbuild@0.28.1": true,
     "esbuild@0.28.2": true,
     "unrs-resolver@1.12.2": true,
-    "sharp@0.34.5": true,
-    "prisma@7.10.0": true,
-    "@prisma/engines@7.10.0": true,
-    "@prisma/client@7.10.0": true,
-    "@prisma/prisma7@7.10.0": true,
-    "workerd@1.20261002.1": false
+    "sharp@0.34.5": true
   }
 }

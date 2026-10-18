@@ -103,7 +103,7 @@ function main() {
     totalFreed += removePathSafe(path.join(nodeModules, rel), `node_modules/${rel.replace(/\\/g, "/")}`);
   }
 
-  // Ensure a minimal 200-byte CJS stub exists for @prisma/studio-core so `prisma7 generate` CLI loads cleanly
+  // Ensure a minimal 200-byte CJS stub exists for @prisma/studio-core so Prisma CLI loads cleanly
   const studioCoreDir = path.join(nodeModules, "@prisma", "studio-core");
   fs.mkdirSync(studioCoreDir, { recursive: true });
   fs.writeFileSync(
@@ -125,8 +125,8 @@ function main() {
   );
   fs.writeFileSync(path.join(studioCoreDir, "index.js"), "module.exports = {};\n", "utf-8");
 
-  // 2. Purge stale legacy Prisma 6 native query-engine binaries in node_modules/.prisma/client
-  //    (Prisma 7 uses query_compiler_fast_bg.wasm-base64.js + @prisma/adapter-pg)
+  // 2. Purge stale legacy Prisma native query-engine binaries in node_modules/.prisma/client
+  //    (Prisma 8 uses @prisma/orm-postgres runtime + pg driver)
   const dotPrismaClient = path.join(nodeModules, ".prisma", "client");
   if (fs.existsSync(dotPrismaClient)) {
     const files = fs.readdirSync(dotPrismaClient);

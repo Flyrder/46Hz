@@ -1,12 +1,12 @@
 ---
-description: 46Hz Engineering, Prisma 7+8 Coexistence, Standalone Purge, and UI/UX Governance
+description: 46Hz Engineering, Pure Prisma 8 Architecture, Standalone Purge, and UI/UX Governance
 ---
 
 # 46Hz Engineering & Architecture Invariants
 
-## 1. Prisma 7 + Prisma 8 RC Coexistence & Standalone Purge
-- Use `npx prisma7 generate` for Prisma 7 (`prisma7.config.ts`) and `npm run prisma8:contract` (`npx prisma contract emit --config prisma8.config.ts`) for Prisma 8 RC (`@prisma/orm-postgres` `defineConfig` with `contract: "./prisma/contract.json"`).
-- After installing dependencies or running `npm run build`, always run `npm run purge:modules` (`scripts/purge_standalone.ts`) to strip non-runtime `@prisma/composer*`, `workerd`, `@prisma/studio-core` (leaving the 200-byte CJS stub for `prisma7` CLI compatibility), and legacy `query-engine-*` binaries (~2.23 GB) from `node_modules` and `.next/standalone/node_modules`.
+## 1. Pure Prisma 8 Architecture & Standalone Purge
+- Use `npm run prisma:emit` (`npx prisma contract emit`) for Prisma 8 (`prisma.config.ts`) with `@prisma/orm-postgres` (`defineConfig` with `contract: prisma7Schema("prisma/schema.prisma")`). All Prisma 7 dependencies have been completely purged from the codebase.
+- After installing dependencies or running `npm run build`, always run `npm run purge:modules` (`scripts/purge_standalone.ts`) to strip non-runtime `@prisma/composer*`, `workerd`, and legacy binaries from `node_modules` and `.next/standalone/node_modules`.
 
 ## 2. Unified System Settings (`settings.ts` & `/admin/settings`)
 - Never hardcode system constants (Schumann reply caps, 15-min lease window, rate limits, default locale/theme, AI models) in route handlers or components. Always read from `settings.ts` and hydrate via `ensureSettingsLoadedFromDisk()` in `lib/settings-store.ts`.
