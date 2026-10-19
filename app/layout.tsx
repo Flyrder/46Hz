@@ -11,8 +11,11 @@ const nanumSquareRound = localFont({
   src: [
     { path: "../fonts/NanumSquareRoundOTFL.otf", weight: "300", style: "normal" },
     { path: "../fonts/NanumSquareRoundOTFR.otf", weight: "400", style: "normal" },
+    { path: "../fonts/NanumSquareRoundOTFR.otf", weight: "500", style: "normal" },
+    { path: "../fonts/NanumSquareRoundOTFB.otf", weight: "600", style: "normal" },
     { path: "../fonts/NanumSquareRoundOTFB.otf", weight: "700", style: "normal" },
-    { path: "../fonts/NanumSquareRoundOTFEB.otf", weight: "800", style: "normal" }
+    { path: "../fonts/NanumSquareRoundOTFEB.otf", weight: "800", style: "normal" },
+    { path: "../fonts/NanumSquareRoundOTFEB.otf", weight: "900", style: "normal" }
   ],
   variable: "--font-ui",
   display: "swap"
@@ -23,8 +26,10 @@ const maruBuri = localFont({
     { path: "../fonts/MaruBuri-ExtraLight.otf", weight: "200", style: "normal" },
     { path: "../fonts/MaruBuri-Light.otf", weight: "300", style: "normal" },
     { path: "../fonts/MaruBuri-Regular.otf", weight: "400", style: "normal" },
+    { path: "../fonts/MaruBuri-Regular.otf", weight: "500", style: "normal" },
     { path: "../fonts/MaruBuri-SemiBold.otf", weight: "600", style: "normal" },
-    { path: "../fonts/MaruBuri-Bold.otf", weight: "700", style: "normal" }
+    { path: "../fonts/MaruBuri-Bold.otf", weight: "700", style: "normal" },
+    { path: "../fonts/MaruBuri-Bold.otf", weight: "800", style: "normal" }
   ],
   variable: "--font-letter",
   display: "swap"
@@ -86,10 +91,10 @@ export default async function RootLayout({
   return (
     <html
       lang={locale.replace("_", "-")}
-      className={`theme-${theme} ${nanumSquareRound.variable} ${maruBuri.variable}`}
+      className={`theme-${theme} ${nanumSquareRound.variable} ${maruBuri.variable} font-sans`}
       suppressHydrationWarning
     >
-      <body>
+      <body className="font-sans antialiased">
         <I18nProvider locale={locale}>
           <AppShell locale={locale} theme={theme} t={t}>
             {children}

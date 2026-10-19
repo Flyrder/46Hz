@@ -10,8 +10,7 @@ const nextConfig = {
       "node_modules/prisma/**",
       "node_modules/workerd/**",
       "node_modules/@alchemy.run/**",
-      "node_modules/.prisma/client/query-engine-*",
-      "node_modules/.prisma/client/query_engine-*",
+      "node_modules/.prisma/**",
       "node_modules/.cache/**"
     ]
   },

@@ -818,7 +818,7 @@ export const enUS: Translations = {
   "license.tableRole": "Role & Purpose",
   "license.libNextDesc": "React Server Components & App Router full-stack web framework",
   "license.libReactDesc": "Declarative UI and concurrent rendering library",
-  "license.libPrismaDesc": "Type-safe PostgreSQL ORM, adapter, and schema contract toolchain (Prisma 7 & 8 coexistence)",
+  "license.libPrismaDesc": "Type-safe PostgreSQL ORM and pure Prisma 8 Data Contract toolchain",
   "license.libPgDesc": "Non-blocking PostgreSQL client and connection pool for Node.js",
   "license.libZodDesc": "TypeScript-first schema declaration and runtime input validation",
   "license.libLucideDesc": "Consistent stroke-based open-source vector icon toolkit",

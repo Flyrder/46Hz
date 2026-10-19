@@ -126,7 +126,7 @@ export function WritingSparksHelper({
                 <span className="inline-block rounded-md bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
                   {spark.prompt}
                 </span>
-                <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 font-serif">
+                <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 font-letter">
                   &ldquo;{spark.text}&rdquo;
                 </p>
               </div>

@@ -125,19 +125,11 @@ function main() {
   );
   fs.writeFileSync(path.join(studioCoreDir, "index.js"), "module.exports = {};\n", "utf-8");
 
-  // 2. Purge stale legacy Prisma native query-engine binaries in node_modules/.prisma/client
-  //    (Prisma 8 uses @prisma/orm-postgres runtime + pg driver)
-  const dotPrismaClient = path.join(nodeModules, ".prisma", "client");
-  if (fs.existsSync(dotPrismaClient)) {
-    const files = fs.readdirSync(dotPrismaClient);
-    for (const file of files) {
-      if (file.startsWith("query-engine-") || file.startsWith("query_engine-")) {
-        totalFreed += removePathSafe(
-          path.join(dotPrismaClient, file),
-          `node_modules/.prisma/client/${file}`
-        );
-      }
-    }
+  // 2. Purge stale legacy Prisma 7 artifacts in node_modules/.prisma
+  //    (Prisma 8 uses pure @prisma/orm-postgres runtime and outputs to prisma/contract.*)
+  const dotPrisma = path.join(nodeModules, ".prisma");
+  if (fs.existsSync(dotPrisma)) {
+    totalFreed += removePathSafe(dotPrisma, "node_modules/.prisma");
   }
 
   // 3. Purge non-runtime sourcemaps/d.ts/docs from .next/standalone/node_modules

@@ -13,7 +13,7 @@ export default async function NotFound() {
       <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/10 text-accent mb-5">
         <MailQuestion className="h-7 w-7" aria-hidden="true" />
       </div>
-      <span className="inline-block rounded-full bg-muted/70 px-3 py-1 font-mono text-xs font-semibold text-muted-foreground">
+      <span className="inline-block rounded-full bg-muted/70 px-3 py-1 font-sans text-xs font-semibold text-muted-foreground">
         {t("notfound.badge")}
       </span>
       <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground">

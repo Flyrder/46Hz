@@ -46,7 +46,6 @@ This project bundles and applies the following fonts provided by **NAVER Corp.**
 | :--- | :--- | :--- | :--- |
 | `next` | `16.4.0` | MIT | <https://github.com/vercel/next.js> |
 | `react` / `react-dom` | `19.3.0` | MIT | <https://github.com/facebook/react> |
-| `@prisma/client` / `@prisma/adapter-pg` / `@prisma/prisma7` | `7.10.0` | Apache-2.0 | <https://github.com/prisma/prisma> |
 | `prisma` / `@prisma/orm-postgres` | `8.0.0-rc.23` / `8.0.0-rc.18` | Apache-2.0 | <https://github.com/prisma/prisma> |
 | `pg` (`node-postgres`) | `8.23.1` | MIT | <https://github.com/brianc/node-postgres> |
 | `zod` | `4.6.6` | MIT | <https://github.com/colinhacks/zod> |

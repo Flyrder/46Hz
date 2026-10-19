@@ -78,12 +78,15 @@ html.theme-dark {
   }
 }
 
-* {
+*,
+::before,
+::after {
   box-sizing: border-box;
 }
 
 html {
   min-height: 100%;
+  font-family: var(--font-sans);
   background: hsl(var(--background));
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -91,12 +94,10 @@ html {
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Modern Web Guidance: visually-stable-font-fallbacks (font-size-adjust: from-font) */
 body {
   min-height: 100%;
   margin: 0;
   font-family: var(--font-sans);
-  font-size-adjust: from-font;
   overflow-wrap: break-word;
   word-break: break-word;
   color: hsl(var(--foreground));
@@ -106,10 +107,18 @@ body {
   transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
+/* Ensure form controls, buttons, and textareas inherit typography */
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* MaruBuri Stationery Typography for Letters & Replies */
 .font-letter {
   font-family: var(--font-serif);
-  font-size-adjust: from-font;
 }
 
 html.theme-dark body {

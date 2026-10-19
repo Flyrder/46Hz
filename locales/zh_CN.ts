@@ -812,7 +812,7 @@ export const zhCN: Translations = {
   "license.tableRole": "角色与用途",
   "license.libNextDesc": "React 服务端组件与 App Router 全栈 Web 框架",
   "license.libReactDesc": "声明式用户界面与并发渲染核心库",
-  "license.libPrismaDesc": "PostgreSQL 类型安全 ORM、驱动适配器及架构契约工具链（Prisma 7 与 8 共存架构）",
+  "license.libPrismaDesc": "PostgreSQL 类型安全 ORM 及纯 Prisma 8 数据契约（Data Contract）工具链",
   "license.libPgDesc": "适用于 Node.js 的非阻塞 PostgreSQL 客户端与连接池",
   "license.libZodDesc": "TypeScript 优先的模式声明与运行时输入校验库",
   "license.libLucideDesc": "一致的描边风格开源矢量图标工具包",

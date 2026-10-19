@@ -56,8 +56,8 @@ export default async function LicensesPage() {
       url: "https://github.com/facebook/react"
     },
     {
-      name: "Prisma ORM (@prisma/client, @prisma/adapter-pg, prisma)",
-      version: "7.10.0 / 8.0.0-rc.23",
+      name: "Prisma ORM (prisma, @prisma/orm-postgres)",
+      version: "8.0.0-rc.23 / 8.0.0-rc.18",
       license: "Apache-2.0",
       descKey: "license.libPrismaDesc",
       url: "https://github.com/prisma/prisma"

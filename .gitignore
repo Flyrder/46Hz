@@ -12,3 +12,4 @@ dist
 worktrees
 .settings.override.json
 AGENTS.md
+*.sql

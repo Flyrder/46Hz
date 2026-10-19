@@ -146,24 +146,46 @@ function resolveContainerCli(): string | null {
   return null;
 }
 
+function checkContainerExists(cli: string, containerName = "46hz-postgres"): boolean {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    // 1. inspect (fastest and exact in both Docker and WSLC)
+    const inspect = spawnSync(cli, ["inspect", containerName], { encoding: "utf-8" });
+    if (inspect.status === 0) return true;
+
+    // 2. list -a / ps -a
+    const list = spawnSync(cli, ["list", "-a"], { encoding: "utf-8" });
+    if (list.status === 0 && (list.stdout ?? "").includes(containerName)) return true;
+
+    const ps = spawnSync(cli, ["ps", "-a"], { encoding: "utf-8" });
+    if (ps.status === 0 && (ps.stdout ?? "").includes(containerName)) return true;
+
+    // When WSLC is waking up on a cold boot, briefly yield before retrying
+    if (attempt < 2) {
+      const wait = spawnSync("node", ["-e", "setTimeout(() => {}, 800)"]);
+      void wait;
+    }
+  }
+  return false;
+}
+
 function startPostgresContainer(cli: string): void {
   const label = cli.toLowerCase().includes("wslc") ? `WSLC (${cli})` : "Docker CLI";
   console.log(`${COLORS.cyan}[INFO] Managing 46hz-postgres container with ${label}...${COLORS.reset}`);
 
-  const ps = spawnSync(cli, ["ps", "-a"], { encoding: "utf-8" });
-  const exists = (ps.stdout ?? "").includes("46hz-postgres");
+  const exists = checkContainerExists(cli, "46hz-postgres");
 
   if (exists) {
     console.log(`${COLORS.green}[INFO] Starting existing 46hz-postgres container...${COLORS.reset}`);
     const started = spawnSync(cli, ["start", "46hz-postgres"], { stdio: "inherit" });
-    if (started.status !== 0) {
-      throw new Error("Failed to start existing 46hz-postgres container.");
+    if (started.status === 0) {
+      return;
     }
-    return;
+    console.log(`${COLORS.yellow}[WARN] Direct start failed. Retrying...${COLORS.reset}`);
   }
 
+  const defaultImage = process.env.POSTGRES_IMAGE || "postgres:17-alpine";
   console.log(
-    `${COLORS.green}[INFO] Creating and launching 46hz-postgres container (postgres:19beta4-alpine3.24)...${COLORS.reset}`
+    `${COLORS.green}[INFO] Creating and launching 46hz-postgres container (${defaultImage})...${COLORS.reset}`
   );
   const created = spawnSync(
     cli,
@@ -181,13 +203,19 @@ function startPostgresContainer(cli: string): void {
       "-e",
       "POSTGRES_DB=46hz_letterbox",
       "-v",
-      "46hz_postgres_data:/var/lib/postgresql/data",
-      "postgres:19beta4-alpine3.24"
+      "46hz_postgres_v17_data:/var/lib/postgresql/data",
+      defaultImage
     ],
     { stdio: "inherit" }
   );
+
   if (created.status !== 0) {
-    throw new Error("Failed to create 46hz-postgres container.");
+    // If run failed (e.g. name conflict, already exists, or WSLC session race), attempt fallback start
+    console.log(`${COLORS.yellow}[INFO] Fallback: attempting to start container 46hz-postgres...${COLORS.reset}`);
+    const fallbackStart = spawnSync(cli, ["start", "46hz-postgres"], { stdio: "inherit" });
+    if (fallbackStart.status !== 0) {
+      throw new Error("Failed to create or start 46hz-postgres container.");
+    }
   }
 }
 

@@ -73,7 +73,7 @@ describe("Arm64 Architecture Support", () => {
     const composePath = path.join(process.cwd(), "docker-compose.yml");
     const content = fs.readFileSync(composePath, "utf-8");
 
-    expect(content).toMatch(/postgres:(16|19)/);
+    expect(content).toMatch(/postgres:(16|17|19)/);
     expect(content).toContain("46hz-letterbox-postgres");
   });
 

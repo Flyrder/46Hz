@@ -812,7 +812,7 @@ export const koKR: Translations = {
   "license.tableRole": "역할 및 용도",
   "license.libNextDesc": "React 서버 컴포넌트 및 App Router 풀스택 웹 프레임워크",
   "license.libReactDesc": "선언적 사용자 인터페이스 및 동시성 렌더링 엔진",
-  "license.libPrismaDesc": "PostgreSQL 타입 안전 ORM 및 마이그레이션·스키마 계약 도구 (Prisma 7 & 8 공존 아키텍처)",
+  "license.libPrismaDesc": "PostgreSQL 타입 안전 ORM 및 순수 Prisma 8 데이터 계약(Data Contract) 도구 체계",
   "license.libPgDesc": "Node.js용 논블로킹 PostgreSQL 클라이언트 및 커넥션 풀",
   "license.libZodDesc": "TypeScript 퍼스트 스키마 선언 및 런타임 입력 검증 라이브러리",
   "license.libLucideDesc": "일관된 스트로크 기반 오픈소스 벡터 아이콘 툴킷",

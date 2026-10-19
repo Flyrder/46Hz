@@ -60,7 +60,7 @@ export default async function HomePage() {
             <Waves className="h-3.5 w-3.5 animate-pulse" aria-hidden="true" />
             <span>{t("home.schumannBadge")}</span>
             <span className="text-accent/50" aria-hidden="true">·</span>
-            <span className="font-mono text-[11px]">
+            <span className="text-[11px] font-semibold opacity-90">
               {resonanceSettings.defaultMaxReplies}→{resonanceSettings.expandedMaxReplies} {t("home.resonanceCapSuffix")}
             </span>
           </div>
@@ -170,7 +170,7 @@ export default async function HomePage() {
                 <span className="grid h-7 w-7 place-items-center rounded-xl bg-accent text-xs font-bold text-accent-foreground">
                   {index + 1}
                 </span>
-                <span className="text-[10px] font-mono text-muted-foreground/60 uppercase">
+                <span className="text-[10px] font-semibold text-muted-foreground/75 tracking-wider uppercase">
                   {t("home.stepBadge", { step: `0${index + 1}` })}
                 </span>
               </div>
